@@ -1,0 +1,45 @@
+[[not tried]]
+
+page faults -> figure out how many dtlb load misses occur
+merge kvpair into bottom level inner nodes
+
+[[tried & kept]]
+
+ndebug !!
+prefetching !!
+careful interpolation implementation !
+reduce gstats overhead (remove latency measurements to avoid index<capacity if-statement) [~5%]
+removing cmp ? [no diff?]
+
+[[tried & reverted]]
+
+possibly bias the branch direction probabilities (to allow likely()) to land too far left w/interpolation [slower]
+reversing left/right traversal checks [slower]
+inline find [slower]
+dcss read overhead [negligible (~1%)]
+
+[[command]]
+
+echo alg,keyrange,nthreads,throughput ; for trial in 0 ; do for k in 2000000 20000000 200000000 ; do for n in 36 144 ; do for bin in brown_ext_ist_lf.ubench_rnone brown_ext_abtree_lf.ubench_rnone natarajan_ext_bst_lf.ubench_rnone ; do throughput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./$bin -i 0 -d 0 -rq 0 -rqsize 100 -k $k -nrq 0 -nwork $n -t 10000 -pin 0-17,72-89,18-35,90-107,36-53,108-125,54-71,126-143 -p | grep "total_throughput" | cut -d"=" -f2` ; echo $bin,$k,$n,$throughput ; done ; done ; done ; done
+
+[[final output]]
+
+alg,keyrange,nthreads,throughput
+brown_ext_ist_lf.ubench_rnone,2000000,36,157712328
+brown_ext_abtree_lf.ubench_rnone,2000000,36,90533294
+natarajan_ext_bst_lf.ubench_rnone,2000000,36,36218682
+brown_ext_ist_lf.ubench_rnone,2000000,144,644414588
+brown_ext_abtree_lf.ubench_rnone,2000000,144,370570359
+natarajan_ext_bst_lf.ubench_rnone,2000000,144,163554770
+brown_ext_ist_lf.ubench_rnone,20000000,36,43691980
+brown_ext_abtree_lf.ubench_rnone,20000000,36,41676168
+natarajan_ext_bst_lf.ubench_rnone,20000000,36,17147151
+brown_ext_ist_lf.ubench_rnone,20000000,144,212789727
+brown_ext_abtree_lf.ubench_rnone,20000000,144,184207469
+natarajan_ext_bst_lf.ubench_rnone,20000000,144,77653629
+brown_ext_ist_lf.ubench_rnone,200000000,36,34055739
+brown_ext_abtree_lf.ubench_rnone,200000000,36,22993802
+natarajan_ext_bst_lf.ubench_rnone,200000000,36,9510134
+brown_ext_ist_lf.ubench_rnone,200000000,144,142060924
+brown_ext_abtree_lf.ubench_rnone,200000000,144,100945311
+natarajan_ext_bst_lf.ubench_rnone,200000000,144,42770019

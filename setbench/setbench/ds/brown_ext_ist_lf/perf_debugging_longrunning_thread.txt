@@ -1,0 +1,170 @@
+inspecting after break in gdb
+main thread - nanosleep (OK)
+thread 504 - main.cpp:700 (OK)
+thread 503 - madvise called from jemalloc/src/pages.c:282 (repeatable) [see backtrace at bottom]
+	sort of reads like deadlock... (nope!)
+
+seems related to huge memory guard region issue that afflicts abtree w/tree ebr.
+	occasional massive page purging? (turned out: yes)
+possible consequence: if thread is non-Q while executing deallocate/retire/rotateBags,
+	might trigger and prevent epoch advance. (true for debra --> fixed in setbench)
+	
+confirmed from backtrace and by printing jemalloc stats that dirty page purging delays cause this.
+	doubly confirmed by setting MALLOC_CONF=dirty_decay_ms:0 and seeing that the problem is mitigated.
+	this is an imperfect solution, because it may have overhead sometimes... when?
+it appears MALLOC_CONF=background_thread:true also helps by having async background purging (whout aggressive dirty_ms).
+
+actually dirty_decay_ms:0 seems to still suffer from massive delays! very possibly during a malloc_print_stats() call??
+	waiting on a lock? i see locking prominently in gdb backtraces. (cost is in the OS maybe?)
+	maybe background_thread:true is a better option, since it appears to relegate purging to only that thread.
+
+fixing the location of announcement in debra helps. in fact, it eliminates the need for background_thread:true.
+	(this suggests the problem is *highly* related to the tree ebr huge epoch problem,
+	 but sadly for the tree-ebr algorithm, there is no real fix without quiescence, which is costly.)
+	HOWEVER, it slows down the ist by ~2x. maybe this is just the cost of the unfinished reclamation!
+
+raises an important point: no one considers the cost of purging pages allocated during a trial.
+	related to pool vs reclamation argument: if pooling, no need to consider purging. but, if not pooling, ...
+
+what i've learned:
+
+dirty page purging is a thing.
+	it hurts data structures that allocate and FREE a lot of memory, especially with large nodes (many pages)!
+	(the diagnostic criterion is likely: high byte count alloc'd/free'd per update on average)
+jemalloc is very aggressive about purging (but unlikely it does any purging before its default of 10000ms).
+	only profiled a bit, but OS is likely SLOW at handling the necessary madvise calls. why? zeroing? any fix?
+
+this is a severe hidden cost of allocation, and a strike against data structures with widely varying node sizes.
+	(if the fix is object pooling, but you have many node sizes, your pools will be complex & expensive)
+
+
+some results with jemalloc and tcmalloc are below
+if the intended use case of a data structure is with pooling, might not want to use eval with jemalloc (tcmalloc?)
+tcmalloc still appears to have some big overhead with big nodes (but not as big as jemalloc).
+	can we confirm the overhead is tcmalloc free (by eliminating the actual free calls)?
+
+jemalloc (very aggressive purging)
+
+    0    50           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=11332162      10002         5548                     29064158 1099740 5379138 7488
+    0    50           brown_ext_ist_lf.ubench_rdebra   144       total_throughput=5001409      10006         2196                     29474049 1059697 4908188 9686
+    0    50        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=18410093      10004        30054                                         226721803
+    0    50        brown_ext_abtree_lf.ubench_rdebra   144      total_throughput=30688609      10007         5754                                         289745147
+    0    50       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=11081788      10004        20390                                          17381144
+    0    50       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=36045447      10005         2464                                          62299398
+    0     5           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=32920379      10004         2810                          6791846 439680 2876893 0
+    0     5           brown_ext_ist_lf.ubench_rdebra   144      total_throughput=47354548      10005          560                     26687306 1013372 4863019 7857
+    0     5        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=27580386      10002        16986                                         144441526
+    0     5        brown_ext_abtree_lf.ubench_rdebra   144      total_throughput=90653785      10006         3112                                         177103700
+    0     5       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=12751327      10004        12570                                           1825600
+    0     5       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=50488046      10008          914                                           7234117
+    0   0.5           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=38386415      10002          326                                47835 1785 25535 0
+    0   0.5           brown_ext_ist_lf.ubench_rdebra   144     total_throughput=149563414      10007           76                             916020 53026 433915 0
+    0   0.5        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=29950050      10002        14890                                         130874854
+    0   0.5        brown_ext_abtree_lf.ubench_rdebra   144     total_throughput=116548660      10007         2964                                         134515339
+    0   0.5       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=13052258      10004        11606                                            167480
+    0   0.5       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=52765243      10007          674                                            435367
+    0     0           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=38943973      10004            0                                           0 0 0 0
+    0     0           brown_ext_ist_lf.ubench_rdebra   144     total_throughput=155434085      10007            0                                           0 0 0 0
+    0     0        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=30620661      10002        14652                                         129168476
+    0     0        brown_ext_abtree_lf.ubench_rdebra   144     total_throughput=122911147      10007         2894                                         128427168
+    0     0       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=13290958      10002        11460                                                 0
+    0     0       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=52954689      10008          660                                                 0
+
+
+tcmalloc (little purging) --- later found purging to still be an issue!
+    0    50           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=13970687      10000         4684                     29007346 1104104 5380431 7446
+    0    50           brown_ext_ist_lf.ubench_rdebra   144       total_throughput=9802539      10000          340                     29709069 1062863 4901059 9849
+    0    50        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=20907483      10000        28884                                         239687371
+    0    50        brown_ext_abtree_lf.ubench_rdebra   144      total_throughput=13986865      10000         2166                                         202752886
+    0    50       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=11153236      10000        20384                                          17517457
+    0    50       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=33498594      10000         2298                                          57471605
+    0     5           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=32878899      10000        26860                          6813701 449472 2887960 0
+    0     5           brown_ext_ist_lf.ubench_rdebra   144      total_throughput=73648055      10000         2146                     29857064 1066297 4910202 9943
+    0     5        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=28618755      10000        34914                                         145076343
+    0     5        brown_ext_abtree_lf.ubench_rdebra   144      total_throughput=90749400      10000         5290                                         178037473
+    0     5       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=12832729      10000        21736                                           1855753
+    0     5       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=51241880      10000         3034                                           7667084
+    0   0.5           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=36448328      10000        29328                                46038 1666 24715 0
+    0   0.5           brown_ext_ist_lf.ubench_rdebra   144     total_throughput=144704215      10000         6342                            1181050 70178 555601 0
+    0   0.5        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=30275085      10000        36226                                         130962742
+    0   0.5        brown_ext_abtree_lf.ubench_rdebra   144     total_throughput=101357766      10000         6028                                         134985019
+    0   0.5       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=13205307      10000        22032                                            188509
+    0   0.5       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=52069911      10000         3112                                            743547
+    0     0           brown_ext_ist_lf.ubench_rdebra    36      total_throughput=36946175      10000        29544                                           0 0 0 0
+    0     0           brown_ext_ist_lf.ubench_rdebra   144     total_throughput=147941187      10000         6396                                           0 0 0 0
+    0     0        brown_ext_abtree_lf.ubench_rdebra    36      total_throughput=30728491      10000        36492                                         129240755
+    0     0        brown_ext_abtree_lf.ubench_rdebra   144     total_throughput=104613889      10000         6180                                         129283282
+    0     0       bronson_pext_bst_occ.ubench_rdebra    36      total_throughput=13184954      10000        21992                                                 0
+    0     0       bronson_pext_bst_occ.ubench_rdebra   144      total_throughput=52177636      10000         3040                                                 0
+
+another thought: perhaps the purging is triggered by deallocate calls performed inside non-Q section (in IST and abtree)
+	test by delaying all deallocation (and maybe retire) until after we are Q
+	(use some thread local vector to store lambdas for freeSubtree calls?)
+	
+================ backtrace showing MASSIVE delay by one thread (this thread) ===============
+
+#0  0x00002aaaac391567 in madvise () at ../sysdeps/unix/syscall-template.S:84
+84      ../sysdeps/unix/syscall-template.S: No such file or directory.
+(gdb) bt
+#0  0x00002aaaac391567 in madvise () at ../sysdeps/unix/syscall-template.S:84
+#1  0x00002aaaaad1a77e in je_pages_purge_forced (addr=<optimized out>, size=<optimized out>) at src/pages.c:282
+#2  0x00002aaaaad1438f in je_extent_dalloc_wrapper (tsdn=tsdn@entry=0x2aaebb153ef0, arena=arena@entry=0x2aaaac9ef980,
+    r_extent_hooks=r_extent_hooks@entry=0x2aaebb153120, extent=extent@entry=0x2aae908e8140) at src/extent.c:1556
+#3  0x00002aaaaace9d7b in arena_decay_stashed (decay=<optimized out>, is_background_thread=<optimized out>, decay_extents=<synthetic pointer>,
+    all=<optimized out>, extents=0x2aaaac9f15f0, r_extent_hooks=0x2aaebb153120, arena=0x2aaaac9ef980, tsdn=0x2aaebb153ef0) at src/arena.c:956
+#4  arena_decay_to_limit (tsdn=tsdn@entry=0x2aaebb153ef0, arena=arena@entry=0x2aaaac9ef980, decay=decay@entry=0x2aaaac9f2a90,
+    extents=extents@entry=0x2aaaac9f15f0, all=all@entry=false, npages_limit=<optimized out>, is_background_thread=false) at src/arena.c:1010
+#5  0x00002aaaaacea48b in arena_decay_to_limit (is_background_thread=<optimized out>, npages_limit=<optimized out>, all=<optimized out>,
+    extents=<optimized out>, decay=<optimized out>, arena=<optimized out>, tsdn=<optimized out>) at src/arena.c:996
+#6  arena_decay_try_purge (is_background_thread=<optimized out>, npages_limit=<optimized out>, current_npages=<optimized out>, extents=<optimized out>,
+    decay=<optimized out>, arena=<optimized out>, tsdn=<optimized out>) at src/arena.c:694
+#7  arena_maybe_decay (tsdn=<optimized out>, arena=0x2aaaac9ef980, decay=0x2aaaac9f2a90, extents=0x2aaaac9f15f0, is_background_thread=<optimized out>)
+    at src/arena.c:839
+#8  0x00002aaaaacec749 in arena_decay_impl (all=false, is_background_thread=false, extents=0x2aaaac9f15f0, decay=0x2aaaac9f2a90, arena=0x2aaaac9ef980,
+    tsdn=0x2aaebb153ef0) at src/arena.c:1037
+#9  arena_decay_dirty (all=false, is_background_thread=false, arena=0x2aaaac9ef980, tsdn=0x2aaebb153ef0) at src/arena.c:1057
+#10 je_arena_decay (tsdn=tsdn@entry=0x2aaebb153ef0, arena=arena@entry=0x2aaaac9ef980, is_background_thread=is_background_thread@entry=false,
+    all=all@entry=false) at src/arena.c:1070
+#11 0x00002aaaaad301dc in arena_decay_ticks (nticks=13, arena=<optimized out>, tsdn=0x2aaebb153ef0) at include/jemalloc/internal/arena_inlines_b.h:81
+#12 je_tcache_bin_flush_small (tsd=tsd@entry=0x2aaebb153ef0, tcache=tcache@entry=0x2aaebb1540a8, tbin=tbin@entry=0x2aaebb1541d8, binind=binind@entry=12,
+    rem=16) at src/tcache.c:164
+#13 0x00002aaaaacd930b in tcache_dalloc_small (slow_path=false, binind=12, ptr=0x2aac077de700, tcache=0x2aaebb1540a8, tsd=0x2aaebb153ef0)
+    at include/jemalloc/internal/tcache_inlines.h:178
+#14 arena_dalloc (slow_path=false, alloc_ctx=<synthetic pointer>, tcache=0x2aaebb1540a8, ptr=0x2aac077de700, tsdn=0x2aaebb153ef0)
+    at include/jemalloc/internal/arena_inlines_b.h:231
+#15 idalloctm (slow_path=false, is_internal=false, alloc_ctx=<synthetic pointer>, tcache=0x2aaebb1540a8, ptr=0x2aac077de700, tsdn=0x2aaebb153ef0)
+    at include/jemalloc/internal/jemalloc_internal_inlines_c.h:115
+#16 ifree (slow_path=false, tcache=0x2aaebb1540a8, ptr=0x2aac077de700, tsd=0x2aaebb153ef0) at src/jemalloc.c:2176
+#17 free (ptr=0x2aac077de700) at src/jemalloc.c:2347
+#18 0x000055555557ad1e in allocator_new<Node<long long, void*> >::deallocate (p=<optimized out>, tid=<optimized out>, this=0x2aaaacd548c0)
+    at ../common/recordmgr/allocator_new.h:56
+#19 allocator_new<Node<long long, void*> >::deallocateAndClear (bag=0x2aac4e2b2380, tid=<optimized out>, this=0x2aaaacd548c0)
+    at ../common/recordmgr/allocator_new.h:65
+#20 pool_none<Node<long long, void*>, allocator_new<Node<long long, void*> > >::addMoveFullBlocks (bag=0x2aac4e2b2380, tid=<optimized out>,
+    this=<optimized out>) at ../common/recordmgr/pool_none.h:54
+#21 reclaimer_debra<Node<long long, void*>, pool_none<Node<long long, void*>, allocator_new<Node<long long, void*> > > >::rotateEpochBags (
+    tid=<optimized out>, this=0x2aabed2d2100) at ../common/recordmgr/reclaimer_debra.h:134
+#22 reclaimer_debra<Node<long long, void*>, pool_none<Node<long long, void*>, allocator_new<Node<long long, void*> > > >::BagRotator<Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter>::rotateAllEpochBags (i=0, this=<synthetic pointer>,
+    reclaimers=<synthetic pointer>, tid=<optimized out>) at ../common/recordmgr/reclaimer_debra.h:155
+#23 reclaimer_debra<Node<long long, void*>, pool_none<Node<long long, void*>, allocator_new<Node<long long, void*> > > >::startOp<Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter> (readOnly=true, numReclaimers=4, reclaimers=<synthetic pointer>,
+    tid=<optimized out>, this=0x2aabed2d2100) at ../common/recordmgr/reclaimer_debra.h:182
+#24 record_manager_single_type<Node<long long, void*>, reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> > >::startOp<Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter> (
+    readOnly=true, numReclaimers=4, reclaimers=<synthetic pointer>, tid=<optimized out>, this=<optimized out>)
+    at ../common/recordmgr/record_manager_single_type.h:138
+#25 RecordManagerSet<reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> >, Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter>::startOp (callForEach=false, readOnly=true,
+    tid=<optimized out>, this=<optimized out>) at ../common/recordmgr/record_manager.h:128
+#27 record_manager<reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> >, Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter>::MemoryReclamationGuard::MemoryReclamationGuard (readOnly=true, _recmgr=<optimized out>, _tid=<optimized out>, this=<synthetic pointer>)
+    at ../common/recordmgr/record_manager.h:292
+#28 record_manager<reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> >, Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter>::getGuard (readOnly=true, tid=<optimized out>, this=<optimized out>) at ../common/recordmgr/record_manager.h:301
+#29 istree<long long, void*, Interpolator<long long>, record_manager<reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> >, Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter> >::find (this=0x2aaaaccd9000, tid=<optimized out>, key=<optimized out>) at ../ds/brown_ext_ist_lf/brown_ext_ist_lf_impl.h:12
+#30 0x00005555555628b5 in istree<long long, void*, Interpolator<long long>, record_manager<reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> >, Node<long long, void*>, KVPair<long long, void*>, RebuildOperation<long long, void*>, MultiCounter> >::contains (key=@0x2aaebb153648: 193576310, tid=<optimized out>, this=<optimized out>)
+    at ../ds/brown_ext_ist_lf/brown_ext_ist_lf.h:625
+#31 ds_adapter<long long, void*, reclaimer_debra<void, pool_interface<void, allocator_interface<void> > >, allocator_new<void>, pool_none<void, allocator_interface<void> > >::contains (
+    key=@0x2aaebb153648: 193576310, tid=<optimized out>, this=<optimized out>) at ../ds/brown_ext_ist_lf/adapter.h:105
+#32 thread_timed (_id=<optimized out>) at main.cpp:680
+#33 0x00002aaaab3c9494 in start_thread (arg=0x2aaebb155700) at pthread_create.c:333
+#34 0x00002aaaac395acf in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:97
+
+
+
+Possible stop-gap solution: use supermalloc? It likely deals with page purging better.

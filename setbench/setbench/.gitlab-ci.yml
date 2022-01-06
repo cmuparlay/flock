@@ -1,0 +1,144 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+    - build
+    - test
+
+before_script:
+    - dos2unix `find . -type f \( -name "*.txt" -o -name "*.sh" \) -print`
+    - chmod 755 `find . -type f -name "*.sh" -print`
+
+build:microbench:
+    stage: build
+    script:
+        - cd microbench
+        - make -j$(grep processor /proc/cpuinfo | wc -l)
+    artifacts:
+        paths:
+            - microbench/bin
+
+build:macrobench:
+    stage: build
+    script:
+        - cd macrobench
+        - ./compile.sh
+    artifacts:
+        paths:
+            - macrobench/bin
+
+docker:build_test_deploy:master:
+    stage: build
+    before_script:
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    script:
+        - cd docker
+        - ./_ci_clean.sh
+        - docker build -f ubuntu_20_04/Dockerfile ../ -t "$CI_REGISTRY_IMAGE"
+        - ./_ci_launch.sh "$CI_REGISTRY_IMAGE"
+        - ./_ci_test_launched.sh
+        - ./_ci_clean.sh
+        - docker push "$CI_REGISTRY_IMAGE"
+    after_script:
+        - echo y | docker container prune
+        - echo y | docker images prune
+        - docker ps -a
+        - docker images
+    only:
+        - master
+
+docker:pull_test:master:
+    stage: test
+    needs: ["docker:build_test_deploy:master"]
+    script:
+        - cd docker
+        - ./_ci_clean.sh
+        - docker rmi -f "$CI_REGISTRY_IMAGE"
+        - docker pull "$CI_REGISTRY_IMAGE"
+        - ./_ci_launch.sh "$CI_REGISTRY_IMAGE"
+        - ./_ci_test_launched.sh
+    after_script:
+        - ./_ci_clean.sh
+    only:
+        - master
+
+test:build_coverage:microbench:options:
+    stage: test
+    needs: []
+    script:
+        - cd microbench
+        - echo
+        - echo "#########################################################"
+        - echo "## make"
+        - echo "#########################################################"
+        - make -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## use_asserts=1"
+        - echo "#########################################################"
+        - make use_asserts=1 -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## use_asserts=1 use_timelines=1"
+        - echo "#########################################################"
+        - make use_asserts=1 use_timelines=1 -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## has_libpapi=0"
+        - echo "#########################################################"
+        - make has_libpapi=0 -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## has_libpapi=0 has_libnuma=0"
+        - echo "#########################################################"
+        - make has_libnuma=0 has_libpapi=0 -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## has_libpapi=0 has_libnuma=0 use_openmp=0"
+        - echo "#########################################################"
+        - make has_libnuma=0 has_libpapi=0 use_openmp=0 -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+
+test:build_coverage:microbench:targets:
+    stage: test
+    needs: []
+    script:
+        - cd microbench
+        - echo
+        - echo "#########################################################"
+        - echo "## make ds-reclaim-pool"
+        - echo "#########################################################"
+        - make ds-reclaim-pool -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+        - echo "#########################################################"
+        - echo "## make all (deprecated build path)"
+        - echo "#########################################################"
+        - make all -j$(grep processor /proc/cpuinfo | wc -l) || exit 1
+        - echo
+
+test:build_coverage:microbench:recordmanagers:
+    stage: test
+    needs: []
+    script:
+        - cd microbench
+        - echo
+        - echo "#########################################################"
+        - echo "## testing all reclaimers"
+        - echo "##   (except for ebr_tree_q, rcu and debraplus, which are not maintained)"
+        - echo "## and testing all pools"
+        - echo "##   (except for per_thread_and_shared, which is not maintained)"
+        - echo "#########################################################"
+        - make all DATA_STRUCTURES="brown_ext_abtree_lf" RECLAIMERS="none debra debracap ebr_token ebr_tree hazardptr" POOLS="none numa" -j$(grep processor /proc/cpuinfo | wc -l)
+
+test:microbench_experiments:example:
+    stage: test
+    needs: []
+    script:
+        - cd microbench_experiments/example
+        - ./run_testing.sh
+
+test:macrobench_experiments:istree_exp1:
+    stage: test
+    needs: []
+    script:
+        - cd macrobench_experiments/istree_exp1
+        - ./run_testing.sh

@@ -1,0 +1,38 @@
+https://dl.acm.org/citation.cfm?id=2312036
+
+insert
+	x NONE -> new CHILDCAS
+help child cas
+	x CHILDCAS -> x NONE
+remove
+	x NONE -> x MARK
+	x NONE -> new RELOCATE [same new RELOCATE for both replace->op and dest->op]
+help relocate
+	x RELOCATE -> x NONE
+	x RELOCATE -> x MARK
+help marked
+	x NONE -> new CHILDCAS
+
+
+do we read fields on MARK and NONE?
+if not, we can free when things go from CHILDCAS to NONE, or from RELOCATE to NONE or MARK.
+(but, beware of multiple nodes pointing to the same RELOCATE operation!)
+
+helpRelocate(currOp, pred, predOp, curr)
+	dereferences currOp
+	but not predOp
+	currOp is RELOCATE
+
+helpChildCAS(currOp, curr)
+	dereferences currOp
+	currOp is CHILDCAS
+
+helpMarked(pred, predOp, curr)
+	does NOT dereference predOp
+
+it would appear NONE and MARK tagged operation objects are never dereferenced.
+
+immediately free new childcas or relocate if we fail the CAS that is supposed to first make them reachable.
+otherwise:
+retire() CHILDCAS just after line 94 iff the CAS succeeds.
+retire() RELOCATE just after line 112.

@@ -1,0 +1,22 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build data structures in ubench matching a search string (specified at the end of command)",
+            "command": "(make -j `make -Bnd all | grep prereq | grep ubench | cut -d\"'\" -f2 | grep ramachandran`)",
+            "args": [
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/microbench"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+    ],
+    "version": "2.0.0"
+}

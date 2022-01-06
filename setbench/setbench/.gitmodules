@@ -1,0 +1,14 @@
+[submodule "common/recordmgr"]
+	path = common/recordmgr
+	url = ../recordmanager.git
+[submodule "tools"]
+	path = tools
+	url = ../tools.git
+[submodule "ds/srivastava_abtree_mcs"]
+	path = ds/srivastava_abtree_mcs
+	url = git@gitlab.com:SrivastavaAnubhav/srivastava_abtree.git
+	branch = mcs-noheightbound
+[submodule "ds/srivastava_abtree_pub"]
+	path = ds/srivastava_abtree_pub
+	url = git@gitlab.com:SrivastavaAnubhav/srivastava_abtree.git
+	branch = pub-noheightbound

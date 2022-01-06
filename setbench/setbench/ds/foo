@@ -1,0 +1,1074 @@
+51d50
+< #include "descriptors.h"
+53d51
+< #include "rq_provider.h"
+55,56c53
+< 
+< #define eassert(x, y) if ((x) != (y)) { std::cout<<"ERROR: "<<#x<<" != "<<#y<<" :: "<<#x<<"="<<x<<" "<<#y<<"="<<y<<std::endl; exit(-1); }
+---
+> #include "scx_provider.h"
+59a57,58
+>     #define MAX_NODE_DEPENDENCIES_PER_SCX 4
+> 
+76,123d74
+<     struct Node;
+< 
+<     template <int DEGREE, typename K>
+<     struct SCXRecord;
+< 
+<     template <int DEGREE, typename K>
+<     class wrapper_info {
+<     public:
+<         const static int MAX_NODES = DEGREE+2;
+<         Node<DEGREE,K> * nodes[MAX_NODES];
+<         SCXRecord<DEGREE,K> * scxPtrs[MAX_NODES];
+<         Node<DEGREE,K> * newNode;
+<         Node<DEGREE,K> * volatile * field;
+<         int state;
+<         char numberOfNodes;
+<         char numberOfNodesToFreeze;
+<         char numberOfNodesAllocated;
+< 
+<         // for rqProvider
+<         Node<DEGREE,K> * insertedNodes[MAX_NODES+1];
+<         Node<DEGREE,K> * deletedNodes[MAX_NODES+1];
+<     };
+< 
+<     template <int DEGREE, typename K>
+<     struct SCXRecord {
+<         const static int STATE_INPROGRESS = 0;
+<         const static int STATE_COMMITTED = 1;
+<         const static int STATE_ABORTED = 2;
+<         struct {
+<             volatile mutables_t mutables;
+< 
+<             int numberOfNodes;
+<             int numberOfNodesToFreeze;
+< 
+<             Node<DEGREE,K> * newNode;
+<             Node<DEGREE,K> * volatile * field;
+<             Node<DEGREE,K> * nodes[wrapper_info<DEGREE,K>::MAX_NODES];            // array of pointers to nodes
+<             SCXRecord<DEGREE,K> * scxPtrsSeen[wrapper_info<DEGREE,K>::MAX_NODES]; // array of pointers to scx records
+< 
+<             // for rqProvider
+<             Node<DEGREE,K> * insertedNodes[wrapper_info<DEGREE,K>::MAX_NODES+1];
+<             Node<DEGREE,K> * deletedNodes[wrapper_info<DEGREE,K>::MAX_NODES+1];
+<         } c;
+<         PAD;
+<         const static int size = sizeof(c);
+<     };
+< 
+<     template <int DEGREE, typename K>
+125c76
+<         SCXRecord<DEGREE,K> * volatile scxPtr;
+---
+>         scx_handle_t volatile scxPtr;
+131,134d81
+< #if defined(RQ_LOCKFREE) || defined(RQ_RWLOCK) || defined(HTM_RQ_RWLOCK)
+<         volatile long long itime; // for use by range query algorithm
+<         volatile long long dtime; // for use by range query algorithm
+< #endif
+181d127
+< //        PAD;
+183,185c129
+< //        PAD;
+<         RQProvider<K, void *, Node<DEGREE,K>, abtree<DEGREE,K,Compare,RecManager>, RecManager, false, false> * const rqProvider;
+< //        PAD;
+---
+>         SCXProvider<Node<DEGREE,K>, MAX_NODE_DEPENDENCIES_PER_SCX> * const prov;
+188,205d131
+<         // descriptor reduction algorithm
+<         #ifndef comma
+<             #define comma ,
+<         #endif
+<         #define DESC1_ARRAY records
+<         #define DESC1_T SCXRecord<DEGREE comma K>
+<         #define MUTABLES1_OFFSET_ALLFROZEN 0
+<         #define MUTABLES1_OFFSET_STATE 1
+<         #define MUTABLES1_MASK_ALLFROZEN 0x1
+<         #define MUTABLES1_MASK_STATE 0x6
+<         #define MUTABLES1_NEW(mutables) \
+<             ((((mutables)&MASK1_SEQ)+(1<<OFFSET1_SEQ)) \
+<             | (SCXRecord<DEGREE comma K>::STATE_INPROGRESS<<MUTABLES1_OFFSET_STATE))
+<         #define MUTABLES1_INIT_DUMMY SCXRecord<DEGREE comma K>::STATE_COMMITTED<<MUTABLES1_OFFSET_STATE | MUTABLES1_MASK_ALLFROZEN<<MUTABLES1_OFFSET_ALLFROZEN
+<         #include "../descriptors/descriptors_impl.h"
+<         PAD;
+<         DESC1_T DESC1_ARRAY[LAST_TID1+1] __attribute__ ((aligned(64)));
+<         PAD;
+207,211d132
+< //        PAD;
+< 
+<         #define DUMMY       ((SCXRecord<DEGREE,K>*) (void*) TAGPTR1_STATIC_DESC(0))
+<         #define FINALIZED   ((SCXRecord<DEGREE,K>*) (void*) TAGPTR1_DUMMY_DESC(1))
+<         #define FAILED      ((SCXRecord<DEGREE,K>*) (void*) TAGPTR1_DUMMY_DESC(2))
+218,221c139
+<             for (int ___i=0;___i<(len);++___i) { \
+<                 rqProvider->write_addr(tid, &(dest)[(destStart)+___i], \
+<                         rqProvider->read_addr(tid, &(src)[(srcStart)+___i])); \
+<             }
+---
+>             arraycopy(src, srcStart, dest, destStart, len)
+236,242d153
+<         bool llx(const int tid, Node<DEGREE,K>* r, Node<DEGREE,K> ** snapshot, const int i, SCXRecord<DEGREE,K> ** ops, Node<DEGREE,K> ** nodes);
+<         SCXRecord<DEGREE,K>* llx(const int tid, Node<DEGREE,K>* r, Node<DEGREE,K> ** snapshot);
+<         bool scx(const int tid, wrapper_info<DEGREE,K> * info);
+<         void helpOther(const int tid, tagptr_t tagptr);
+<         int help(const int tid, const tagptr_t tagptr, SCXRecord<DEGREE,K> const * const snap, const bool helpingOther);
+< 
+<         SCXRecord<DEGREE,K>* createSCXRecord(const int tid, wrapper_info<DEGREE,K> * info);
+259d169
+< //        PAD;
+274d183
+<             rqProvider->initThread(tid);
+279d187
+<             rqProvider->deinitThread(tid);
+296c204
+<         , rqProvider(new RQProvider<K, void *, Node<DEGREE,K>, abtree<DEGREE,K,Compare,RecManager>, RecManager, false, false>(numProcesses, this, recordmgr))
+---
+>         , prov(new SCXProvider<Node<DEGREE,K>, MAX_NODE_DEPENDENCIES_PER_SCX>(numProcesses))
+305,312d212
+< //            recordmgr->endOp(tid);
+< 
+<             DESC1_INIT_ALL(numProcesses);
+< 
+<             SCXRecord<DEGREE,K> *dummy = TAGPTR1_UNPACK_PTR(DUMMY);
+<             dummy->c.mutables = MUTABLES1_INIT_DUMMY;
+<             TRACE COUTATOMICTID("DUMMY mutables="<<dummy->c.mutables<<std::endl);
+< 
+316d215
+<             _entryLeft->scxPtr = DUMMY;
+318d216
+<             _entryLeft->marked = false;
+324,325d221
+<             //_entry = allocateNode(tid);
+<             _entry->scxPtr = DUMMY;
+327d222
+<             _entry->marked = false;
+333,339c228
+<             // need to simulate real insertion of root and the root's child,
+<             // since range queries will actually try to add these nodes,
+<             // and we don't want blocking rq providers to spin forever
+<             // waiting for their itimes to be set to a positive number.
+<             Node<DEGREE,K>* insertedNodes[] = {_entry, _entryLeft, NULL};
+<             Node<DEGREE,K>* deletedNodes[] = {NULL};
+<             rqProvider->linearize_update_at_write(tid, &entry, _entry, insertedNodes, deletedNodes);
+---
+>             entry = _entry;
+347c236
+<             delete rqProvider;
+---
+>             delete prov;
+355c244
+<     private:
+---
+>     public:
+526,555d414
+<         /**
+<          * BEGIN FUNCTIONS FOR RANGE QUERY SUPPORT
+<          */
+< 
+<         inline bool isLogicallyDeleted(const int tid, Node<DEGREE,K> * node) {
+<             return false;
+<         }
+< 
+<         inline int getKeys(const int tid, Node<DEGREE,K> * node, K * const outputKeys, void ** const outputValues) {
+<             if (node->isLeaf()) {
+<                 // leaf ==> its keys are in the set.
+<                 const int sz = node->getKeyCount();
+<                 for (int i=0;i<sz;++i) {
+<                     outputKeys[i] = node->keys[i];
+<                     outputValues[i] = (void *) node->ptrs[i];
+<                 }
+<                 return sz;
+<             }
+<             // note: internal ==> its keys are NOT in the set
+<             return 0;
+<         }
+< 
+<         bool isInRange(const K& key, const K& lo, const K& hi) {
+<             return (!cmp(key, lo) && !cmp(hi, key));
+<         }
+< 
+<         /**
+<          * END FUNCTIONS FOR RANGE QUERY SUPPORT
+<          */
+< 
+561d419
+<             int preallocated = wrapper_info<DEGREE,K>::MAX_NODES * recordmgr->NUM_PROCESSES;
+581,605d438
+< abtree_ns::SCXRecord<DEGREE,K> * abtree_ns::abtree<DEGREE,K,Compare,RecManager>::createSCXRecord(const int tid, wrapper_info<DEGREE,K> * info) {
+< 
+<     SCXRecord<DEGREE,K> * result = DESC1_NEW(tid);
+<     result->c.newNode = info->newNode;
+<     for (int i=0;i<info->numberOfNodes;++i) {
+<         result->c.nodes[i] = info->nodes[i];
+<     }
+<     for (int i=0;i<info->numberOfNodesToFreeze;++i) {
+<         result->c.scxPtrsSeen[i] = info->scxPtrs[i];
+<     }
+< 
+<     int i;
+<     for (i=0;info->insertedNodes[i];++i) result->c.insertedNodes[i] = info->insertedNodes[i];
+<     result->c.insertedNodes[i] = NULL;
+<     for (i=0;info->deletedNodes[i];++i) result->c.deletedNodes[i] = info->deletedNodes[i];
+<     result->c.deletedNodes[i] = NULL;
+< 
+<     result->c.field = info->field;
+<     result->c.numberOfNodes = info->numberOfNodes;
+<     result->c.numberOfNodesToFreeze = info->numberOfNodesToFreeze;
+<     DESC1_INITIALIZED(tid);
+<     return result;
+< }
+< 
+< template <int DEGREE, typename K, class Compare, class RecManager>
+612c445
+<     rqProvider->init_node(tid, newnode);
+---
+>     prov->initNode(newnode);
+619,621d451
+< /**
+<  * Returns the value associated with key, or NULL if key is not present.
+<  */
+626,627c456
+<     Node<DEGREE,K> * l = rqProvider->read_addr(tid, &entry->ptrs[0]);
+<     prefetch_range(l, sizeof(*l));
+---
+>     Node<DEGREE,K> * l = entry->ptrs[0];
+630,631c459
+<         l = rqProvider->read_addr(tid, &l->ptrs[ix]);
+<         prefetch_range(l, sizeof(*l));
+---
+>         l = l->ptrs[ix];
+635c463
+<         result.first = l->ptrs[index]; // this is a value, not a pointer, so it cannot be modified by rqProvider->linearize_update_at_..., so we do not use read_addr
+---
+>         result.first = l->ptrs[index];
+651,692c479
+<     block<Node<DEGREE,K>> stack (NULL);
+<     auto guard = recordmgr->getGuard(tid, true);
+<     rqProvider->traversal_start(tid);
+< 
+<     // depth first traversal (of interesting subtrees)
+<     int size = 0;
+<     TRACE COUTATOMICTID("rangeQuery(lo="<<lo<<", hi="<<hi<<", size="<<(hi-lo+1)<<")"<<std::endl);
+< 
+<     stack.push(entry);
+<     while (!stack.isEmpty()) {
+<         Node<DEGREE,K> * node = stack.pop();
+<         prefetch_range(node, sizeof(*node));
+<         assert(node);
+< 
+<         // if leaf node, check if we should add its keys to the traversal
+<         if (node->isLeaf()) {
+<             rqProvider->traversal_try_add(tid, node, resultKeys, resultValues, &size, lo, hi);
+< 
+<         // else if internal node, explore its children
+<         } else {
+<             // find right-most sub-tree that could contain a key in [lo, hi]
+<             int nkeys = node->getKeyCount();
+<             int r = nkeys;
+<             while (r > 0 && cmp(hi, (const K&) node->keys[r-1])) --r;           // subtree rooted at node->ptrs[r] contains only keys > hi
+< 
+<             // find left-most sub-tree that could contain a key in [lo, hi]
+<             int l = 0;
+<             while (l < nkeys && !cmp(lo, (const K&) node->keys[l])) ++l;        // subtree rooted at node->ptrs[l] contains only keys < lo
+< 
+<             // perform DFS from left to right (so push onto stack from right to left)
+<             for (int i=r;i>=l; --i) stack.push(rqProvider->read_addr(tid, &node->ptrs[i]));
+< 
+< //            // simply explore EVERYTHING
+< //            for (int i=0;i<node->getABDegree();++i) {
+< //                stack.push(rqProvider->read_addr(tid, &node->ptrs[i]));
+< //            }
+<         }
+<     }
+< 
+<     // success
+<     rqProvider->traversal_end(tid, resultKeys, resultValues, &size, lo, hi);
+<     return size;
+---
+>     setbench_error("not implemented");
+698,699d484
+<     wrapper_info<DEGREE,K> _info;
+<     wrapper_info<DEGREE,K>* info = &_info;
+705,708c490,492
+< //        GSTATS_ADD_IX(tid, num_prop_guard_insdel_attempts, 1, GSTATS_GET(tid, num_getguard));
+<         Node<DEGREE,K>* gp = NULL;
+<         Node<DEGREE,K>* p = entry;
+<         Node<DEGREE,K>* l = rqProvider->read_addr(tid, &p->ptrs[0]);
+---
+>         Node<DEGREE,K> * gp = NULL;
+>         Node<DEGREE,K> * p = entry;
+>         Node<DEGREE,K> * l = p->ptrs[0];
+711d494
+<         prefetch_range(l, sizeof(*l));
+717,718c500
+<             l = rqProvider->read_addr(tid, &l->ptrs[ixToL]);
+<             prefetch_range(l, sizeof(*l));
+---
+>             l = l->ptrs[ixToL];
+729c511
+<             void* const oldValue = l->ptrs[keyIndex]; // this is a value, not a pointer, so it cannot be modified by rqProvider->linearize_update_at_..., so we do not use read_addr
+---
+>             void* const oldValue = l->ptrs[keyIndex];
+733a516,517
+>             prov->scxInit(tid);
+> 
+735,737c519,521
+<             if (!llx(tid, p, NULL, 0, info->scxPtrs, info->nodes)
+<                      || rqProvider->read_addr(tid, &p->ptrs[ixToL]) != l) {
+<                 continue;    // retry the search
+---
+>             auto llxResult = prov->llx(tid, p);
+>             if (!prov->isSuccessfulLLXResult(llxResult) || p->ptrs[ixToL] != l) {
+>                 continue; // retry the search
+739c523,524
+<             info->nodes[1] = l;
+---
+>             prov->scxAddNode(tid, p, false, llxResult);
+>             // no need to add l, since it is a leaf, and leaves are IMMUTABLE (so no point freezing or finalizing them)
+742c527
+<             Node<DEGREE,K>* n = allocateNode(tid);
+---
+>             Node<DEGREE,K> * n = allocateNode(tid);
+744,745c529,530
+<             arraycopy(l->ptrs, 0, n->ptrs, 0, l->getABDegree());    // although we are copying l->ptrs, since l is a leaf, l->ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+<             n->ptrs[keyIndex] = (Node<DEGREE,K>*) value;            // similarly, we don't use write_addr here
+---
+>             arraycopy(l->ptrs, 0, n->ptrs, 0, l->getABDegree());
+>             n->ptrs[keyIndex] = (Node<DEGREE,K> *) value;
+747,748d531
+<             n->marked = false;
+<             n->scxPtr = DUMMY;
+753,765c536,537
+<             // construct info record to pass to SCX
+<             info->numberOfNodes = 2;
+<             info->numberOfNodesAllocated = 1;
+<             info->numberOfNodesToFreeze = 1;
+<             info->field = &p->ptrs[ixToL];
+<             info->newNode = n;
+<             info->insertedNodes[0] = n;
+<             info->insertedNodes[1] = NULL;
+<             info->deletedNodes[0] = l;
+<             info->deletedNodes[1] = NULL;
+< 
+<             if (scx(tid, info)) {
+<                 TRACE COUTATOMICTID("replace std::pair ("<<key<<", "<<value<<"): SCX succeeded"<<std::endl);
+---
+>             if (prov->scxExecute(tid, (void * volatile *) &p->ptrs[ixToL], l, n)) {
+>                 this->recordmgr->retire(tid, l);
+769d540
+<             TRACE COUTATOMICTID("replace std::pair ("<<key<<", "<<value<<"): SCX FAILED"<<std::endl);
+778,780c549,553
+<             // perform LLXs
+<             if (!llx(tid, p, NULL, 0, info->scxPtrs, info->nodes) || rqProvider->read_addr(tid, &p->ptrs[ixToL]) != l) {
+<                 continue;    // retry the search
+---
+>             prov->scxInit(tid);
+> 
+>             auto llxResult = prov->llx(tid, p);
+>             if (!prov->isSuccessfulLLXResult(llxResult) || p->ptrs[ixToL] != l) {
+>                 continue; // retry the search
+782c555,556
+<             info->nodes[1] = l;
+---
+>             prov->scxAddNode(tid, p, false, llxResult);
+>             // no need to add l, since it is a leaf, and leaves are IMMUTABLE (so no point freezing or finalizing them)
+790c564
+<                 Node<DEGREE,K>* n = allocateNode(tid);
+---
+>                 Node<DEGREE,K> * n = allocateNode(tid);
+794c568
+<                 arraycopy(l->ptrs, 0, n->ptrs, 0, keyIndex); // although we are copying the ptrs array, since the source node is a leaf, ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+---
+>                 arraycopy(l->ptrs, 0, n->ptrs, 0, keyIndex);
+796c570
+<                 n->ptrs[keyIndex] = (Node<DEGREE,K>*) value; // similarly, we don't use write_addr here
+---
+>                 n->ptrs[keyIndex] = (Node<DEGREE,K> *) value;
+798,799d571
+<                 n->marked = false;
+<                 n->scxPtr = DUMMY;
+804,816c576,577
+<                 // construct info record to pass to SCX
+<                 info->numberOfNodes = 2;
+<                 info->numberOfNodesAllocated = 1;
+<                 info->numberOfNodesToFreeze = 1;
+<                 info->field = &p->ptrs[ixToL];
+<                 info->newNode = n;
+<                 info->insertedNodes[0] = n;
+<                 info->insertedNodes[1] = NULL;
+<                 info->deletedNodes[0] = l;
+<                 info->deletedNodes[1] = NULL;
+< 
+<                 if (scx(tid, info)) {
+<                     TRACE COUTATOMICTID("insert std::pair ("<<key<<", "<<value<<"): SCX succeeded"<<std::endl);
+---
+>                 if (prov->scxExecute(tid, (void * volatile *) &p->ptrs[ixToL], l, n)) {
+>                     recordmgr->retire(tid, l);
+820d580
+<                 TRACE COUTATOMICTID("insert std::pair ("<<key<<", "<<value<<"): SCX FAILED"<<std::endl);
+832c592
+<                 Node<DEGREE,K>* ptrs[DEGREE+1];
+---
+>                 Node<DEGREE,K> * ptrs[DEGREE+1];
+836c596
+<                 arraycopy(l->ptrs, 0, ptrs, 0, keyIndex); // although we are copying the ptrs array, since the source node is a leaf, ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+---
+>                 arraycopy(l->ptrs, 0, ptrs, 0, keyIndex);
+838c598
+<                 ptrs[keyIndex] = (Node<DEGREE,K>*) value;
+---
+>                 ptrs[keyIndex] = (Node<DEGREE,K> *) value;
+847c607
+<                 Node<DEGREE,K>* left = allocateNode(tid);
+---
+>                 Node<DEGREE,K> * left = allocateNode(tid);
+849c609
+<                 arraycopy(ptrs, 0, left->ptrs, 0, size1); // although we are copying the ptrs array, since the node is a leaf, ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+---
+>                 arraycopy(ptrs, 0, left->ptrs, 0, size1);
+851,852d610
+<                 left->marked = false;
+<                 left->scxPtr = DUMMY;
+858c616
+<                 Node<DEGREE,K>* right = allocateNode(tid);
+---
+>                 Node<DEGREE,K> * right = allocateNode(tid);
+860c618
+<                 arraycopy(ptrs, size1, right->ptrs, 0, size2); // although we are copying the ptrs array, since the node is a leaf, ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+---
+>                 arraycopy(ptrs, size1, right->ptrs, 0, size2);
+862,863d619
+<                 right->marked = false;
+<                 right->scxPtr = DUMMY;
+868c624
+<                 Node<DEGREE,K>* n = allocateNode(tid);
+---
+>                 Node<DEGREE,K> * n = allocateNode(tid);
+870,871c626,627
+<                 rqProvider->write_addr(tid, &n->ptrs[0], left);
+<                 rqProvider->write_addr(tid, &n->ptrs[1], right);
+---
+>                 n->ptrs[0] = left;
+>                 n->ptrs[1] = right;
+873,874d628
+<                 n->marked = false;
+<                 n->scxPtr = DUMMY;
+883,896c637
+<                 //       if n will become the root (of the B-slack tree)
+< 
+<                 // construct info record to pass to SCX
+<                 info->numberOfNodes = 2;
+<                 info->numberOfNodesAllocated = 3;
+<                 info->numberOfNodesToFreeze = 1;
+<                 info->field = &p->ptrs[ixToL];
+<                 info->newNode = n;
+<                 info->insertedNodes[0] = n;
+<                 info->insertedNodes[1] = left;
+<                 info->insertedNodes[2] = right;
+<                 info->insertedNodes[3] = NULL;
+<                 info->deletedNodes[0] = l;
+<                 info->deletedNodes[1] = NULL;
+---
+>                 //       if n will become the root
+898,902c639,641
+<                 if (scx(tid, info)) {
+<                     TRACE COUTATOMICTID("insert overflow ("<<key<<", "<<value<<"): SCX succeeded"<<std::endl);
+< 
+<                     // after overflow, there may be a weight violation at n,
+<                     // and there may be a slack violation at p
+---
+>                 if (prov->scxExecute(tid, (void * volatile *) &p->ptrs[ixToL], l, n)) {
+>                     recordmgr->retire(tid, l);
+>                     // after overflow, there may be a weight violation at n
+906d644
+<                 TRACE COUTATOMICTID("insert overflow ("<<key<<", "<<value<<"): SCX FAILED"<<std::endl);
+918,919d655
+<     wrapper_info<DEGREE,K> _info;
+<     wrapper_info<DEGREE,K>* info = &_info;
+925,929c661,663
+< //        GSTATS_ADD_IX(tid, num_prop_guard_insdel_attempts, 1, GSTATS_GET(tid, num_getguard));
+<         Node<DEGREE,K>* gp = NULL;
+<         Node<DEGREE,K>* p = entry;
+<         Node<DEGREE,K>* l = rqProvider->read_addr(tid, &p->ptrs[0]);
+<         prefetch_range(l, sizeof(*l));
+---
+>         Node<DEGREE,K> * gp = NULL;
+>         Node<DEGREE,K> * p = entry;
+>         Node<DEGREE,K> * l = p->ptrs[0];
+937,938c671
+<             l = rqProvider->read_addr(tid, &l->ptrs[ixToL]);
+<             prefetch_range(l, sizeof(*l));
+---
+>             l = l->ptrs[ixToL];
+955,957c688,692
+<             // perform LLXs
+<             if (!llx(tid, p, NULL, 0, info->scxPtrs, info->nodes) || rqProvider->read_addr(tid, &p->ptrs[ixToL]) != l) {
+<                 continue;    // retry the search
+---
+>             prov->scxInit(tid);
+> 
+>             auto llxResult = prov->llx(tid, p);
+>             if (!prov->isSuccessfulLLXResult(llxResult) || p->ptrs[ixToL] != l) {
+>                 continue; // retry the search
+959c694,696
+<             info->nodes[1] = l;
+---
+>             prov->scxAddNode(tid, p, false, llxResult);
+>             // no need to add l, since it is a leaf, and leaves are IMMUTABLE (so no point freezing or finalizing them)
+> 
+961,962c698
+<             Node<DEGREE,K>* n = allocateNode(tid);
+<             //printf("keyIndex=%d getABDegree-keyIndex=%d\n", keyIndex, l->getABDegree()-keyIndex);
+---
+>             Node<DEGREE,K> * n = allocateNode(tid);
+965c701
+<             arraycopy(l->ptrs, 0, n->ptrs, 0, keyIndex); // although we are copying the ptrs array, since the node is a leaf, ptrs CANNOT contain modified by rqProvider->linearize_update_at_..., so we do not use arraycopy_ptrs.
+---
+>             arraycopy(l->ptrs, 0, n->ptrs, 0, keyIndex);
+968,969d703
+<             n->marked = false;
+<             n->scxPtr = DUMMY;
+974,988c708,710
+<             // construct info record to pass to SCX
+<             info->numberOfNodes = 2;
+<             info->numberOfNodesAllocated = 1;
+<             info->numberOfNodesToFreeze = 1;
+<             info->field = &p->ptrs[ixToL];
+<             info->newNode = n;
+<             info->insertedNodes[0] = n;
+<             info->insertedNodes[1] = NULL;
+<             info->deletedNodes[0] = l;
+<             info->deletedNodes[1] = NULL;
+< 
+<             void* oldValue = l->ptrs[keyIndex]; // since the node is a leaf, ptrs is not modified by any call to rqProvider->linearize_update_at_..., so we do not need to use read_addr to access it
+<             if (scx(tid, info)) {
+<                 TRACE COUTATOMICTID("delete std::pair ("<<key<<", "<<oldValue<<"): SCX succeeded"<<std::endl);
+< 
+---
+>             void* oldValue = l->ptrs[keyIndex];
+>             if (prov->scxExecute(tid, (void * volatile *) &p->ptrs[ixToL], l, n)) {
+>                 recordmgr->retire(tid, l);
+995d716
+<             TRACE COUTATOMICTID("delete std::pair ("<<key<<", "<<oldValue<<"): SCX FAILED"<<std::endl);
+1011c732
+< bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::fixWeightViolation(const int tid, Node<DEGREE,K>* viol) {
+---
+> bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::fixWeightViolation(const int tid, Node<DEGREE,K> * viol) {
+1018c739
+<     if (llx(tid, viol, NULL) == FINALIZED) {
+---
+>     if (prov->llx(tid, viol) == prov->FINALIZED) {
+1026,1028d746
+<     wrapper_info<DEGREE,K> _info;
+<     wrapper_info<DEGREE,K>* info = &_info;
+< 
+1031,1032d748
+< //        GSTATS_ADD_IX(tid, num_prop_guard_rebalance_attempts, 1, GSTATS_GET(tid, num_getguard));
+< 
+1034,1037c750,752
+<         Node<DEGREE,K>* gp = NULL;
+<         Node<DEGREE,K>* p = entry;
+<         Node<DEGREE,K>* l = rqProvider->read_addr(tid, &p->ptrs[0]);
+<         prefetch_range(l, sizeof(*l));
+---
+>         Node<DEGREE,K> * gp = NULL;
+>         Node<DEGREE,K> * p = entry;
+>         Node<DEGREE,K> * l = p->ptrs[0];
+1045,1046c760
+<             l = rqProvider->read_addr(tid, &l->ptrs[ixToL]);
+<             prefetch_range(l, sizeof(*l));
+---
+>             l = l->ptrs[ixToL];
+1061a776,778
+>         prov->scxInit(tid);
+>         scx_handle_t llxResult;
+> 
+1063,1065c780,793
+<         if (!llx(tid, gp, NULL, 0, info->scxPtrs, info->nodes) || rqProvider->read_addr(tid, &gp->ptrs[ixToP]) != p) continue;    // retry the search
+<         if (!llx(tid, p, NULL, 1, info->scxPtrs, info->nodes) || rqProvider->read_addr(tid, &p->ptrs[ixToL]) != l) continue;      // retry the search
+<         if (!llx(tid, l, NULL, 2, info->scxPtrs, info->nodes)) continue;                             // retry the search
+---
+> 
+>         llxResult = prov->llx(tid, gp);
+>         if (!prov->isSuccessfulLLXResult(llxResult) || gp->ptrs[ixToP] != p) continue;
+>         prov->scxAddNode(tid, gp, false, llxResult);
+> 
+>         llxResult = prov->llx(tid, p);
+>         if (!prov->isSuccessfulLLXResult(llxResult) || p->ptrs[ixToL] != l) continue;
+>         prov->scxAddNode(tid, p, true, llxResult);
+> 
+>         if (!l->isLeaf()) {
+>             llxResult = prov->llx(tid, l);
+>             if (!prov->isSuccessfulLLXResult(llxResult)) continue;
+>             prov->scxAddNode(tid, l, true, llxResult);
+>         }
+1078,1079c806,807
+<             Node<DEGREE,K>* n = allocateNode(tid);
+<             arraycopy_ptrs(p->ptrs, 0, n->ptrs, 0, ixToL); // p and l are both internal, so we use arraycopy_ptrs
+---
+>             Node<DEGREE,K> * n = allocateNode(tid);
+>             arraycopy_ptrs(p->ptrs, 0, n->ptrs, 0, ixToL);
+1086,1087d813
+<             n->marked = false;
+<             n->scxPtr = DUMMY;
+1092,1115c818,820
+<             // construct info record to pass to SCX
+<             info->numberOfNodes = 3;
+<             info->numberOfNodesAllocated = 1;
+<             info->numberOfNodesToFreeze = 3;
+<             info->field = &gp->ptrs[ixToP];
+<             info->newNode = n;
+< //            info->insertedNodes[0] = info->deletedNodes[0] = NULL;
+<             info->insertedNodes[0] = n;
+<             info->insertedNodes[1] = NULL;
+<             info->deletedNodes[0] = p;
+<             info->deletedNodes[1] = l;
+<             info->deletedNodes[2] = NULL;
+< 
+<             if (scx(tid, info)) {
+<                 TRACE COUTATOMICTID("absorb: SCX succeeded"<<std::endl);
+< 
+<                 //    absorb [check: slack@n]
+<                 //        no weight at pi(u)
+<                 //        degree at pi(u) -> eliminated
+<                 //        slack at pi(u) -> eliminated or slack at n
+<                 //        weight at u -> eliminated
+<                 //        no degree at u
+<                 //        slack at u -> slack at n
+< 
+---
+>             if (prov->scxExecute(tid, (void * volatile *) &gp->ptrs[ixToP], p, n)) {
+>                 recordmgr->retire(tid, p);
+>                 recordmgr->retire(tid, l);
+1123d827
+<             TRACE COUTATOMICTID("absorb: SCX FAILED"<<std::endl);
+1134,1135c838,839
+<             Node<DEGREE,K>* ptrs[2*DEGREE];
+<             arraycopy_ptrs(p->ptrs, 0, ptrs, 0, ixToL); // p and l are both internal, so we use arraycopy_ptrs
+---
+>             Node<DEGREE,K> * ptrs[2*DEGREE];
+>             arraycopy_ptrs(p->ptrs, 0, ptrs, 0, ixToL);
+1152c856
+<             Node<DEGREE,K>* left = allocateNode(tid);
+---
+>             Node<DEGREE,K> * left = allocateNode(tid);
+1156,1157d859
+<             left->marked = false;
+<             left->scxPtr = DUMMY;
+1163c865
+<             Node<DEGREE,K>* right = allocateNode(tid);
+---
+>             Node<DEGREE,K> * right = allocateNode(tid);
+1167,1168d868
+<             right->marked = false;
+<             right->scxPtr = DUMMY;
+1173c873
+<             Node<DEGREE,K>* n = allocateNode(tid);
+---
+>             Node<DEGREE,K> * n = allocateNode(tid);
+1175,1176c875,876
+<             rqProvider->write_addr(tid, &n->ptrs[0], left);
+<             rqProvider->write_addr(tid, &n->ptrs[1], right);
+---
+>             n->ptrs[0] = left;
+>             n->ptrs[1] = right;
+1178,1179d877
+<             n->marked = false;
+<             n->scxPtr = DUMMY;
+1188,1203c886
+<             //       if n will become the root (of the B-slack tree)
+< 
+<             // construct info record to pass to SCX
+<             info->numberOfNodes = 3;
+<             info->numberOfNodesAllocated = 3;
+<             info->numberOfNodesToFreeze = 3;
+<             info->field = &gp->ptrs[ixToP];
+<             info->newNode = n;
+< //            info->insertedNodes[0] = info->deletedNodes[0] = NULL;
+<             info->insertedNodes[0] = n;
+<             info->insertedNodes[1] = left;
+<             info->insertedNodes[2] = right;
+<             info->insertedNodes[3] = NULL;
+<             info->deletedNodes[0] = p;
+<             info->deletedNodes[1] = l;
+<             info->deletedNodes[2] = NULL;
+---
+>             //       if n will become the root
+1205,1206c888,890
+<             if (scx(tid, info)) {
+<                 TRACE COUTATOMICTID("split: SCX succeeded"<<std::endl);
+---
+>             if (prov->scxExecute(tid, (void * volatile *) &gp->ptrs[ixToP], p, n)) {
+>                 recordmgr->retire(tid, p);
+>                 recordmgr->retire(tid, l);
+1212d895
+<             TRACE COUTATOMICTID("split: SCX FAILED"<<std::endl);
+1221,1222c904,905
+< bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::fixDegreeViolation(const int tid, Node<DEGREE,K>* viol) {
+<     if (viol->getABDegree() >= a || viol == entry || viol == rqProvider->read_addr(tid, &entry->ptrs[0])) {
+---
+> bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::fixDegreeViolation(const int tid, Node<DEGREE,K> * viol) {
+>     if (viol->getABDegree() >= a || viol == entry || viol == entry->ptrs[0]) {
+1227c910
+<     if (llx(tid, viol, NULL) == FINALIZED) {
+---
+>     if (prov->llx(tid, viol) == prov->FINALIZED) {
+1235,1237d917
+<     wrapper_info<DEGREE,K> _info;
+<     wrapper_info<DEGREE,K>* info = &_info;
+< 
+1241d920
+< //        GSTATS_ADD_IX(tid, num_prop_guard_rebalance_attempts, 1, GSTATS_GET(tid, num_getguard));
+1247,1250c926,928
+<         Node<DEGREE,K>* gp = NULL;
+<         Node<DEGREE,K>* p = entry;
+<         Node<DEGREE,K>* l = rqProvider->read_addr(tid, &p->ptrs[0]);
+<         prefetch_range(l, sizeof(*l));
+---
+>         Node<DEGREE,K> * gp = NULL;
+>         Node<DEGREE,K> * p = entry;
+>         Node<DEGREE,K> * l = p->ptrs[0];
+1258,1259c936
+<             l = rqProvider->read_addr(tid, &l->ptrs[ixToL]);
+<             prefetch_range(l, sizeof(*l));
+---
+>             l = l->ptrs[ixToL];
+1269a947,949
+>         prov->scxInit(tid);
+>         scx_handle_t llxResult;
+> 
+1271,1274c951,958
+<         if (!llx(tid, gp, NULL, 0, info->scxPtrs, info->nodes)
+<                  || rqProvider->read_addr(tid, &gp->ptrs[ixToP]) != p) continue;   // retry the search
+<         if (!llx(tid, p, NULL, 1, info->scxPtrs, info->nodes)
+<                  || rqProvider->read_addr(tid, &p->ptrs[ixToL]) != l) continue;     // retry the search
+---
+> 
+>         llxResult = prov->llx(tid, gp);
+>         if (!prov->isSuccessfulLLXResult(llxResult) || gp->ptrs[ixToP] != p) continue;
+>         prov->scxAddNode(tid, gp, false, llxResult);
+> 
+>         llxResult = prov->llx(tid, p);
+>         if (!prov->isSuccessfulLLXResult(llxResult) || p->ptrs[ixToL] != l) continue;
+>         prov->scxAddNode(tid, p, true, llxResult);
+1277c961
+<         Node<DEGREE,K>* s = rqProvider->read_addr(tid, &p->ptrs[ixToS]);
+---
+>         Node<DEGREE,K> * s = p->ptrs[ixToS];
+1308,1309c992,993
+<         Node<DEGREE,K>* left;
+<         Node<DEGREE,K>* right;
+---
+>         Node<DEGREE,K> * left;
+>         Node<DEGREE,K> * right;
+1314,1315d997
+<             if (!llx(tid, l, NULL, 2, info->scxPtrs, info->nodes)) continue; // retry the search
+<             if (!llx(tid, s, NULL, 3, info->scxPtrs, info->nodes)) continue; // retry the search
+1321,1322d1002
+<             if (!llx(tid, s, NULL, 2, info->scxPtrs, info->nodes)) continue; // retry the search
+<             if (!llx(tid, l, NULL, 3, info->scxPtrs, info->nodes)) continue; // retry the search
+1328a1009,1020
+>         // since both left and right have weight 0, if one is a leaf, then both are.
+>         // so, we can test one, and perform llx on both or neither, as appropriate.
+>         if (!left->isLeaf()) {
+>             llxResult = prov->llx(tid, left);
+>             if (!prov->isSuccessfulLLXResult(llxResult)) continue;
+>             prov->scxAddNode(tid, left, true, llxResult);
+> 
+>             llxResult = prov->llx(tid, right);
+>             if (!prov->isSuccessfulLLXResult(llxResult)) continue;
+>             prov->scxAddNode(tid, right, true, llxResult);
+>         }
+> 
+1338c1030
+<             Node<DEGREE,K>* newl = allocateNode(tid);
+---
+>             Node<DEGREE,K> * newl = allocateNode(tid);
+1348c1040
+<                     rqProvider->write_addr(tid, &newl->ptrs[k2++], rqProvider->read_addr(tid, &left->ptrs[i]));
+---
+>                     newl->ptrs[k2++] = left->ptrs[i];
+1359c1051
+<                     rqProvider->write_addr(tid, &newl->ptrs[k2++], rqProvider->read_addr(tid, &right->ptrs[i]));
+---
+>                     newl->ptrs[k2++] = right->ptrs[i];
+1363,1364d1054
+<             newl->marked = false;
+<             newl->scxPtr = DUMMY;
+1372,1387c1062,1065
+< 
+<                 // construct info record to pass to SCX
+<                 info->numberOfNodes = 4; // gp + p + l + s
+<                 info->numberOfNodesAllocated = 1; // newl
+<                 info->numberOfNodesToFreeze = 4; // gp + p + l + s
+<                 info->field = &gp->ptrs[ixToP];
+<                 info->newNode = newl;
+<                 info->insertedNodes[0] = newl;
+<                 info->insertedNodes[1] = NULL;
+<                 info->deletedNodes[0] = p;
+<                 info->deletedNodes[1] = l;
+<                 info->deletedNodes[2] = s;
+<                 info->deletedNodes[3] = NULL;
+< 
+<                 if (scx(tid, info)) {
+<                     TRACE COUTATOMICTID("absorbsibling AND rootabsorb: SCX succeeded"<<std::endl);
+---
+>                 if (prov->scxExecute(tid, (void * volatile *) &gp->ptrs[ixToP], p, newl)) {
+>                     recordmgr->retire(tid, p);
+>                     recordmgr->retire(tid, l);
+>                     recordmgr->retire(tid, s);
+1392d1069
+<                 TRACE COUTATOMICTID("absorbsibling AND rootabsorb: SCX FAILED"<<std::endl);
+1401c1078
+<                 Node<DEGREE,K>* n = allocateNode(tid);
+---
+>                 Node<DEGREE,K> * n = allocateNode(tid);
+1406c1083
+<                     rqProvider->write_addr(tid, &n->ptrs[i], rqProvider->read_addr(tid, &p->ptrs[i]));      // n and p are internal, so their ptrs arrays might have entries that are being modified by rqProvider->linearize_update_at_..., so we use read_addr and write_addr
+---
+>                     n->ptrs[i] = p->ptrs[i];
+1412c1089
+<                     rqProvider->write_addr(tid, &n->ptrs[i-1], rqProvider->read_addr(tid, &p->ptrs[i]));    // n and p are internal, so their ptrs arrays might have entries that are being modified by rqProvider->linearize_update_at_..., so we use read_addr and write_addr
+---
+>                     n->ptrs[i-1] = p->ptrs[i];
+1414,1415c1091,1092
+<                 // replace l with newl
+<                 rqProvider->write_addr(tid, &n->ptrs[ixToL - (ixToL > ixToS)], newl);
+---
+>                 // replace l with newl in n's pointers
+>                 n->ptrs[ixToL - (ixToL > ixToS)] = newl;
+1417,1418d1093
+<                 n->marked = false;
+<                 n->scxPtr = DUMMY;
+1423,1438c1098,1101
+<                 // construct info record to pass to SCX
+<                 info->numberOfNodes = 4; // gp + p + l + s
+<                 info->numberOfNodesAllocated = 2; // n + newl
+<                 info->numberOfNodesToFreeze = 4; // gp + p + l + s
+<                 info->field = &gp->ptrs[ixToP];
+<                 info->newNode = n;
+<                 info->insertedNodes[0] = n;
+<                 info->insertedNodes[1] = newl;
+<                 info->insertedNodes[2] = NULL;
+<                 info->deletedNodes[0] = p;
+<                 info->deletedNodes[1] = l;
+<                 info->deletedNodes[2] = s;
+<                 info->deletedNodes[3] = NULL;
+< 
+<                 if (scx(tid, info)) {
+<                     TRACE COUTATOMICTID("absorbsibling: SCX succeeded"<<std::endl);
+---
+>                 if (prov->scxExecute(tid, (void * volatile *) &gp->ptrs[ixToP], p, n)) {
+>                     recordmgr->retire(tid, p);
+>                     recordmgr->retire(tid, l);
+>                     recordmgr->retire(tid, s);
+1444d1106
+<                 TRACE COUTATOMICTID("absorbsibling: SCX FAILED"<<std::endl);
+1458,1460c1120,1122
+<             Node<DEGREE,K>* n = allocateNode(tid);
+<             Node<DEGREE,K>* newleft = allocateNode(tid);
+<             Node<DEGREE,K>* newright = allocateNode(tid);
+---
+>             Node<DEGREE,K> * n = allocateNode(tid);
+>             Node<DEGREE,K> * newleft = allocateNode(tid);
+>             Node<DEGREE,K> * newright = allocateNode(tid);
+1464c1126
+<             Node<DEGREE,K>* ptrs[2*DEGREE];
+---
+>             Node<DEGREE,K> * ptrs[2*DEGREE];
+1473c1135
+<                     ptrs[k2++] = rqProvider->read_addr(tid, &left->ptrs[i]);
+---
+>                     ptrs[k2++] = left->ptrs[i];
+1484c1146
+<                     ptrs[k2++] = rqProvider->read_addr(tid, &right->ptrs[i]);
+---
+>                     ptrs[k2++] = right->ptrs[i];
+1498c1160
+<                     rqProvider->write_addr(tid, &newleft->ptrs[i], ptrs[k2++]);
+---
+>                     newleft->ptrs[i] = ptrs[k2++];
+1502,1503d1163
+<             newleft->marked = false;
+<             newleft->scxPtr = DUMMY;
+1518c1178
+<                     rqProvider->write_addr(tid, &newright->ptrs[i], ptrs[k2++]);
+---
+>                     newright->ptrs[i] = ptrs[k2++];
+1522,1523d1181
+<             newright->marked = false;
+<             newright->scxPtr = DUMMY;
+1534c1192
+<                 rqProvider->write_addr(tid, &n->ptrs[i], rqProvider->read_addr(tid, &p->ptrs[i])); // n and p are internal, so their ptrs arrays might have entries that are being modified by rqProvider->linearize_update_at_..., so we use read_addr and write_addr
+---
+>                 n->ptrs[i] = p->ptrs[i];
+1537,1538c1195,1196
+<             rqProvider->write_addr(tid, &n->ptrs[leftindex], newleft);
+<             rqProvider->write_addr(tid, &n->ptrs[rightindex], newright);
+---
+>             n->ptrs[leftindex] = newleft;
+>             n->ptrs[rightindex] = newright;
+1540,1541d1197
+<             n->marked = false;
+<             n->scxPtr = DUMMY;
+1546,1562c1202,1205
+<             // construct info record to pass to SCX
+<             info->numberOfNodes = 4; // gp + p + l + s
+<             info->numberOfNodesAllocated = 3; // n + newleft + newright
+<             info->numberOfNodesToFreeze = 4; // gp + p + l + s
+<             info->field = &gp->ptrs[ixToP];
+<             info->newNode = n;
+<             info->insertedNodes[0] = n;
+<             info->insertedNodes[1] = newleft;
+<             info->insertedNodes[2] = newright;
+<             info->insertedNodes[3] = NULL;
+<             info->deletedNodes[0] = p;
+<             info->deletedNodes[1] = l;
+<             info->deletedNodes[2] = s;
+<             info->deletedNodes[3] = NULL;
+< 
+<             if (scx(tid, info)) {
+<                 TRACE COUTATOMICTID("distribute: SCX succeeded"<<std::endl);
+---
+>             if (prov->scxExecute(tid, (void * volatile *) &gp->ptrs[ixToP], p, n)) {
+>                 recordmgr->retire(tid, p);
+>                 recordmgr->retire(tid, l);
+>                 recordmgr->retire(tid, s);
+1567d1209
+<             TRACE COUTATOMICTID("distribute: SCX FAILED"<<std::endl);
+1575,1649d1216
+< /**
+<  *
+<  * IMPLEMENTATION OF LLX AND SCX
+<  *
+<  *
+<  */
+< 
+< template <int DEGREE, typename K, class Compare, class RecManager>
+< bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::llx(const int tid, Node<DEGREE,K>* r, Node<DEGREE,K> ** snapshot, const int i, SCXRecord<DEGREE,K> ** ops, Node<DEGREE,K> ** nodes) {
+<     SCXRecord<DEGREE,K>* result = llx(tid, r, snapshot);
+<     if (result == FAILED || result == FINALIZED) return false;
+<     ops[i] = result;
+<     nodes[i] = r;
+<     return true;
+< }
+< 
+< template <int DEGREE, typename K, class Compare, class RecManager>
+< abtree_ns::SCXRecord<DEGREE,K>* abtree_ns::abtree<DEGREE,K,Compare,RecManager>::llx(const int tid, Node<DEGREE,K>* r, Node<DEGREE,K> ** snapshot) {
+<     const bool marked = r->marked;
+<     SOFTWARE_BARRIER;
+<     tagptr_t tagptr = (tagptr_t) r->scxPtr;
+< 
+<     // read mutable state field of descriptor
+<     bool succ;
+<     TRACE COUTATOMICTID("tagged ptr seq="<<UNPACK1_SEQ(tagptr)<<" descriptor seq="<<UNPACK1_SEQ(TAGPTR1_UNPACK_PTR(tagptr)->c.mutables)<<std::endl);
+<     int state = DESC1_READ_FIELD(succ, TAGPTR1_UNPACK_PTR(tagptr)->c.mutables, tagptr, MUTABLES1_MASK_STATE, MUTABLES1_OFFSET_STATE);
+<     if (!succ) state = SCXRecord<DEGREE,K>::STATE_COMMITTED;
+<     TRACE { mutables_t debugmutables = TAGPTR1_UNPACK_PTR(tagptr)->c.mutables; COUTATOMICTID("llx scxrecord succ="<<succ<<" state="<<state<<" mutables="<<debugmutables<<" desc-seq="<<UNPACK1_SEQ(debugmutables)<<std::endl); }
+<     // note: special treatment for alg in the case where the descriptor has already been reallocated (impossible before the transformation, assuming safe memory reclamation)
+<     SOFTWARE_BARRIER;
+< 
+<     if (state == SCXRecord<DEGREE,K>::STATE_ABORTED || ((state == SCXRecord<DEGREE,K>::STATE_COMMITTED) && !r->marked)) {
+<         // read snapshot fields
+<         if (snapshot != NULL) {
+<             if (r->isLeaf()) {
+<                 arraycopy(r->ptrs, 0, snapshot, 0, r->getABDegree());
+<             } else {
+<                 arraycopy_ptrs(r->ptrs, 0, snapshot, 0, r->getABDegree());
+<             }
+<         }
+<         if ((tagptr_t) r->scxPtr == tagptr) return (SCXRecord<DEGREE,K> *) tagptr; // we have a snapshot
+<     }
+< 
+<     if (state == SCXRecord<DEGREE,K>::STATE_INPROGRESS) {
+<         helpOther(tid, tagptr);
+<     }
+<     return (marked ? FINALIZED : FAILED);
+< }
+< 
+< template<int DEGREE, typename K, class Compare, class RecManager>
+< bool abtree_ns::abtree<DEGREE,K,Compare,RecManager>::scx(const int tid, wrapper_info<DEGREE,K> * info) {
+<     const int init_state = SCXRecord<DEGREE,K>::STATE_INPROGRESS;
+<     SCXRecord<DEGREE,K> * newdesc = createSCXRecord(tid, info);
+<     tagptr_t tagptr = TAGPTR1_NEW(tid, newdesc->c.mutables);
+<     info->state = help(tid, tagptr, newdesc, false);
+<     return info->state & SCXRecord<DEGREE,K>::STATE_COMMITTED;
+< }
+< 
+< // returns true if we executed help, and false otherwise
+< template<int DEGREE, typename K, class Compare, class RecManager>
+< void abtree_ns::abtree<DEGREE,K,Compare,RecManager>::helpOther(const int tid, tagptr_t tagptr) {
+<     if ((void*) tagptr == DUMMY) {
+<         return; // deal with the dummy descriptor
+<     }
+<     SCXRecord<DEGREE,K> snap;
+<     if (DESC1_SNAPSHOT(&snap, tagptr, SCXRecord<DEGREE comma K>::size)) {
+<         help(tid, tagptr, &snap, true);
+<     }
+< }
+< 
+< template<int DEGREE, typename K, class Compare, class RecManager>
+< int abtree_ns::abtree<DEGREE,K,Compare,RecManager>::help(const int tid, const tagptr_t tagptr, SCXRecord<DEGREE,K> const * const snap, const bool helpingOther) {
+< #ifdef NO_HELPING
+<     int IGNORED_RETURN_VALUE = -1;
+<     if (helpingOther) return IGNORED_RETURN_VALUE;
+1651,1706d1217
+< //    TRACE COUTATOMICTID("help "<<tagptrToString(tagptr)<<" helpingOther="<<helpingOther<<" numNodes="<<snap->c.numberOfNodes<<" numToFreeze="<<snap->c.numberOfNodesToFreeze<<std::endl);
+<     SCXRecord<DEGREE,K> *ptr = TAGPTR1_UNPACK_PTR(tagptr);
+<     //if (helpingOther) { eassert(UNPACK1_SEQ(snap->c.mutables), UNPACK1_SEQ(tagptr)); /*assert(UNPACK1_SEQ(snap->c.mutables) == UNPACK1_SEQ(tagptr));*/ }
+<     // freeze sub-tree
+<     for (int i=helpingOther; i<snap->c.numberOfNodesToFreeze; ++i) {
+<         if (snap->c.nodes[i]->isLeaf()) {
+<             TRACE COUTATOMICTID((helpingOther?"    ":"")<<"help "<<"nodes["<<i<<"]@"<<"0x"<<((uintptr_t)(snap->c.nodes[i]))<<" is a leaf\n");
+<             assert(i > 0); // nodes[0] cannot be a leaf...
+<             continue; // do not freeze leaves
+<         }
+< 
+<         bool successfulCAS = __sync_bool_compare_and_swap(&snap->c.nodes[i]->scxPtr, snap->c.scxPtrsSeen[i], tagptr);
+<         SCXRecord<DEGREE,K> *exp = snap->c.nodes[i]->scxPtr;
+< //        TRACE if (successfulCAS) COUTATOMICTID((helpingOther?"    ":"")<<"help froze nodes["<<i<<"]@0x"<<((uintptr_t)snap->c.nodes[i])<<" with tagptr="<<tagptrToString((tagptr_t) snap->c.nodes[i]->scxPtr)<<std::endl);
+<         if (successfulCAS || exp == (void*) tagptr) continue; // if node is already frozen for our operation
+< 
+<         // note: we can get here only if:
+<         // 1. the state is inprogress, and we just failed a cas, and every helper will fail that cas (or an earlier one), so the scx must abort, or
+<         // 2. the state is committed or aborted
+<         // (this suggests that it might be possible to get rid of the allFrozen bit)
+< 
+<         // read mutable allFrozen field of descriptor
+<         bool succ;
+<         bool allFrozen = DESC1_READ_FIELD(succ, ptr->c.mutables, tagptr, MUTABLES1_MASK_ALLFROZEN, MUTABLES1_OFFSET_ALLFROZEN);
+<         if (!succ) return SCXRecord<DEGREE,K>::STATE_ABORTED;
+< 
+<         if (allFrozen) {
+<             TRACE COUTATOMICTID((helpingOther?"    ":"")<<"help return state "<<SCXRecord<DEGREE comma K>::STATE_COMMITTED<<" after failed freezing cas on nodes["<<i<<"]"<<std::endl);
+<             return SCXRecord<DEGREE,K>::STATE_COMMITTED;
+<         } else {
+<             const int newState = SCXRecord<DEGREE,K>::STATE_ABORTED;
+<             TRACE COUTATOMICTID((helpingOther?"    ":"")<<"help return state "<<newState<<" after failed freezing cas on nodes["<<i<<"]"<<std::endl);
+<             MUTABLES1_WRITE_FIELD(ptr->c.mutables, snap->c.mutables, newState, MUTABLES1_MASK_STATE, MUTABLES1_OFFSET_STATE);
+<             return newState;
+<         }
+<     }
+< 
+<     MUTABLES1_WRITE_BIT(ptr->c.mutables, snap->c.mutables, MUTABLES1_MASK_ALLFROZEN);
+<     SOFTWARE_BARRIER;
+<     for (int i=1; i<snap->c.numberOfNodesToFreeze; ++i) {
+<         if (snap->c.nodes[i]->isLeaf()) continue; // do not mark leaves
+<         snap->c.nodes[i]->marked = true; // finalize all but first node
+<     }
+< 
+<     // CAS in the new sub-tree (update CAS)
+<     rqProvider->linearize_update_at_cas(tid, snap->c.field, snap->c.nodes[1], snap->c.newNode, snap->c.insertedNodes, snap->c.deletedNodes);
+< //    __sync_bool_compare_and_swap(snap->c.field, snap->c.nodes[1], snap->c.newNode);
+<     TRACE COUTATOMICTID((helpingOther?"    ":"")<<"help CAS'ed to newNode@0x"<<((uintptr_t)snap->c.newNode)<<std::endl);
+< 
+<     MUTABLES1_WRITE_FIELD(ptr->c.mutables, snap->c.mutables, SCXRecord<DEGREE comma K>::STATE_COMMITTED, MUTABLES1_MASK_STATE, MUTABLES1_OFFSET_STATE);
+< 
+<     TRACE COUTATOMICTID((helpingOther?"    ":"")<<"help return COMMITTED after performing update cas"<<std::endl);
+<     return SCXRecord<DEGREE,K>::STATE_COMMITTED; // success
+< }
+< 
+< #endif
+\ No newline at end of file

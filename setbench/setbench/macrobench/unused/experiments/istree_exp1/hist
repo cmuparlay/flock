@@ -1,0 +1,930 @@
+note: experiment commands are now cleaned and pulled into run.sh
+
+ 3007  pico step10634.txt 
+ 3008  pico step10633.txt 
+ 3009  ls -l
+ 3010  pico step10632.txt
+ 3011  pico step10626.txt 
+ 3012  cd ..
+ 3013  ls
+ 3014  zip -r data.zip data
+ 3015  sudo apt install zip
+ 3016  zip -r data.zip data
+ 3017  ls
+ 3018  rm data/*
+ 3019  htop
+ 3020  ls data
+ 3021  unzip data.zip 
+ 3022  ls data
+ 3023  pico data/step10633.txt
+ 3024  pico data/step10632.txt
+ 3025  pico data/step10631.txt
+ 3026  pico data/step10634
+ 3027  pico data/step10634.txt 
+ 3028  ll
+ 3029  cd data/
+ 3030  ll
+ 3031  who
+ 3032  pico ../run.sh 
+ 3033  cd ..
+ 3034  ls
+ 3035  pico data.csv 
+ 3036  pico run.sh 
+ 3037  cat data.csv 
+ 3038  pico run.sh 
+ 3039  ../parse.sh data/*.txt
+ 3040  ../parse.sh data/*.txt | tee data_manual.csv
+ 3041  pico data_manual.csv 
+ 3042  pico data/step10244.txt 
+ 3043  pico run.sh 
+ 3044  pico data/step10244.txt 
+ 3045  pico data/step10245.txt 
+ 3046  ./run 10245
+ 3047  ./run.sh 10245
+ 3048  pico data/step10244.txt
+ 3049  ./run 10245
+ 3050  ./run.sh 10245
+ 3051  ./run.sh
+ 3052  sudo ./run.sh
+ 3053  pico data/step10001.txt 
+ 3054  ll
+ 3055  pico run.sh 
+ 3056  ./run.sh
+ 3057  ./run.sh 10245
+ 3058  pico run.sh 
+ 3059  ./run.sh 10245
+ 3060  htop
+ 3061  ./run.sh
+ 3062  pico run.sh 
+ 3063  ./run.sh
+ 3064  ls
+ 3065  ls -l
+ 3066  sudo rm data.csv
+ 3067  ll
+ 3068  ./run.sh
+ 3069  ./run.sh 1
+ 3070  pico run.sh 
+ 3071  ./run.sh 245
+ 3072  pico run.sh 
+ 3073  ./run.sh 10245
+ 3074  pico data/step10245.txt 
+ 3075  pico run.sh 
+ 3076  ./run.sh 10245
+ 3077  pico data/step10245.txt 
+ 3078  LD_PRELOAD=../../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ../../bin/brown_ext_ist_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 200000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3079  ldd ../../bin/brown_ext_ist_lf.ubench_rdebra 
+ 3080  LD_PRELOAD=../../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ../../bin/brown_ext_ist_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 200000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3081  ls data
+ 3082  ./run.sh 10633
+ 3083  tmux attach-session
+ 3084  tmux 
+ 3085  tmux attach-session
+ 3086  cd ~/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/bin/
+ 3087  ls
+ 3088  ./brown_ext_abtree_lf.ubench_rdebra -i 50 -d 50 -rq 0 -k 2000000 -p 1 -nwork 1 -nrq 1 -t 3000
+ 3089  ./brown_ext_abtree_lf.ubench_rdebra -i 50 -d 50 -rq 0 -k 2000000 -nprefill 1 -nwork 1 -nrq 1 -t 3000
+ 3090  sudo sh -c 'echo -1 >/proc/sys/kernel/perf_event_paranoid'
+ 3091  ./brown_ext_abtree_lf.ubench_rdebra -i 50 -d 50 -rq 0 -k 2000000 -nprefill 1 -nwork 1 -nrq 1 -t 3000
+ 3092  ./brown_ext_abtree_lf.ubench_rdebra -i 50 -d 50 -rq 0 -k 2000000 -nprefill 1 -nwork 1 -nrq 0 -t 3000
+ 3093  ./brown_ext_abtree_lf.ubench_rdebra -i 0 -d 0 -rq 0 -k 2000000 -nprefill 1 -nwork 1 -nrq 0 -t 3000
+ 3094  htop
+ 3157  cd ~/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/bin/
+ 3158  ls
+ 3159  LD_PRELOAD=../lib/libjemalloc-5.0.1-25.so numactl --interleave=all bin/brown_ext_ist_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 200000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3160  ls
+ 3161  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 200000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3162  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 200000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3163  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 2000000 -nrq 0 -t 16000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3164  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 2000000 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3165  ls ../../lib
+ 3166  htop
+ 3167  tmux attach-session
+ 3168  tmux
+ 3169  tmux attach-session
+ 3170  tmux list-sessions
+ 3171  tmux a
+ 3172  htop -d 6
+ 3173  ls
+ 3174  htop
+ 3175  tmux a
+ 3176  ls
+ 3177  man ssh
+ 3178  ssh jax.multicore.cs.uwaterloo.ca
+ 3179  exit
+ 3180  htop
+ 3181  su
+ 3182  sudo usermod -aG sudo dkim
+ 3183  htop
+ 3184  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/
+ 3185  cd microbench/bin/
+ 3186  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 2000000 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3187  ll
+ 3188  lscpu
+ 3189  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 2000000 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3190  htop
+ 3191  sudo sh -c 'echo -1 >/proc/sys/kernel/perf_event_paranoid'
+ 3192  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 5 -d 5 -rq 0 -rqsize 1 -k 2000000 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3193  htop
+ 3194  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 10 -d 10 -rq 0 -rqsize 1 -k 16777216 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3195  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 10 -d 10 -rq 0 -rqsize 1 -k 2147483648 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3196  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 10 -d 10 -rq 0 -rqsize 1 -k 1073741823 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3197  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 10 -d 10 -rq 0 -rqsize 1 -k 2147483647 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3198  tmux
+ 3199  tmux as 3278  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/bin/
+ 3279  ls
+ 3280  tmux as
+ 3281  tmux a
+ 3282  history | grep "brown_"
+ 3283  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so numactl --interleave=all ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 -nprefill 192 -i 50 -d 50 -rq 0 -rqsize 1 -k 20000000 -nrq 0 -t 3000 -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191
+ 3284  tmux
+ 3285  htop
+ 3299  htop
+ 3300  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/setbench/microbench/bin/
+ 3301  ll
+ 3302  ./brown_ext_bst_glock.ubench_rdebra -nwork 1
+ 3303  ./brown_ext_bst_glock.ubench_rdebra -nwork 2
+ 3304  ./brown_ext_bst_glock.ubench_rdebra -nwork 3
+ 3305  ./brown_ext_bst_glock.ubench_rdebra -nwork 3 | grep "total throughput"
+ 3306  ./brown_ext_abtree_lf.ubench_rdebra -nwork 1 | grep "total throughput"
+ 3307  ./brown_ext_abtree_lf.ubench_rdebra -nwork 12 | grep "total throughput"
+ 3308  ./brown_ext_abtree_lf.ubench_rdebra -nwork 48 | grep "total throughput"
+ 3309  ./brown_ext_abtree_lf.ubench_rdebra -nwork 192 | grep "total throughput"
+ 3310  for n in 1 24 48 96 144 192 ; do ./brown_ext_abtree_lf.ubench_rdebra -nwork $n | grep "total throughput" ; done
+ 3311  for n in 1 24 48 96 144 192 ; do echo -n "$n    " ; ./brown_ext_abtree_lf.ubench_rdebra -nwork $n | grep "total throughput" ; done
+ 3312  for n in 1 24 48 96 144 192 ; do echo -n "$n    " ; ./brown_ext_abtree_lf.ubench_rdebra -nwork $n | grep "total throughput" | cut -d":" -f2 ; done
+ 3313  for n in 1 24 48 96 144 192 ; do echo -n "$n," ; ./brown_ext_abtree_lf.ubench_rdebra -nwork $n | grep "total throughput" | cut -d":" -f2 ; done
+ 3314  for n in 1 24 48 96 144 192 ; do echo -n "$n," ; ./brown_ext_abtree_lf.ubench_rdebra -nwork $n | grep "total throughput" | cut -d":" -f2 | cut -d" " -f2 ; done
+ 3315  htop
+ 3316  tmux as
+ 3317  tmux attach-session
+ 3318  htop
+ 3319  tmux
+ 3320  tmux attach-session
+ 3321  htop -d 1
+ 3322  htop
+ 3323  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/setbench/microbench/bin/
+ 3324  ls
+ 3325  ll
+ 3326  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone 
+ 3327  ls ../../lib
+ 3328  ls ../lib
+ 3329  ls ../../lib
+ 3330  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone 
+ 3331  ../experiments/get_pinning_cluster.sh 
+ 3332  pico ../experiments/get_pinning_cluster.sh 
+ 3333  ../experiments/get_pinning_cluster.sh 
+ 3334  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone -pin `../experiments/get_pinning_cluster.sh`
+ 3335  LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone -pin `../experiments/get_pinning_cluster.sh` -rqsize 0 -rq 0 -nrq 0 -t 3000 -k 10000000 -i 50 -d 50 -nwork 48
+ 3336  ls ../experiments/get_thread_counts.sh 
+ 3337  ../experiments/get_thread_counts.sh 
+ 3338  for n in 1 24 48 96 144 192 ; do echo -n $n, ; LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone -pin `../experiments/get_pinning_cluster.sh` -rqsize 0 -rq 0 -nrq 0 -t 3000 -k 10000000 -i 50 -d 50 -nwork 48 | grep "total throughput" | cut -d":" -f2 | tr -d " " ; done
+ 3339  for n in 1 24 48 96 144 192 ; do echo -n $n, ; LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rnone -pin `../experiments/get_pinning_cluster.sh` -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i 50 -d 50 | grep "total throughput" | cut -d":" -f2 | tr -d " " ; done
+ 3340  for n in 1 24 48 96 144 192 ; do echo -n $n, ; LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_rdebra -pin `../experiments/get_pinning_cluster.sh` -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i 50 -d 50 | grep "total throughput" | cut -d":" -f2 | tr -d " " ; done
+ 3341  for u in 0 1 5 ; do for memrec in debra none ; do for n in 1 24 48 96 144 192 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r$memrec -pin `../experiments/get_pinning_cluster.sh` -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3342  for u in 0 1 5 ; do for memrec in debra none ; do for n in 1 24 48 96 144 192 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3343  for u in 5 ; do for memrec in debra none ; do for n in 1 24 48 96 144 192 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3344  for u in 5 ; do for memrec in debra none ; do for n in 1 24 48 96 144 192 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3345  for u in 5 ; do for memrec in debra none ; do for n in 192 48 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3346  for u in 50 ; do for memrec in debra ; do for n in 192 144 96 48 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3347  for u in 50 ; do for memrec in debra ; do for n in 192 48 96 144 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3348  for u in 50 ; do for memrec in debra ; do for n in 192 48 96 144 ; do tput=`LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" > step$n.txt; done ; done ; done
+ 3349  for u in 50 ; do for memrec in debra ; do for n in 192 48 96 144 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./brown_ext_ist_lf.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3350  for u in 50 5 ; do for memrec in debra ; do for n in 48 96 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./bronson_pext_bst_occ.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%20s %20s %20s %20s\n" "$memrec" "$u" "$n" "$tput" ; done ; done ; done
+ 3351  for alg in bronson_pext_bst_occ brown_ext_ist_lf ; do for u in 50 5 ; do for memrec in debra ; do for n in 48 96 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3352  for u in 50 5 ; do for memrec in none debra ; do for alg in bronson_pext_bst_occ brown_ext_ist_lf ; do for n in 48 96 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3353  for u in 50 ; do for memrec in none ; do for alg in brown_ext_ist_lf ; do for n in 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3354  for u in 50 ; do for memrec in debra ; do for alg in brown_ext_ist_lf ; do for n in 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 60000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3355  for u in 50 ; do for memrec in debra treeebr ; do for alg in brown_ext_ist_lf ; do for n in 48 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3356  for u in 50 ; do for memrec in debra treeebr ; do for alg in brown_ext_ist_lf ; do for n in 48 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 20000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3357  for u in 50 ; do for memrec in debra treeebr ; do for alg in brown_ext_abtree_rq_lf ; do for n in 48 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 20000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3358  for u in 50 ; do for memrec in treeebr ; do for alg in brown_ext_abtree_rq_lf ; do for n in 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 20000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3359  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 48 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 20000 -k 10000000 -i $u -d $u > step$n.txt ; tput=`cat step$n.txt | grep "total throughput" | cut -d":" -f2 | tr -d " "` ; printf "%30s %20s %20s %20s %20s\n" "$alg" "$memrec" "$u" "$n" "$tput" ; done ; done ; done ; done
+ 3360  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 48 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 20000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3361  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 2 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3362  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 24 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3363  for u in 50 ; do for memrec in ebrtoken debra ; do for alg in brown_ext_abtree_rq_lf ; do for n in 24 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3364  for u in 50 ; do for memrec in ebrtoken debra ; do for alg in brown_ext_abtree_rq_lf ; do for n in 24 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3365  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 48 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3366  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 48 96 144 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3367  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3368  2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2286 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340 2340
+ 3369  3 2483 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2496 2660 2668 2668 2668 2668 2668 2822 2822 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 2869 3013 3013 3013 3013 3013 3013 3013 3013 3013 3013 3013 30
+ 3370  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3371  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 190 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3372  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 96 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3373  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 144 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 3000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3374  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 144 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3375  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 96 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3376  for u in 50 ; do for memrec in debra ; do for alg in brown_ext_abtree_rq_lf ; do for n in 96 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3377  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 96 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3378  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 8 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3379  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 100 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3380  for u in 50 ; do for memrec in ebrtoken ; do for alg in brown_ext_abtree_rq_lf ; do for n in 192 ; do LD_PRELOAD=../../lib/libjemalloc-5.0.1-25.so time ./${alg}.ubench_r${memrec} -pin 0-23,96-119,24-47,120-143,48-71,144-167,72-95,168-191 -rqsize 0 -rq 0 -nrq 0 -nprefill $n -nwork $n -t 10000 -k 10000000 -i $u -d $u ; done ; done ; done ; done
+ 3381  cat /proc/80863/status | grep "Threads"
+ 3382  watch `cat /proc/80863/status | grep "Threads"`
+ 3383  cat /proc/80863/status | grep "Threads"
+ 3384  watch -1 `cat /proc/80863/status | grep "Threads"`
+ 3385  watch -n 1 `cat /proc/80863/status | grep "Threads"`
+ 3386  cat /proc/80863/status | grep "Threads"
+ 3387  ps | grep
+ 3388  ps | grep "brown"
+ 3389  ps
+ 3390  ps -a
+ 3391  ps -a | grep "ubench"
+ 3392  ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "
+ 3393  `ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`
+ 3394  cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads"
+ 3395  for ((i=0;i<1000;++i)); do cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads" ; done
+ 3396  cat /proc/80863/status | grep "Threads"
+ 3397  watch `cat /proc/80863/status | grep "Threads"`
+ 3398  cat /proc/80863/status | grep "Threads"
+ 3399  watch -1 `cat /proc/80863/status | grep "Threads"`
+ 3400  watch -n 1 `cat /proc/80863/status | grep "Threads"`
+ 3401  cat /proc/80863/status | grep "Threads"
+ 3402  ps | grep
+ 3403  ps | grep "brown"
+ 3404  ps
+ 3405  ps -a
+ 3406  ps -a | grep "ubench"
+ 3407  ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "
+ 3408  `ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`
+ 3409  cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads"
+ 3410  for ((i=0;i<1000;++i)); do cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads" ; done
+ 3411  cat /proc/80863/status | grep "Threads"
+ 3412  watch `cat /proc/80863/status | grep "Threads"`
+ 3413  cat /proc/80863/status | grep "Threads"
+ 3414  watch -1 `cat /proc/80863/status | grep "Threads"`
+ 3415  watch -n 1 `cat /proc/80863/status | grep "Threads"`
+ 3416  cat /proc/80863/status | grep "Threads"
+ 3417  ps | grep
+ 3418  ps | grep "brown"
+ 3419  ps
+ 3420  ps -a
+ 3421  ps -a | grep "ubench"
+ 3422  ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "
+ 3423  `ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`
+ 3424  cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads"
+ 3425  for ((i=0;i<1000;++i)); do cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads" ; done
+ 3426  tmux
+ 3427  htop
+ 3428  tmux attach-session
+ 3429  htop
+ 3430  tmux attach-session
+ 3431  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/bin/
+ 3432  ll
+ 3433  tmux list-sessions
+ 3434  tmux attach-session
+ 3435  tmux a
+ 3436  cat /proc/80863/status | grep "Threads"
+ 3437  watch `cat /proc/80863/status | grep "Threads"`
+ 3438  cat /proc/80863/status | grep "Threads"
+ 3439  watch -1 `cat /proc/80863/status | grep "Threads"`
+ 3440  watch -n 1 `cat /proc/80863/status | grep "Threads"`
+ 3441  cat /proc/80863/status | grep "Threads"
+ 3442  ps | grep
+ 3443  ps | grep "brown"
+ 3444  ps
+ 3445  ps -a
+ 3446  ps -a | grep "ubench"
+ 3447  ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "
+ 3448  `ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`
+ 3449  cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads"
+ 3450  for ((i=0;i<1000;++i)); do cat /proc/`ps -a | grep "ubench" | cut -d"p" -f1 | tr -d " "`/status | grep "Threads" ; done
+ 3451  ulimit -u
+ 3452  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/
+ 3453  ls
+ 3454  cd bin
+ 3455  pico temp.txt 
+ 3456  tail -10 temp.txt 
+ 3457  cat temp.txt | grep "prefilling round" | tail
+ 3458  pico step10003.txt 
+ 3459  tmux a
+ 3460  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/microbench/bin/
+ 3461  ls
+ 3462  pico temp.txt 
+ 3463  pip install matplotlib
+ 3464  pip install python-tk
+ 3465  sudo apt install python-tl
+ 3466  sudo apt install python-tk
+ 3467  htop
+ 3468  man mmap
+ 3469  ps -ah
+ 3470  kill 102447
+ 3471  ps
+ 3472  ps -a
+ 3473  kill -9 102411
+ 3474  kill -9 102988
+ 3475  ps -a
+ 3476  kill -9 102989
+ 3477  ps -a
+ 3478  kill -9 104566
+ 3479  kill -9 104599
+ 3480  kill -9 104600
+ 3481  ps -a
+ 3482  xclock
+ 3483  sudo apt install x11-apps
+ 3484  xclock
+ 3485  tmux a
+ 3486  echo $DISPLAY
+ 3487  tmux a
+ 3488  htop
+ 3489  pico
+ 3490  ls
+ 3491  htop
+ 3492  tmux a
+ 3493  fg
+ 3494  tmux a
+ 3495  exit
+ 3496  tmux a
+ 3497  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/macrobench/
+ 3498  ls
+ 3499  cd bin
+ 3500  ls
+ 3501  cd ..
+ 3502  ls
+ 3503  pico compile.sh 
+ 3504  ./compile.sh 
+ 3505  pico compile.sh 
+ 3506  cd bin
+ 3507  ls
+ 3508  ls -l
+ 3509  LD_PRELOAD=../../lib/libjemalloc.so ./rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23.
+ 3510  LD_PRELOAD=../../lib/libjemalloc.so ./rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23
+ 3511  LD_PRELOAD=../../lib/libjemalloc.so ./rundb_TPCC_bronson_pext_bst_occ -t24 -n24
+ 3512  LD_PRELOAD=../../lib/libjemalloc.so ./rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24
+ 3513  ./rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24
+ 3514  LD_PRELOAD=../../lib/libjemalloc.so echo -e "run -t24 -n24 \n bt" | gdb ./rundb_TPCC_brown_ext_abtree_rq_lf
+ 3515  htop
+ 3516  tmux a
+ 3517  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/setbench/macrobench/
+ 3518  ls
+ 3519  cd bin/
+ 3520  ls
+ 3521  cd ..
+ 3522  ls
+ 3523  pico runscript.sh 
+ 3524  dos2unix
+ 3525  pico runscript.sh 
+ 3526  ls ../lib/
+ 3527  ls
+ 3528  pico runscript.sh 
+ 3529  ls
+ 3530  cd bin
+ 3531  ls
+ 3532  rm rundb_TPCC_brown_ext_bslack_rq_lf 
+ 3533  rm rundb_TPCC_brown_ext_bst_rq_lf 
+ 3534  cd ..
+ 3535  ./runscript.sh 
+ 3536  cd bin
+ 3537  ls
+ 3538  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t1 -n12 -pin 0-17.72-89.18-35.90-107.36-53.108-125.54-71.126-143
+ 3539  cd ..
+ 3540  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t1 -n12 -pin 0-17.72-89.18-35.90-107.36-53.108-125.54-71.126-143
+ 3541  lscpu
+ 3542  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3543  ls -l
+ 3544  ls -l bin
+ 3545  args="-t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3546  args="-t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_hash_chaining 
+ 3547  args="-t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3548  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3549  args="-t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3550  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3551  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3552  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3553  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3554  ls
+ 3555  ls bin/
+ 3556  ls bin/OBJS_TPCC_brown_ext_ist_lf/
+ 3557  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3558  args="-t12 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191" ; echo -e "run $args \n bt" | gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3559  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3560  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3561  env LD_PRELOAD=../lib/libtreejemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3562  env LD_PRELOAD=../lib/libjemalloc_old.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3563  env LD_PRELOAD=../lib/libtreejemalloc-0.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23.96-119.24-47.120-143.48-71.144-167.72-95.168-191
+ 3564  env LD_PRELOAD=../lib/libtreejemalloc-0.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23
+ 3565  env LD_PRELOAD=../lib/libjemalloc_old.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23
+ 3566  env LD_PRELOAD=../lib/libtcmalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23
+ 3567  env LD_PRELOAD=../lib/libhoard.so ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23
+ 3568  env LD_PRELOAD=../lib/libhoard.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3569  env LD_PRELOAD=../lib/libtcmalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3570  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3571  env LD_PRELOAD=../lib/libsupermalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3572  ./bin/rundb_TPCC_brown_ext_ist_lf -t1 -n12 -pin 0-23
+ 3573  ./bin/rundb_TPCC_brown_ext_ist_lf -t12 -n12 -pin 0-23
+ 3574  ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3575  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_a -t24 -n24 -pin 0-23
+ 3576  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24 -pin 0-23
+ 3577  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3578  env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3579  env LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3580  env LD_PRELOAD=../lib/libtcmalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3581  q
+ 3582  env LD_PRELOAD=../lib/libtcmalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3583  ls
+ 3584  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24 -pin 0-23
+ 3585  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_hash_chaining -t24 -n24 -pin 0-23
+ 3586  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23
+ 3587  echo -e "run -t24 -n24 -pin 0-23 \n bt" | LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_bronson_pext_bst_occ
+ 3588  ls
+ 3589  ls -l
+ 3590  ls -l bin
+ 3591  ls
+ 3592  cd /home/t35brown/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench
+ 3593  ls
+ 3594  ls bin
+ 3595  ./compile.sh 
+ 3596  ls
+ 3597  cd bin
+ 3598  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_hash_chaining -t24 -n24 -pin 0-23
+ 3599  cd ..
+ 3600  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_hash_chaining -t24 -n24 -pin 0-23
+ 3601  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23
+ 3602  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24 -pin 0-23
+ 3603  ls ../lib/
+ 3604  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24 -pin 0-23
+ 3605  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23
+ 3606  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_hash_chaining -t24 -n24 -pin 0-23
+ 3607  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf -t24 -n24 -pin 0-23
+ 3608  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ -t24 -n24 -pin 0-23
+ 3609  env LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf -t24 -n24 -pin 0-23
+ 3610  args="-t24 -n24 -pin 0-23" ; echo -e "run $args \n bt" | LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3611  ls
+ 3612  cd ..
+ 3613  ls
+ 3614  ./debug_run.sh 
+ 3615  ls /home/t35brown/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/gitlab_setbench/microbench/bin/rundb_TPCC_brown_ext_ist_lf
+ 3616  ls /home/t35brown/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/gitlab_setbench/microbench/bin/
+ 3617  ls /home/t35brown/.netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/gitlab_setbench/microbench/bin/kill -9 111484
+ 3618  kill -9 111484
+ 3619  ls lib
+ 3620  kill -9 111525
+ 3621  kill -9 111572
+ 3622  kill -9 111940
+ 3623  ls
+ 3624  cd macrobench/
+ 3625  ls
+ 3626  cd bin
+ 3627  ls
+ 3628  history | grep gdb | tail
+ 3629  args="-t24 -n24 -pin 0-23" ; echo -e "run $args \n bt" | LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3630  cd ..
+ 3631  args="-t24 -n24 -pin 0-23" ; echo -e "run $args \n bt" | LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3632  ls bin
+ 3633  args="-t24 -n24 -pin 0-23" ; echo -e "run $args \n bt" | LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf
+ 3634  man gdb
+ 3635  args="-t24 -n24 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -command="run $args"
+ 3636  man gdb
+ 3637  args="-t24 -n24 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3638  args="-t24 -n24 -pin 0-23" ; gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3639  args="-t24 -n24 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3640  args="-t1 -n1 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3641  args="-t1 -n1 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3642  args="-t1 -n1 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3643  n=24 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3644  n=24 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3645  args="-t1 -n1 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3646  pico compile.sh 
+ 3647  ./compile.sh 
+ 3648  cat compiling.out | grep "NDEBUG"
+ 3649  pico compil
+ 3650  pico compile.sh 
+ 3651  ./compile.sh 
+ 3652  args="-t1 -n1 -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3653  n=24 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3654  n=24 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args \n bt \n q"
+ 3655  n=24 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3656  n=1 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3657  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind --fair-sched=yes ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3658  n=2 ; args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so gdb ./bin/rundb_TPCC_brown_ext_ist_lf -ex="run $args"
+ 3659  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind --fair-sched=yes ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3660  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind --fair-sched=yes ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3661  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3662  cd ..
+ 3663  rm -r macrobench/
+ 3664  cd macrobench/
+ 3665  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3666  ./compile.sh 
+ 3667  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3668  n=2 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libtcmalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3669  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3670  ls
+ 3671  pico compile.sh 
+ 3672  ./compile.sh 
+ 3673  pico compile
+ 3674  pico compile.sh 
+ 3675  pico compiled.TPCC.brown_ext_ist_lf.txt 
+ 3676  cd ..
+ 3677  rm -r macrobench/
+ 3678  cd macrobench/
+ 3679  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3680  ll
+ 3681  head -1 compiled.TPCC.brown_ext_ist_lf.txt 
+ 3682  tail -1 compiled.TPCC.brown_ext_ist_lf.txt 
+ 3683  ls ../common/
+ 3684  tail -1 compiled.TPCC.brown_ext_ist_lf.txt | grep "test_"
+ 3685  tail -1 compiled.TPCC.brown_ext_ist_lf.txt | grep "test_bl"
+ 3686  ls
+ 3687  tail -1 compiled.TPCC.brown_ext_ist_lf.txt 
+ 3688  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3689  nm bin/rundb_TPCC_brown_ext_ist_lf 
+ 3690  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -v "asan"
+ 3691  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -vE "asan|lsan"
+ 3692  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -vE "asan|lsan|sanitiz" | wc
+ 3693  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -vE "asan|lsan|sanitiz"
+ 3694  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -vE "asan|lsan|sanitiz|RebuildOp|intercept"
+ 3695  nm bin/rundb_TPCC_brown_ext_ist_lf | grep -vE "asan|lsan|sanitiz|RebuildOp|intercept" | wc -l
+ 3696  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "rcu"
+ 3697  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "numa"
+ 3698  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "papi"
+ 3699  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "dl"
+ 3700  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "dlopen"
+ 3701  cat compiled.TPCC.brown_ext_ist_lf.txt | grep "papi"
+ 3702  nm bin/rundb_TPCC_brown_ext_ist_lf | grep "papi"
+ 3703  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3704  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_YCSB_brown_ext_ist_lf
+ 3705  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args
+ 3706  pico compile.sh 
+ 3707  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args
+ 3708  ./compile.sh 
+ 3709  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3710  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args
+ 3711  ls
+ 3712  rm *.txt
+ 3713  ll
+ 3714  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args
+ 3715  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt
+ 3716  head temp.txt 
+ 3717  head -30 temp.txt 
+ 3718  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep "detected"
+ 3719  head -30 temp.txt 
+ 3720  tail -30 temp.txt 
+ 3721  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3722  ls
+ 3723  ls -l
+ 3724  pico temp.txt 
+ 3725  cd ..
+ 3726  rm -r gitlab_setbench/
+ 3727  cd gitlab_setbench/macrobench/
+ 3728  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3729  ls
+ 3730  pico temp.txt 
+ 3731  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3732  pico temp.txt 
+ 3733  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3734  pico temp.txt 
+ 3735  cd ..
+ 3736  rm -r gitlab_setbench/
+ 3737  cd gitlab_setbench/macrobench/
+ 3738  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3739  pico ../ds/bronson_pext_bst_occ/ccavl.h 
+ 3740  ls
+ 3741  rm -r bin
+ 3742  ls
+ 3743  ls -l
+ 3744  ls bin
+ 3745  pico ../ds/bronson_pext_bst_occ/ccavl.h 
+ 3746  pico compile.sh 
+ 3747  pico Makefile 
+ 3748  cd ..
+ 3749  rm -r macrobench/ ds/
+ 3750  cd macrobench/
+ 3751  ls
+ 3752  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3753  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3754  pico temp.txt 
+ 3755  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3756  n=1 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3757  pico temp.txt 
+ 3758  n=1 args="-t$n -n$n -pin 0-23" ; valgrind ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3759  pico temp.txt 
+ 3760  n=1 args="-t$n -n$n -pin 0-23" ; valgrind --leak-check=full ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3761  n=1 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind --leak-check=full ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3762  ls ../lib
+ 3763  n=1 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so valgrind --leak-check=full ./bin/rundb_TPCC_brown_ext_ist_lf $args
+ 3764  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3765  pico temp.txt 
+ 3766  ls
+ 3767  rm -r bin
+ 3768  ./compile.sh 
+ 3769  pico compile.sh 
+ 3770  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3771  pico temp.txt 
+ 3772  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3773  pico temp.txt 
+ 3774  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3775  pico temp.txt 
+ 3776  cd ..
+ 3777  rm -r gitlab_setbench/
+ 3778  cd gitlab_setbench/macrobench/
+ 3779  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3780  pico temp.txt 
+ 3781  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3782  pico temp.txt 
+ 3783  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; cat temp.txt | grep -E "detected|leaked"
+ 3784  pico temp.txt 
+ 3785  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3786  pico temp.txt 
+ 3787  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3788  pico temp.txt 
+ 3789  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3790  pico temp.txt 
+ 3791  n=2 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3792  pico temp.txt 
+ 3793  n=24 args="-t$n -n$n -pin 0-23" ; ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3794  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3795  ls ../lib
+ 3796  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3797  pico temp.txt 
+ 3798  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3799  pico temp.txt 
+ 3800  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3801  pico temp.txt 
+ 3802  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3803  pico temp.txt 
+ 3804  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3805  pico temp.txt 
+ 3806  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3807  ls
+ 3808  ls bin
+ 3809  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPC $args 2> temp.txt ; tail -20 temp.txt
+ 3810  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3811  pico temp.txt 
+ 3812  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3813  pico temp.txt 
+ 3814  ll
+ 3815  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3816  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; tail -20 temp.txt
+ 3817  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3818  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3819  pico temp.txt 
+ 3820  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; tail -20 temp.txt
+ 3821  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "total throughput" temp.txt ; tail -20 temp.txt
+ 3822  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3823  pico temp.txt 
+ 3824  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3825  pico temp.txt 
+ 3826  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3827  pico temp.txt 
+ 3828  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3829  pico temp.txt 
+ 3830  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3831  pico temp.txt 
+ 3832  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3833  pico temp.txt 
+ 3834  n=24 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3835  pico temp.txt 
+ 3836  n=24 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3837  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3838  pico temp.txt 
+ 3839  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=1 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3840  pico temp.txt 
+ 3841  n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3842  jeprof --show_bytes --pdf `which w` jeprof.19678.0.f.heap > w.pdf
+ 3843  jeprof --show_bytes --pdf `which w` jeprof.181329.0.f.heap > w.pdf
+ 3844  sudo apt install ps2pdf
+ 3845  sudo apt install ghostscript
+ 3846  jeprof --show_bytes `which w` jeprof.181329.0.f.heap
+ 3847  jeprof --show_bytes bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap
+ 3848  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap
+ 3849  exit
+ 3850  cd .netbeans/remote/jax.multicore.cs.uwaterloo.ca/desktop-2ookkmk-Windows-x86_64/C/Users/t35brown/Documents/bitbucket/
+ 3851  rm -r setbench/
+ 3852  cd gitlab_setbench/
+ 3853  ls
+ 3854  cd macrobench/
+ 3855  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap > temp.pdf
+ 3856  history | grep "scp" | tail
+ 3857  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.26.110:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3858  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3859  ls
+ 3860  history | tail
+ 3861  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=1 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3862  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3863  pico temp.
+ 3864  pico temp.txt 
+ 3865  n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3866  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.181329.0.f.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3867  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.3254.0.f.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3868  n=1 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3869  n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3870  n=1 args="-t$n -n$n -pin 0-23" ; LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3871  n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3872  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.7699.0.f.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3873  n=24 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3874  n=4 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3875  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3876  ll
+ 3877  rm jeprof.181329.0.f.heap 
+ 3878  rm jeprof.3254.0.f.heap 
+ 3879  rm jeprof.7164.0.f.heap 
+ 3880  rm jeprof.7699.0.f.heap 
+ 3881  ls
+ 3882  rm jeprof.181329.0.f.heap 
+ 3883  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3884  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3885  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3886  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3887  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3888  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3889  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3890  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3891  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3892  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3893  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3894  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3895  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3896  rm jeprof.*.heap ; n=1 args="-t$n -n$n -pin 0-23" ; MALLOC_CONF=prof_leak:true,lg_prof_sample:0,prof_final:true LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3897  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 3898  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3899  pico temp.txt 
+ 3900  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3901  pico temp.txt 
+ 3902  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3903  pico temp.txt 
+ 3904  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3905  ls
+ 3906  pico temp.txt 
+ 3907  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3908  pico temp.txt 
+ 3909  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3910  pico temp.txt 
+ 3911  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3912  pico temp.txt
+ 3913  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3914  ls
+ 3915  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3916  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 3917  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; cat temp.txt | grep "summary" ; tail -20 temp.txt
+ 3918  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary" ; tail -20 temp.txt
+ 3919  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3920  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3921  pico temp.txt 
+ 3922  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3923  lscpui
+ 3924  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3925  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3926  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3927  ls bin
+ 3928  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3929  ls bin
+ 3930  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 3931  ls -l
+ 3932  pico log.compile.success.TPCC.hash_chaining.-DIDX_HASH\=1.txt 
+ 3933  pico log.compile.success.TPCC.brown_ext_abtree_rq_lf.-DUSE_RANGE_QUERIES.-DRQ_UNSAFE.txt 
+ 3934  ls bin
+ 3935  ls
+ 3936  n=190 args="-t$n -n$n -pin 0-192" ; for alg in `ls bin/rundb_TPCC*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 3937  n=190 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_TPCC*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 3938  ls
+ 3939  rm -r ../ds/brown_ext_ist_lf/
+ 3940  ls
+ 3941  ls bin
+ 3942  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 3943  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; grep "summary" $f ; done
+ 3944  pico $f
+ 3945  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; grep "summary" $f ; done
+ 3946  pico $f
+ 3947  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3948  ./bin/rundb_YCSB_hash_chaining -?
+ 3949  ./bin/rundb_YCSB_hash_chaining 
+ 3950  n=24 args="-t$n -s`1024` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3951  "1024 * 1024" | bc
+ 3952  echo "1024 * 1024" | bc
+ 3953  echo "1024 * 1024 * 24" | bc
+ 3954  n=24 args="-t$n -s`echo "1024*1024*24 | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3955  n=24 args="-t$n -s`echo "1024 * 1024 * 24 | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3956  echo -t$n -s`ech^C"1024 * 1024 * 24 | bc`
+ 3957  echo -t$n -s`echo "1024 * 1024 * 24" | bc`
+ 3958  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3959  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3960  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3961  pico $f
+ 3962  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3963  ls
+ 3964  rm w.pdf 
+ 3965  rm temp.pdf
+ 3966  ls
+ 3967  ls bin
+ 3968  rm bin/rundb_YCSB_hash_chaining 
+ 3969  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 3970  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 3971  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; echo -n $alg ; grep "summary" $f ; done
+ 3972  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n $f ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 3973  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 3974  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*abtree*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 3975  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*abtree*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3976  ls
+ 3977  rm -r ../ds
+ 3978  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; echo ; done
+ 3979  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3980  ls bin/rundb_Y*
+ 3981  rm bin/rundb_Y*
+ 3982  ls
+ 3983  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3984  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*ist*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3985  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3986  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3987  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 3988  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3989  ./bin/rundb_YCSB_brown_ext_ist_lf -h
+ 3990  n=24 args="-t$n -s`echo "1024*1024*1152" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3991  n=24 args="-t$n -s`echo "1024*1024*192" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3992  n=24 args="-t$n -s`echo "1024*1024*24" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3993  n=24 args="-t$n -s`echo "1024*1024*192" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3994  n=24 args="-t$n -s`echo "1024*1024*100" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3995  n=24 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3996  rm bin/rundb_YCSB_bro*
+ 3997  n=24 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3998  n=190 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3999  n=96 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 4000  source ~/.profile ; source ~/.profile
+ 4001   history -w '/home/t35brown/.tmux/resurrect/bash_history-0:2.0'
+ 4002   history -w '/home/t35brown/.tmux/resurrect/bash_history-istree:2.0'
+ 4003  l
+ 4004  pwd
+ 4005  mkdir ~/temp_istree
+ 4006  history > ~/temp_istree/hist
+
+
+
+ 2897  jeprof --show_bytes --pdf bin/rundb_TPCC_brown_ext_ist_lf jeprof.*.heap > temp.pdf && scp -P 2222 temp.pdf trbot@129.97.170.24:/mnt/c/Users/t35brown/Documents/bitbucket/gitlab_setbench/macrobench/_private/
+ 2898  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2900  n=1 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2902  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2904  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2907  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2909  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2911  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2913  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2915  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2916  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; grep "summary" temp.txt ; tail -20 temp.txt
+ 2917  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args 2> temp.txt ; cat temp.txt | grep "summary" ; tail -20 temp.txt
+ 2918  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary" ; tail -20 temp.txt
+ 2919  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2920  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2922  n=24 args="-t$n -n$n -pin 0-23" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2924  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_bronson_pext_bst_occ $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2925  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_ist_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2926  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2928  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2930  n=190 args="-t$n -n$n -pin 0-192" ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/rundb_TPCC_brown_ext_abtree_rq_lf $args | tee temp.txt 2>&1 ; cat temp.txt | grep "summary"
+ 2936  n=190 args="-t$n -n$n -pin 0-192" ; for alg in `ls bin/rundb_TPCC*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 2937  n=190 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_TPCC*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 2942  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; done ; grep "summary" temp.*.txt
+ 2943  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; grep "summary" $f ; done
+ 2945  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args > $f 2>&1 ; grep "summary" $f ; done
+ 2947  n=24 args="-t$n -n$n -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2948  ./bin/rundb_YCSB_hash_chaining -?
+ 2949  ./bin/rundb_YCSB_hash_chaining
+ 2950  n=24 args="-t$n -s`1024` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2954  n=24 args="-t$n -s`echo "1024*1024*24 | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2955  n=24 args="-t$n -s`echo "1024 * 1024 * 24 | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2958  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2959  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; grep "summary" $f ; done
+ 2960  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee
+$f ; grep "summary" $f ; done
+ 2962  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*bronson*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee
+$f ; grep "summary" $f ; done
+ 2968  rm bin/rundb_YCSB_hash_chaining
+ 2969  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 | tee $f ; gre
+p "summary" $f ; done
+ 2970  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "s
+ummary" $f ; done
+ 2971  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; echo -n
+ $alg ; grep "summary" $f ; done
+
+ 2972  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n $f ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 2973  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 2974  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*abtree*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f ; grep "summary" $f ; done
+ 2975  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*abtree*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 2978  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo -n "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; echo ; done
+ 2979  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1
+> $f && grep "summary" $f ; done
+ 2980  ls bin/rundb_Y*
+ 2981  rm bin/rundb_Y*
+ 2983  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1
+> $f && grep "summary" $f ; done
+ 2984  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*ist*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 2985  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-192" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1
+> $f && grep "summary" $f ; done
+ 2986  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1
+> $f && grep "summary" $f ; done
+ 2987  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done
+ 2988  n=24 args="-t$n -s`echo "1024*1024*24" | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2989  ./bin/rundb_YCSB_brown_ext_ist_lf -h
+ 2990  n=24 args="-t$n -s`echo "1024*1024*1152" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2991  n=24 args="-t$n -s`echo "1024*1024*192" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2992  n=24 args="-t$n -s`echo "1024*1024*24" -r0.9 -w0.1 -z0.6 | bc` -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2993  n=24 args="-t$n -s`echo "1024*1024*192" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2994  n=24 args="-t$n -s`echo "1024*1024*100" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2995  n=24 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2996  rm bin/rundb_YCSB_bro*
+ 2997  n=24 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2998  n=190 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 2999  n=96 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3002  n=24 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo
+ 3004  for n in 24 48 96 190 ; do echo "#################### n=$n ####################" ; args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo ; done
+ 3005  for n in 24 48 96 190 ; do echo ; echo "#################### n=$n ####################" ; args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo ; done
+ 3006  n=96 args="-t$n -s`echo "1024*1024*96" | bc` -r0.9 -w0.1 -z0.6 -pin 0-189" ; for alg in `cd bin ; ls rundb_YCSB*` ; do f=temp.$alg.txt ; echo ; echo "$f: " ; ASAN_OPTIONS=new_delete_type_mismatch=0 LD_PRELOAD=../lib/libjemalloc.so ./bin/$alg $args 2>&1 > $f && grep "summary" $f ; done ; echo

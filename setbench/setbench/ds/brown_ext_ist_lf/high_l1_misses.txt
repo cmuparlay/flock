@@ -1,0 +1,22 @@
+Studying 100% insertIfAbsent with prefilling (essentially 100% search) with 1M keys and 144 threads:
+
+[[IST]]
+PAPI_L1_DCM=59.8046 (cf 39 w/1 thread, 59 w/2 pinned to same core)
+PAPI_L2_TCM=20.8917
+PAPI_L3_TCM=5.23829
+PAPI_TOT_CYC=4463.45
+PAPI_TOT_INS=3413.68
+
+[[BST]]
+PAPI_L1_DCM=29.2678 (cf 27 w/1 thread, 29 w/2 pinned to same core)
+PAPI_L2_TCM=12.3652
+PAPI_L3_TCM=2.80366
+PAPI_TOT_CYC=2752.67
+PAPI_TOT_INS=908.481
+
+[[ABTREE]]
+PAPI_L1_DCM=20.4396
+PAPI_L2_TCM=9.46377
+PAPI_L3_TCM=1.03924
+PAPI_TOT_CYC=1134.2
+PAPI_TOT_INS=497.527
