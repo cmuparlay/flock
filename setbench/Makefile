@@ -3,7 +3,7 @@
 DFLAGS = -DRECLAIM_TYPE=debra -DUSE_TREE_STATS -DMAX_THREADS_POW2=512 -DCPU_FREQ_GHZ=2.4  -DMEMORY_STATS=if\(0\) -DMEMORY_STATS2=if\(0\) -DDEBRA_ORIGINAL_FREE
 CFLAGS = -std=c++17 -mcx16 -march=native -O3 -DHOMEGROWN -pthread -DNDEBUG  -fpermissive
 CFLAGS_DEBUG = -std=c++17 -mcx16 -march=native -fsanitize=undefined -fsanitize=address -static-libasan -fno-omit-frame-pointer -g -DHOMEGROWN -pthread 
-IFLAGS = -Isetbench -I../include -I../include/locks `find setbench/common -type d | sed s/^/-I/`
+IFLAGS = -Isetbench -I../include -I../include/flock `find setbench/common -type d | sed s/^/-I/`
 LFLAGS = -Lsetbench/lib  -L/usr/local/lib -lpthread -ldl -ljemalloc
 
 all: bronson_bst_bench ellen_bst_bench chromatic_bst_bench drachsler_bst_bench  natarajan_bst_bench  srivastava_abtree_pub_bench srivastava_abtree_pub_bench_debug chromatic_bst_bench_debug

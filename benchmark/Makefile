@@ -1,5 +1,5 @@
 CPP = g++
-INCLUDES = -I../include -I../include/flock -I../include/parlay -I../structures
+INCLUDES = -I../include -I../include/flock -I../structures
 CFLAGS = -std=c++17 -O3 -march=native -DHOMEGROWN -pthread -DNDEBUG $(INCLUDES)
 CFLAGS_DEBUG = -std=c++17 -g -march=native -DHOMEGROWN -pthread -DNDEBUG
 LFLAGS = -L/usr/local/lib -ljemalloc
