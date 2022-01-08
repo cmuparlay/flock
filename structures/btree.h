@@ -3,6 +3,10 @@
 #include "parlay/primitives.h"
 #include "ptr_type.h"
 
+// A top-down implementation of abtrees
+// Nodes are split or joined on the way down to ensure that each node
+// can fit one more child, or remove one more child.
+
 template <typename K_, typename V_>
 struct Set {
   using K = K_;
@@ -40,7 +44,7 @@ struct Set {
   // The only mutable fields are the child pointers (children) and the
   // removed flag, which is only written to once when the node is
   // being removed.
-  // A node needs to be copied to add or remove children.
+  // A node needs to be copied to add, remove, or rebalance children.
   struct alignas(64) node : header {
     write_once<bool> removed;
     K keys[node_block_size-1];
@@ -309,70 +313,76 @@ struct Set {
   // Tree code
   // ***************************************
 
+  // Splits an overfull node (i.e. one with block_size entries)
   // for a grandparent gp, parent p, and child c:
-  // 1) If c is overfull splits c into two
-  //    If c is underfull it either joins or rebalance c with its neighbor depending on size
-  // 2) copies the parent p to replace with new child or children
-  // 3) updates the grandparent gp to point to the new copied parent
-  // If spliting it takes two locks, one on gp and one on p
-  // If joining or rebalancing, it also takes a lock on the neighboring child 
-  void fix_node(node* gp, int pidx, node* p, int cidx, node* c) {
+  // copies the parent p to replace with new children and
+  // updates the grandparent gp to point to the new copied parent.
+  void overfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
     try_lock(gp->lck, [=] {
 	// check that gp has not been removed, and p has not changed
 	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
 	return try_lock(p->lck, [=] {
 	    // check that c has not changed
 	    if (p->children[cidx].load() != c) return false;
-	    // overfull, so split
-	    if (c->status == isOver) {
-	      auto lmr = c->is_leaf ? split_leaf(c) : split(c);
-	      gp->children[pidx] = add_child(p, lmr, cidx);
-	      node_pool.retire(p);
-	      if(c->is_leaf) leaf_pool.retire((leaf*) c);
-	      else node_pool.retire(c);
-	      return true;
+	    if (c->is_leaf) {
+	      gp->children[pidx] = add_child(p, split_leaf(c), cidx);
+	      leaf_pool.retire((leaf*) c);
 	    } else {
-	      // underfull so join or rebalance
-	      // need to pair up with a neighbor (next if cidx==0, previous otherwise)
-	      node* other_c = p->children[(cidx == 0 ? cidx + 1 : cidx - 1)].load();
-	      auto [li, lc, rc] = ((cidx == 0) ?
-				   std::make_tuple(0,c,other_c) :
-				   std::make_tuple(cidx-1,other_c,c));
-	      if (c->is_leaf) {
-		if (lc->size + rc->size < leaf_join_cutoff) {  // join
-		  gp->children[pidx] = join_children(p, join_leaf(lc, rc), li);
+		gp->children[pidx] = add_child(p, split(c), cidx);
+		node_pool.retire(c);
+	    }
+	    node_pool.retire(p);
+	    return true;
+	  });});
+  }
+
+  // Joins or rebalances an underfull node (i.e. one with min_size)
+  // Picks one of the two neighbors and either joins with it if the sum of
+  // the sizes is less than join_cutoff, or rebalances the two otherwise.
+  // Copies the parent p to replace with new child or children.
+  // Updates the grandparent gp to point to the new copied parent.
+  void underfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
+    try_lock(gp->lck, [=] {
+	// check that gp has not been removed, and p has not changed
+	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
+	return try_lock(p->lck, [=] {
+	    // join with next if first in block, otherwise with previous
+	    node* other_c = p->children[(cidx == 0 ? cidx + 1 : cidx - 1)].load();
+	    auto [li, lc, rc] = ((cidx == 0) ?
+				 std::make_tuple(0, c, other_c) :  
+				 std::make_tuple(cidx-1, other_c, c)); 
+	    if (c->is_leaf) { // leaf
+	      if (lc->size + rc->size < leaf_join_cutoff)  // join
+		gp->children[pidx] = join_children(p, join_leaf(lc, rc), li);
+	      else   // rebalance
+		gp->children[pidx] = rebalance_children(p, rebalance_leaf(lc, rc), li);
+	      node_pool.retire(p);
+	      leaf_pool.retire((leaf*) lc);
+	      leaf_pool.retire((leaf*) rc);
+	      return true;
+	    } else { // internal node
+	      K k = p->keys[li];
+	      // need to lock the other child 
+	      return try_lock(other_c->lck, [=] {
+		  other_c->removed = true;
+		  if (lc->size + rc->size < node_join_cutoff)   // join
+		    gp->children[pidx] = join_children(p, join(lc, k, rc), li);
+		  else // rebalance
+		    gp->children[pidx] = rebalance_children(p, rebalance(lc, k, rc), li);
 		  node_pool.retire(p);
-		  leaf_pool.retire((leaf*) lc);
-		  leaf_pool.retire((leaf*) rc);
-		}
-		else {
-		  gp->children[pidx] = rebalance_children(p, rebalance_leaf(lc, rc), li);
-		  node_pool.retire(p);
-		  leaf_pool.retire((leaf*) lc);
-		  leaf_pool.retire((leaf*) rc);
-		}
-		return true;
-	      } else { // internal node
-		K k = p->keys[li];
-		// need to lock the other child 
-		return try_lock(other_c->lck, [=] {
-		    other_c->removed = true;
-		    if (lc->size + rc->size < node_join_cutoff) {  // join
-		      gp->children[pidx] = join_children(p, join(lc, k, rc), li);
-		      node_pool.retire(p);
-		      node_pool.retire(lc);
-		      node_pool.retire(rc);
-		    }
-		    else {
-		      gp->children[pidx] = rebalance_children(p, rebalance(lc, k, rc), li);
-		      node_pool.retire(p);
-		      node_pool.retire(lc);
-		      node_pool.retire(rc);
-		    }
-		    return true;
-		  });
-	      }
-	    }});});
+		  node_pool.retire(lc);
+		  node_pool.retire(rc);
+		  return true;
+		});
+	    }
+	  });});
+  }
+
+  void fix_node(node* gp, int pidx, node* p, int cidx, node* c) {
+    if (c->status == isOver)
+      overfull_node(gp, pidx, p, cidx, c);
+    else 
+      underfull_node(gp, pidx, p, cidx, c);
   }
 
   // If c (child of root) is overfull it splits it and creates a new internal node with the
@@ -385,10 +395,13 @@ struct Set {
 	// check that c has not changed
 	if (root->children[0].load() != c) return false;
 	if (c->status == isOver) {
-	  auto lmr = c->is_leaf ? split_leaf(c) : split(c);
-	  root->children[0] = node_pool.new_obj(lmr);
-	  if(c->is_leaf) leaf_pool.retire((leaf*) c);
-	  else node_pool.retire(c);
+	  if (c->is_leaf) {
+	    root->children[0] = node_pool.new_obj(split_leaf(c));
+	    leaf_pool.retire((leaf*) c);
+	  } else {
+	    root->children[0] = node_pool.new_obj(split(c));
+	    node_pool.retire(c);
+	  }
 	  return true;
 	} else { // c has degree 1 and not a leaf
 	  root->children[0] = c->children[0].load();
@@ -406,6 +419,7 @@ struct Set {
   // to split a child along the way since its parent is not full and can
   // absorb an extra pointer
   std::tuple<node*, int, leaf*> find_and_fix(node* root, K k) {
+    int cnt = 0;
     while (true) {
       node* p = root;
       int cidx = 0;
@@ -423,10 +437,10 @@ struct Set {
         // they prefetch the next two cache lines
         __builtin_prefetch (((char*) c) + 64); 
         __builtin_prefetch (((char*) c) + 128);
-        if (c->status != OK) {
+	if (c->status != OK) {
           fix_node(gp, pidx, p, cidx, c);
           break;
-        }
+	}
       }
     }
   }

@@ -1,5 +1,5 @@
 CPP = g++
-INCLUDES = -I../include -I../include/locks -I../include/memory -I../include/parlay -I../structures
+INCLUDES = -I../include -I../include/flock -I../include/parlay -I../structures
 CFLAGS = -std=c++17 -O3 -march=native -DHOMEGROWN -pthread -DNDEBUG $(INCLUDES)
 CFLAGS_DEBUG = -std=c++17 -g -march=native -DHOMEGROWN -pthread -DNDEBUG
 LFLAGS = -L/usr/local/lib -ljemalloc
@@ -10,7 +10,7 @@ DEPS = $(../include/locks/:LOCK_DEPS) $(../include/memory/:MEM_DEPS) zipfian.h p
 
 LISTS = list dlist 
 TREES = leaftree blockleaftree arttree btree 
-HASH = hash_optimistic
+HASH = hash
 OTHER = harris_list harris_list_opt
 DS = $(LISTS) $(TREES) $(HASH)
 ALL = $(DS) $(OTHER) blockleaftree_bl
