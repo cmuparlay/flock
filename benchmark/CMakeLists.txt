@@ -20,6 +20,21 @@ foreach(bench ${FLOCK_PER_BENCH})
   target_include_directories(${bench}_per PRIVATE ${STRUCTDIR})
 endforeach()
 
+# hash locked version of all the benchmarks
+foreach(bench ${FLOCK_BENCH})
+  add_executable(${bench}_hl ${SOURCES})
+  target_compile_options(${bench}_hl PRIVATE -DHashLock -include ${STRUCTDIR}/${bench}.h)
+  target_link_libraries(${bench}_hl PRIVATE flock)
+  target_include_directories(${bench}_hl PRIVATE ${STRUCTDIR})
+endforeach()
+
+foreach(bench ${FLOCK_PER_BENCH})
+  add_executable(${bench}_per_hl ${SOURCES})
+  target_compile_options(${bench}_per_hl PRIVATE -DPersistent -DHashLock -include ${STRUCTDIR}/${bench}.h)
+  target_link_libraries(${bench}_per_hl PRIVATE flock)
+  target_include_directories(${bench}_per_hl PRIVATE ${STRUCTDIR})
+endforeach()
+
 set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
 
