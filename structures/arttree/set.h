@@ -1,7 +1,7 @@
 #include <limits>
-#include "lock.h"
-#include "parlay/primitives.h"
-#include "ptr_type.h"
+#include <flock/lock.h>
+#include <flock/ptr_type.h>
+#include <parlay/primitives.h>
 
 template <typename K, typename V>
 struct Set {
@@ -118,7 +118,8 @@ struct Set {
   };
 
   struct leaf : header {
-    V value; 
+    V value;
+    //size_t x[2];
     leaf(K key, V value) : header(key, Leaf, sizeof(K)), value(value) {};
   };
 
@@ -293,7 +294,8 @@ struct Set {
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
 	auto [gp, p, cptr, l, pos] = find_location(root, k);
-	auto ll = (leaf*) cptr->load();
+	if (cptr != nullptr) cptr->validate();
+	auto ll = (leaf*) l;
 	if (ll != nullptr) return std::optional<V>(ll->value); 
 	else return {};
       });

@@ -150,8 +150,19 @@ struct persistent_ptr {
   static bool is_empty(V* ptr) {return (((size_t) ptr) >> 63) == 1;}
   static bool is_null(V* ptr) {return ptr == nullptr || is_empty(ptr);}
   static V* strip_tag(V* ptr) {return (V*) (((size_t) ptr) & ((1ul << 63) - 1));}
-  static V* get_ptr(V* ptr) {return is_empty(ptr) ? nullptr : ptr;}
-  
+  static V* get_ptr(V* ptr) { return is_empty(ptr) ? nullptr : ptr;}
+
+  V* fix_ptr() {
+    V* ptr = set_stamp(v.load());
+    if (is_empty(ptr)) {
+      V* ptr_notag = strip_tag(ptr);
+      if (ptr_notag->time_stamp.load() < 0)
+	if (v.compare_exchange_strong(ptr,nullptr))
+	  empty_pool.pool.retire((persistent*) ptr_notag);
+      return nullptr;
+    } return ptr;
+  }
+
 public:
 
   persistent_ptr(V* v) : v(v) {}
@@ -174,7 +185,11 @@ public:
   }
 
   V* read_() { return get_ptr(v.load());}
-
+  //V* read_() { return fix_ptr();}
+  //V* read_() { return read();}
+  void validate() { set_stamp(v.load());}
+  //void validate() {}
+  
   void store(V* newv) {
     V* newv_tagged = newv;
     V* oldv_tagged = get_val(lg);
@@ -193,7 +208,7 @@ public:
       newv->next = (void*) oldv_tagged;
       bool succeeded = v.compare_exchange_strong(oldv_tagged, newv_tagged);
       if (succeeded && is_empty(oldv_tagged))
-	empty_pool.pool.retire((persistent*) oldv);
+        empty_pool.pool.retire((persistent*) oldv);
       set_stamp(newv);
       // shortcut if appropriate
       if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)

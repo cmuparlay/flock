@@ -1,8 +1,6 @@
 #include <limits>
-#include "lock.h"
-#include "defs.h"
+#include <flock/lock_type.h>
 #include "rebalance.h"
-#include "lock_type.h"
 
 #ifdef BALANCED
 bool balanced = true;

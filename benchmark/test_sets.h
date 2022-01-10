@@ -3,9 +3,9 @@
 #include <parlay/io.h>
 #include <parlay/internal/get_time.h>
 #include <parlay/internal/group_by.h>
+#include <flock/defs.h>
 #include "zipfian.h"
 #include "parse_command_line.h"
-#include "defs.h"
 
 void assert_key_exists(bool b) {
   if(!b) {

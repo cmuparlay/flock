@@ -1,7 +1,6 @@
 #include <limits>
-#include "lock.h"
-#include "lock_type.h"
-#include "ptr_type.h"
+#include <flock/lock_type.h>
+#include <flock/ptr_type.h>
 
 template <typename K, typename V>
 struct Set {

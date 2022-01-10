@@ -11,9 +11,8 @@
 // (i.e. accidental collision).
 
 #include <limits>
-#include "lock.h"
-#include "parlay/primitives.h"
-#include "lock_type.h"
+#include <flock/lock_type.h>
+#include <parlay/primitives.h>
 
 template <typename K, typename V>
 struct Set {

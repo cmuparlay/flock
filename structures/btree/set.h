@@ -1,7 +1,7 @@
 #include <limits>
-#include "lock.h"
-#include "parlay/primitives.h"
-#include "ptr_type.h"
+#include <flock/lock.h>
+#include <flock/ptr_type.h>
+#include <parlay/primitives.h>
 
 // A top-down implementation of abtrees
 // Nodes are split or joined on the way down to ensure that each node

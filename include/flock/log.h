@@ -277,7 +277,6 @@ public:
   void init(V vv) {v = TV::init(vv);}
   V load() {return TV::value(get_val(lg));}
   V read() {return TV::value(v.load());}
-  V read_() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(lg), vv);}
   void cam(V oldv, V newv) {
     V old_t = get_val(lg);
@@ -285,6 +284,10 @@ public:
       TV::cam(v, old_t, newv);}
   V operator=(V b) {store(b); return b; }
 
+  // compatibility with multiversioning
+  V read_() {return TV::value(v.load());}
+  void validate() {}
+  
   // operator V() { return load(); } // implicit conversion
 };
 

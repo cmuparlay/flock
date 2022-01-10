@@ -16,17 +16,17 @@ message(STATUS "CMAKE_CXX_FLAGS:                ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_CXX_FLAGS_DEBUG:          ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "CMAKE_CXX_FLAGS_RELEASE:        ${CMAKE_CXX_FLAGS_RELEASE}")
 message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-message(STATUS "CMAKE_EXE_LINKER_FLAGS          ${CMAKE_CXX_LINKER_FLAGS}")
+message(STATUS "CMAKE_EXE_LINKER_FLAGS          ${CMAKE_EXE_LINKER_FLAGS}")
 message(STATUS "CMAKE_INSTALL_PREFIX:           ${CMAKE_INSTALL_PREFIX}" )
 
 # -------------------------------------------------------------------
 #                       Library definition
 
 add_library(flock INTERFACE)
-set(FLOCK_INCLUDE_DIR "${FLOCK_SOURCE_DIR}/include/flock")
+set(FLOCK_INCLUDE_DIR "${FLOCK_SOURCE_DIR}/include")
 target_include_directories(flock INTERFACE ${FLOCK_INCLUDE_DIR})
 target_compile_features(flock INTERFACE cxx_std_17)
-target_compile_options(flock INTERFACE -mcx16 -march=native)
+target_compile_options(flock INTERFACE -mcx16 -march=native -g)
 
 # Find threading library
 find_package(Threads REQUIRED)
