@@ -1,7 +1,9 @@
 using K = long;
 using V = long;
 
+#include "lock.h"
 #include "test_sets.h"
+#include "set.h"
 
 int main(int argc, char* argv[]) {
   commandLine P(argc,argv,"[-l] [-n <size>] [-r <rounds>]");

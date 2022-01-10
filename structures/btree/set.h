@@ -423,7 +423,7 @@ struct Set {
     while (true) {
       node* p = root;
       int cidx = 0;
-      node* c = p->children[cidx].load();
+      node* c = p->children[cidx].read_();
       if (c->status == isOver || (!c->is_leaf && c->size == 1))
         fix_root(root, c);
       else while (true) {
@@ -498,12 +498,14 @@ struct Set {
   // a wait-free version that does not split on way down
   std::optional<V> find_internal(node* root, K k) {
     node* c = root;
+    ptr_type<node>* x;
     while (!c->is_leaf) {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
-      c = (c->children[c->find(k)]).load();
+      x = &c->children[c->find(k)];
+      c = x->read_();
     }
-    return ((leaf*) c)->find(k);
+    return ((leaf*) x->load())->find(k);
   }
 
   std::optional<V> find(node* root, K k) {

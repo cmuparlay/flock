@@ -3,7 +3,6 @@
 #include <parlay/io.h>
 #include <parlay/internal/get_time.h>
 #include <parlay/internal/group_by.h>
-// #include "lock.h"
 #include "zipfian.h"
 #include "parse_command_line.h"
 #include "defs.h"

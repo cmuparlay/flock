@@ -206,7 +206,6 @@ struct Set {
 		      s_c->keys[i] = s_n->keys[i];
 		      s_c->ptr[i].init(s_n->ptr[i].load());
 		    }
-		    //std::cout << "copy: " << s_n->num_used << "," << s_c->byte_num << std::endl;
 		    s_c->init_child(k, c);
 	          });
 		}
@@ -225,11 +224,9 @@ struct Set {
     node* p = root;
     while (true) {
       node_ptr* cptr = get_child(p, k);
-      //std::cout << "gc: " << cptr << ", " << p->byte_num <<std::endl;
-      //print(p);
       if (cptr == nullptr) // has no child with given key
 	return std::make_tuple(gp, p, cptr, (node*) nullptr, byte_pos);
-      node* c = cptr->load();
+      node* c = cptr->read_();
       if (c == nullptr) // has empty child with given key
 	return std::make_tuple(gp, p, cptr, c, byte_pos);
       byte_pos++;
@@ -238,14 +235,12 @@ struct Set {
 	byte_pos++;
       if (byte_pos != c->byte_num || c->nt == Leaf) // reached leaf
 	return std::make_tuple(gp, p, cptr, c, byte_pos);
-      //std::cout << "fl: " << byte_pos << std::endl;
       gp = p;
       p = c;
     }
   }
 
   bool insert(node* root, K k, V v) {
-    //std::cout << "insert: " << k << std::endl;
     return with_epoch([=] {
       while (true) {		 
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
@@ -266,7 +261,6 @@ struct Set {
 		// split an existing leaf into a sparse node with two children
 		else {
 		  *cptr = (node*) sparse_pool.new_obj(byte_pos, c, c->key, new_l, k);
-		  //std::cout << "split" << std::endl;
 		}
 		return true;
 	      })) return true;
@@ -299,9 +293,7 @@ struct Set {
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
 	auto [gp, p, cptr, l, pos] = find_location(root, k);
-	//std::cout << "find: " << p << ", " << l << ", " << pos << std::endl;
-	//print(p);
-	auto ll = (leaf*) l;
+	auto ll = (leaf*) cptr->load();
 	if (ll != nullptr) return std::optional<V>(ll->value); 
 	else return {};
       });

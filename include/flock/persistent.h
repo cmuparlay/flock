@@ -172,7 +172,9 @@ public:
 	head = (V*) strip_tag(head)->next;
     return get_ptr(head);
   }
-  
+
+  V* read_() { return get_ptr(v.load());}
+
   void store(V* newv) {
     V* newv_tagged = newv;
     V* oldv_tagged = get_val(lg);
