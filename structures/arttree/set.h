@@ -1,5 +1,5 @@
 #include <limits>
-#include <flock/lock.h>
+#include <flock/lock_type.h>
 #include <flock/ptr_type.h>
 #include <parlay/primitives.h>
 
@@ -10,7 +10,8 @@ struct Set {
 
   enum node_type : char {Full, Indirect, Sparse, Leaf};
 
-  // currenty for 4 byte integer types
+  // assumes little endian, and currently specific to integer types
+  // need to generalize to character or byte strings
   static int get_byte(K key, int pos) {
     return (key >> (8*(sizeof(K)-1-pos))) & 255;
   }
@@ -19,20 +20,18 @@ struct Set {
     K key;
     node_type nt;
     write_once<bool> removed;
-    short int byte_num;
+    short int byte_num; // every node has a byte position in the key
     header(node_type nt) : nt(nt), removed(false) {}
     header(K key, node_type nt, int byte_num)
       : key(key), nt(nt), removed(false), byte_num((short int) byte_num) {}
   };
 
-  struct node : header {
-    lock lck;
-  };
-
+  // generic node
+  struct node : header, lock_type {};
   using node_ptr = ptr_type<node>;
-  
-  struct full_node : header {
-    lock lck;
+
+  // 256 entries, one for each value of a byte, null if empty
+  struct full_node : header, lock_type {
     node_ptr children[256];
 
     bool is_full() {return false;}
@@ -49,10 +48,12 @@ struct Set {
     full_node() : header(Full), children{nullptr} {};
   };
 
-  struct indirect_node : header {
-    lock lck;
+  // up to 64 entries, with array of 256 1-byte pointers
+  // to the 64 entries.  Entries can only be added, but on deletion
+  // the entry pointer can be made null, and later refilled.
+  struct indirect_node : header, lock_type {
     mutable_val<int> num_used; // could be aba_free
-    write_once<char> idx[256];
+    write_once<char> idx[256];  // -1 means empty
     node_ptr ptr[64];
 
     bool is_full() {return num_used.load() == 64;}
@@ -83,11 +84,10 @@ struct Set {
     };
   };
 
-  // a list of keys along with a pointer
+  // up to 16 entries each consisting of a key and pointer
   // adding a new child requires copying
   // updating a child can be done in place
-  struct alignas(64) sparse_node : header {
-    lock lck;
+  struct alignas(64) sparse_node : header, lock_type {
     int num_used; 
     unsigned char keys[16];
     node_ptr ptr[16];
@@ -119,7 +119,6 @@ struct Set {
 
   struct leaf : header {
     V value;
-    //size_t x[2];
     leaf(K key, V value) : header(key, Leaf, sizeof(K)), value(value) {};
   };
 
@@ -153,17 +152,17 @@ struct Set {
   // If p is copies, then gp is updated to point to it
   bool add_child(node* gp, node* p, K k, V v) {
     if (p->nt == Indirect && !is_full(p)) {
-      return try_lock(p->lck, [=] {
+      return p->try_with_lock([=] {
 	  if (p->removed.load()) return false;
 	  node* c = (node*) leaf_pool.new_obj(k, v);
 	  return ((indirect_node*) p)->add_child(k, c);
 	});
     } else {
-      return try_lock(gp->lck, [=] {
+      return gp->try_with_lock([=] {
 	  auto x = get_child(gp, p->key);
 	  if (gp->removed.load() || x->load() != p)
 	    return false;
-	  return try_lock(p->lck, [=] {
+	  return p->try_with_lock([=] {
 	      node* c = (node*) leaf_pool.new_obj(k, v);
 	      if (p->nt == Indirect) {
 		indirect_node* i_n = (indirect_node*) p;
@@ -228,6 +227,7 @@ struct Set {
       if (cptr == nullptr) // has no child with given key
 	return std::make_tuple(gp, p, cptr, (node*) nullptr, byte_pos);
       node* c = cptr->read_();
+      //node* c = cptr->read_fix(p);
       if (c == nullptr) // has empty child with given key
 	return std::make_tuple(gp, p, cptr, c, byte_pos);
       byte_pos++;
@@ -245,11 +245,10 @@ struct Set {
     return with_epoch([=] {
       while (true) {		 
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
-	//std::cout << "insert: " << k << ", " << byte_pos << ", " << cptr << std::endl;
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
 	  return false; // already in the tree
 	if (cptr != nullptr) { // child pointer exists
-	    if (try_lock(p->lck, [=] {
+	    if (p->try_with_lock([=] {
 		// exit and retry if state has changed
 		if (p->removed.load() || cptr->load() != c) return false;
 
@@ -280,9 +279,9 @@ struct Set {
 	// if not found return
 	if (c == nullptr || !(c->nt == Leaf && c->byte_num == byte_pos))
 	  return false;
-	if (try_lock(p->lck, [=] {
+	if (p->try_with_lock([=] {
 	      if (p->removed.load() || cptr->load() != c) return false;
-	      *cptr = nullptr; //sc(nullptr);
+	      *cptr = nullptr; 
 	      leaf_pool.retire((leaf*) c);
 	      return true;
 	    })) return true;
@@ -370,7 +369,6 @@ struct Set {
   }
   
   long check(node* p) {
-    // using rtup = std::tuple<K, K, long>;
     std::function<size_t(node*)> crec;
     crec = [&] (node* p) -> size_t {
 	     if (p == nullptr) return 0;

@@ -9,7 +9,7 @@ PPoPP 2022
 
 To access the artifact evaluation for that paper, go to the "ae" branch.
 
-# Library functionality
+## Library functionality
 
 The library supplies a variety of components.  It supplies a `lock`
 type and a `try_lock` function.  The `try_lock` takes as arguments a
@@ -52,6 +52,24 @@ try_lock(lck1, [=] {
 });
 ```
 
+## Directory Structure
 
-
-
+```
+- flock
+  - CMakeLists.txt
+  - include
+    - flock
+      - lock_type.h    // this needs to be included 
+      ...
+  - structures         // the flock data structures
+    - arttree
+      - set.h
+    - [avltree blockleaftree btree dlist hash hash_block leaftree list list_onelock]
+  - benchmark
+    - CMakeLists.txt
+    - test_sets.cpp   // the benchmarking driver   
+    - [ various .h files]
+  - setbench         // code from Trevor Brown's setbench adapted to work with flock benchmarks
+    - CMakeLists.txt
+    - ...
+```

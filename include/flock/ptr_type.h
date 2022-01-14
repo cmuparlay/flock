@@ -9,7 +9,11 @@
 
 // persistent objects, ptr_type includes version chains
 #ifdef Persistent
+#ifdef noABA
+#include "persistent_noaba.h"
+#else
 #include "persistent.h"
+#endif
 using ll_head = persistent;
 
 template <typename T>

@@ -1,5 +1,6 @@
 #include <limits>
-#include <flock/lock.h>
+#define noABA 1
+#include <flock/lock_type.h>
 #include <flock/ptr_type.h>
 #include <parlay/primitives.h>
 
@@ -49,7 +50,7 @@ struct Set {
     write_once<bool> removed;
     K keys[node_block_size-1];
     ptr_type<node> children[node_block_size];
-    lock lck;
+    lock_type lck;
     
     int find(K k) {
       uint i=0;
@@ -318,10 +319,10 @@ struct Set {
   // copies the parent p to replace with new children and
   // updates the grandparent gp to point to the new copied parent.
   void overfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
-    try_lock(gp->lck, [=] {
+    gp->lck.try_with_lock([=] {
 	// check that gp has not been removed, and p has not changed
 	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
-	return try_lock(p->lck, [=] {
+	return p->lck.try_with_lock([=] {
 	    // check that c has not changed
 	    if (p->children[cidx].load() != c) return false;
 	    if (c->is_leaf) {
@@ -342,10 +343,10 @@ struct Set {
   // Copies the parent p to replace with new child or children.
   // Updates the grandparent gp to point to the new copied parent.
   void underfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
-    try_lock(gp->lck, [=] {
+    gp->lck.try_with_lock([=] {
 	// check that gp has not been removed, and p has not changed
 	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
-	return try_lock(p->lck, [=] {
+	return p->lck.try_with_lock([=] {
 	    // join with next if first in block, otherwise with previous
 	    node* other_c = p->children[(cidx == 0 ? cidx + 1 : cidx - 1)].load();
 	    auto [li, lc, rc] = ((cidx == 0) ?
@@ -363,7 +364,7 @@ struct Set {
 	    } else { // internal node
 	      K k = p->keys[li];
 	      // need to lock the other child 
-	      return try_lock(other_c->lck, [=] {
+	      return other_c->lck.try_with_lock([=] {
 		  other_c->removed = true;
 		  if (lc->size + rc->size < node_join_cutoff)   // join
 		    gp->children[pidx] = join_children(p, join(lc, k, rc), li);
@@ -391,7 +392,7 @@ struct Set {
   // In both cases it updates the root to point to the new internal node
   // it takes a lock on the root
   void fix_root(node* root, node* c) {
-      try_lock(root->lck, [=] {
+      root->lck.try_with_lock([=] {
 	// check that c has not changed
 	if (root->children[0].load() != c) return false;
 	if (c->status == isOver) {
@@ -457,7 +458,7 @@ struct Set {
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
 	if (l->find(k).has_value()) return false; // already there
-	if (try_lock(p->lck, [=] () {
+	if (p->lck.try_with_lock([=] {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) insert_leaf(l, k, v);
@@ -477,7 +478,7 @@ struct Set {
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
 	if (!l->find(k).has_value()) return false; // not there
-	if (try_lock(p->lck, [=] () {
+	if (p->lck.try_with_lock([=] {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) remove_leaf(l, k);
@@ -503,9 +504,11 @@ struct Set {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
       x = &c->children[c->find(k)];
-      c = x->read_();
+      //c = x->read_();
+      c = x->read();
     }
-    return ((leaf*) x->load())->find(k);
+    //x->validate();
+    return ((leaf*) c)->find(k);
   }
 
   std::optional<V> find(node* root, K k) {

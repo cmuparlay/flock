@@ -285,7 +285,9 @@ public:
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning
-  V read_() {return TV::value(v.load());}
+  V read_() {return read();}
+  template <typename Lock>
+  V read_fix(Lock* lck) {return read();}
   void validate() {}
   
   // operator V() { return load(); } // implicit conversion
