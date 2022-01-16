@@ -45,7 +45,7 @@ struct Set {
       children[b].init(v);
     }
 
-    full_node() : header(Full), children{nullptr} {};
+    full_node() : header(Full), children{nullptr} {}
   };
 
   // up to 64 entries, with array of 256 1-byte pointers
@@ -227,6 +227,7 @@ struct Set {
       if (cptr == nullptr) // has no child with given key
 	return std::make_tuple(gp, p, cptr, (node*) nullptr, byte_pos);
       node* c = cptr->read_();
+      //node* c = cptr->load();
       //node* c = cptr->read_fix(p);
       if (c == nullptr) // has empty child with given key
 	return std::make_tuple(gp, p, cptr, c, byte_pos);

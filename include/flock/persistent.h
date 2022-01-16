@@ -8,10 +8,15 @@ using IT = size_t;
 struct persistent {
   std::atomic<TS> time_stamp;
   IT next;
-  persistent() : time_stamp(0), next(bad_ptr) {}
+  persistent() : time_stamp(-1), next(bad_ptr) {}
 };
 
-memory_pool<persistent> empty_pool;
+struct plink : persistent {
+  IT value;
+  plink() : persistent() {}
+};
+
+memory_pool<plink> link_pool;
 
 template <typename V>
 struct persistent_ptr {
@@ -21,11 +26,13 @@ struct persistent_ptr {
 
   // sets the timestamp in a version link if time stamp is TBD
   static IT set_stamp(IT newv) {
-    V* x = strip_tag(newv);
-    if ((x != nullptr) && x->time_stamp.load() == tbd) {
-      TS ts = global_stamp.get_write_stamp();
-      long old = tbd;
-      x->time_stamp.compare_exchange_strong(old, ts);
+    if (is_unset(newv)) {
+      V* x = strip_tag(newv);
+      if ((x != nullptr) && x->time_stamp.load() == tbd) {
+	TS ts = global_stamp.get_write_stamp();
+	long old = tbd;
+	x->time_stamp.compare_exchange_strong(old, ts);
+      }
     }
     return newv;
   }
@@ -34,27 +41,35 @@ struct persistent_ptr {
     return set_stamp(p.commit_value(v.load()).first);
   }
 
-  // uses lowest bit to "mark" a "nullptr"
+  // uses lowest bits to "mark" if an indirect link and if null
+  // 2nd bit indirect, 1st null
   // highest bits are used by the ABA "tag"
   // required to support using store with a nullptr
   // such a store creates a version link and stores a pointer to that link
   // the link is tagged with a bit to indicate it is a "nullptr"
-  static V* add_tag(V* ptr) {return (V*) (1ul | (IT) ptr);};
+  static V* add_null_mark(V* ptr) {return (V*) (3ul | (IT) ptr);};
+  static V* add_indirect_mark(V* ptr) {return (V*) (2ul | (IT) ptr);};
+  static V* add_unset(V* ptr) {return (V*) (4ul | (IT) ptr);};
   static bool is_empty(IT ptr) {return ptr & 1;}
+  static bool is_indirect(IT ptr) {return (ptr >> 1) & 1;}
+  static bool is_unset(IT ptr) {return (ptr >> 2) & 1;}
   static bool is_null(IT ptr) {return TV::value(ptr) == nullptr || is_empty(ptr);}
-  static V* strip_tag(IT ptr) {return TV::value(ptr & ~1ul);}
-  static V* get_ptr(IT ptr) { return is_empty(ptr) ? nullptr : TV::value(ptr);}
-
+  static V* strip_tag(IT ptr) {return TV::value(ptr & ~7ul);}
+  static V* get_ptr(IT ptr) {
+    return (is_indirect(ptr) ?
+	    (is_empty(ptr) ? nullptr : (V*) ((plink*) strip_tag(ptr))->value) :
+	    TV::value(ptr));}
+  
   template <typename Lock>
-  V* read_fix(Lock* lck) {
+  V* load_fix(Lock* lck) {
     IT ptr = v.load();
     set_stamp(ptr);     // ensure time stamp is set
-    if (is_empty(ptr)) {
+    if (is_indirect(ptr)) {
       V* ptr_notag = strip_tag(ptr);
-      if (ptr_notag->time_stamp.load() > 0)
+      if (true) //ptr_notag->time_stamp.load() > -1)
 	lck->try_with_lock([=] {
-	  if (TV::cas(v, ptr, nullptr))
-	    empty_pool.pool.retire((persistent*) ptr_notag);
+          if (TV::cas(v, ptr, nullptr)) 
+	    link_pool.pool.retire((plink*) ptr_notag);
 	  return true;});
       return nullptr;
     }
@@ -83,25 +98,39 @@ public:
   }
 
   V* read_() { return get_ptr(v.load());}
-  void validate() { set_stamp(v.load());}
+  void validate() {
+    set_stamp(v.load());     // ensure time stamp is set
+  }
   
   void store(V* newv) {
-    V* newv_tagged = newv;
+    V* newv_marked = newv;
     IT oldv_tagged = get_val(lg);
     V* oldv = strip_tag(oldv_tagged);
 
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
-      newv = (V*) empty_pool.pool.new_obj();
-      newv_tagged = add_tag(newv);
+      newv = (V*) link_pool.pool.new_obj();
+      newv_marked = add_null_mark(newv);
+      // if newv has already been recoreded, we need to create a link for it
+    } else {
+      TS ts = lg.commit_value(newv->time_stamp.load()).first;
+      if (ts != -1) {
+    	abort();
+    	plink* tmp = link_pool.pool.new_obj();
+    	tmp->value = (IT) newv;
+    	newv = (V*) tmp;
+    	newv_marked = add_indirect_mark(newv);
+      }
     }
     newv->time_stamp = tbd;
     newv->next = (IT) oldv_tagged;
     //bool succeeded = v.compare_exchange_strong(oldv_tagged, (IT) newv_tagged);
-    bool succeeded = TV::cas(v, oldv_tagged, newv_tagged);
-    if (succeeded && is_empty(oldv_tagged))
-      empty_pool.pool.retire((persistent*) oldv);
+    bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
+    IT x = get_val(lg);
+    if (succeeded && is_indirect(oldv_tagged))
+      link_pool.pool.retire((plink*) oldv);
     set_stamp((IT) newv);
+    TV::cas(v, x, newv_marked);
     // shortcut if appropriate
     if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
       newv->next = oldv->next;

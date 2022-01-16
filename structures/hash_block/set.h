@@ -88,10 +88,8 @@ struct Set {
   // should not require stupid gcc attribute, but compiler screws up otherwise
   __attribute__((always_inline)) std::optional<V> find_at(slot* s, K k) {
 #ifdef Persistent // compiler should do this, sigh
-    //node* x = s->ptr.v.load();
-    //s->ptr.set_stamp(x);
-    //if (s->ptr.is_null(x)) return {};
-    node* x = s->ptr.read_fix(s);
+    node* x = s->ptr.load_fix(s);
+    //s->ptr.validate();
     //node* x = s->ptr.read();
     if (x == nullptr) return {};
 #else 
@@ -108,8 +106,10 @@ struct Set {
   std::optional<V> find(Table& table, K k) {
     slot* s = table.get_slot(k);
     __builtin_prefetch (s);
-    return with_epoch([&] { return find_at(s, k);});
+    auto x = with_epoch([&] { return find_at(s, k);});
+    return x;
   }
+  
 
   bool insert_at(slot* s, K k, V v) {
     while (true) {
