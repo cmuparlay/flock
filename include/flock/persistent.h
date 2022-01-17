@@ -7,8 +7,8 @@
 using IT = size_t;
 struct persistent {
   std::atomic<TS> time_stamp;
-  IT next;
-  persistent() : time_stamp(-1), next(bad_ptr) {}
+  IT next_version;
+  persistent() : time_stamp(-1), next_version(bad_ptr) {}
 };
 
 struct plink : persistent {
@@ -58,20 +58,20 @@ struct persistent_ptr {
   static V* get_ptr(IT ptr) {
     return (is_indirect(ptr) ?
 	    (is_empty(ptr) ? nullptr : (V*) ((plink*) strip_tag(ptr))->value) :
-	    TV::value(ptr));}
+	    strip_tag(ptr));}
   
+
   template <typename Lock>
-  V* load_fix(Lock* lck) {
-    IT ptr = v.load();
-    set_stamp(ptr);     // ensure time stamp is set
+  V* shortcut_indirect(IT ptr, Lock lck) {
     if (is_indirect(ptr)) {
       V* ptr_notag = strip_tag(ptr);
+      V* newv = is_empty(ptr) ? nullptr : (V*) ((plink*) strip_tag(ptr))->value;
       if (true) //ptr_notag->time_stamp.load() > -1)
 	lck->try_with_lock([=] {
-          if (TV::cas(v, ptr, nullptr)) 
+          if (TV::cas(v, ptr, newv))
 	    link_pool.pool.retire((plink*) ptr_notag);
 	  return true;});
-      return nullptr;
+      return newv;
     }
     return strip_tag(ptr);
   }
@@ -93,8 +93,15 @@ public:
     if (ls != -1) 
       // chase down version chain
       while (head != 0 && strip_tag(head)->time_stamp.load() > ls)
-	head = (IT) strip_tag(head)->next;
+    	head = (IT) strip_tag(head)->next_version;
     return get_ptr(head);
+  }
+
+  template <typename Lock>
+  V* read_fix(Lock* lck) {
+    IT ptr = v.load();
+    set_stamp(ptr);     // ensure time stamp is set
+    return shortcut_indirect(ptr, lck);
   }
 
   V* read_() { return get_ptr(v.load());}
@@ -109,13 +116,15 @@ public:
 
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
-      newv = (V*) link_pool.pool.new_obj();
+      plink* tmp = link_pool.pool.new_obj();
+      tmp->value = 0;
+      newv = (V*) tmp;
       newv_marked = add_null_mark(newv);
-      // if newv has already been recoreded, we need to create a link for it
     } else {
+      // if newv has already been recoreded, we need to create a link for it
+      // loading timestamp needs to be idempotent
       TS ts = lg.commit_value(newv->time_stamp.load()).first;
       if (ts != -1) {
-    	abort();
     	plink* tmp = link_pool.pool.new_obj();
     	tmp->value = (IT) newv;
     	newv = (V*) tmp;
@@ -123,17 +132,16 @@ public:
       }
     }
     newv->time_stamp = tbd;
-    newv->next = (IT) oldv_tagged;
-    //bool succeeded = v.compare_exchange_strong(oldv_tagged, (IT) newv_tagged);
+    newv->next_version = (IT) oldv_tagged;
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
     IT x = get_val(lg);
-    if (succeeded && is_indirect(oldv_tagged))
-      link_pool.pool.retire((plink*) oldv);
     set_stamp((IT) newv);
     TV::cas(v, x, newv_marked);
+    if (succeeded && is_indirect(oldv_tagged))
+      link_pool.pool.retire((plink*) oldv);
     // shortcut if appropriate
     if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
-      newv->next = oldv->next;
+     newv->next_version = oldv->next_version;
   }
   V* operator=(V* b) {store(b); return b; }
 };

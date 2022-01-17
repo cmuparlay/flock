@@ -1,6 +1,7 @@
 // doubly linked list
 #include <limits>
 #include <flock/lock_type.h>
+#include <flock/ptr_type.h>
 
 template <typename K, typename V>
 struct Set {
@@ -8,9 +9,9 @@ struct Set {
   K key_min = std::numeric_limits<K>::min();
   K key_max = std::numeric_limits<K>::max();
 
-  struct node : lock_type {
-    mutable_val<node*> next;
-    mutable_val<node*> prev;
+  struct node : ll_head, lock_type {
+    ptr_type<node> next;
+    ptr_type<node> prev;
     write_once<bool> removed;
     K key;
     V value;

@@ -8,10 +8,12 @@ struct Set {
   K key_min = std::numeric_limits<K>::min();
 
   // common header for internal nodes and leaves
-  struct header {
+  struct header : ll_head {
     K key;
     bool is_leaf;
     write_once<bool> removed; // not used for leaves, but fits here
+    header(K key, bool is_leaf)
+      : key(key), is_leaf(is_leaf), removed(false) {}
   };
 
   // internal node
@@ -19,12 +21,12 @@ struct Set {
     ptr_type<node> left;
     ptr_type<node> right;
     node(K k, node* left, node* right)
-      : header{k,false,false}, left(left), right(right) {};
+      : header{k,false}, left(left), right(right) {};
   };
 
   struct leaf : header {
     V value;
-    leaf(K k, V v) : header{k,true, false}, value(v) {};
+    leaf(K k, V v) : header{k,true}, value(v) {};
   };
 
   memory_pool<node> node_pool;
