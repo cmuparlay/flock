@@ -95,12 +95,19 @@ struct timestamp_read_write {
     return s; // return old stamp
   }
 
+  TS current() { return stamp.load();}
+  
   timestamp_read_write() : stamp(0) {}
 };
 
 timestamp_read_write global_stamp;
 thread_local TS local_stamp{-1};
 const TS tbd = -1;
+
+// this is updated by the epoch-based reclamation
+// Whenever an epoch is incremented this is set to the stamp
+// from the previous increment (which is now safe to collect).
+TS done_stamp = -1;
 
 template <typename F>
 auto with_snapshot(F f) {

@@ -1,6 +1,5 @@
 #pragma once
 #include "log.h"
-#include "timestamps.h"
 
 #define bad_ptr ((1ul << 48) -1)
 
@@ -20,14 +19,35 @@ memory_pool<plink> link_pool;
 
 template <typename V>
 struct persistent_ptr {
-  // private:
+private:
   using TV = tagged<V*>;
   std::atomic<IT> v;
 
+  // uses lowest three bits as mark:
+  //   2nd bit to indicate it is an indirect pointer
+  //   1st bit to indicate it is a null pointer via an indirect pointer (2nd bit also set)
+  //   3rd bit to indicate time_stamp has not been set yet
+  // the highest 16 bits are used by the ABA "tag"
+  static V* add_null_mark(V* ptr) {return (V*) (3ul | (IT) ptr);};
+  static V* add_indirect_mark(V* ptr) {return (V*) (2ul | (IT) ptr);};
+  static V* add_unset(V* ptr) {return (V*) (4ul | (IT) ptr);};
+  static bool is_empty(IT ptr) {return ptr & 1;}
+  static bool is_indirect(IT ptr) {return (ptr >> 1) & 1;}
+  static bool is_unset(IT ptr) {return (ptr >> 2) & 1;}
+  static bool is_null(IT ptr) {return TV::value(ptr) == nullptr || is_empty(ptr);}
+  static V* strip_mark_and_tag(IT ptr) {return TV::value(ptr & ~7ul);}
+  static V* get_ptr(IT ptr) {
+    return (is_indirect(ptr) ?
+	    (is_empty(ptr) ? nullptr : (V*) ((plink*) strip_mark_and_tag(ptr))->value) :
+	    strip_mark_and_tag(ptr));}
+  
+
   // sets the timestamp in a version link if time stamp is TBD
+  // The test for is_unset is an optimization avoiding reading the timestamp
+  // if timestamp has been set and the "unset" mark removed from the pointer.
   static IT set_stamp(IT newv) {
     if (is_unset(newv)) {
-      V* x = strip_tag(newv);
+      V* x = strip_mark_and_tag(newv);
       if ((x != nullptr) && x->time_stamp.load() == tbd) {
 	TS ts = global_stamp.get_write_stamp();
 	long old = tbd;
@@ -41,39 +61,24 @@ struct persistent_ptr {
     return set_stamp(p.commit_value(v.load()).first);
   }
 
-  // uses lowest bits to "mark" if an indirect link and if null
-  // 2nd bit indirect, 1st null
-  // highest bits are used by the ABA "tag"
-  // required to support using store with a nullptr
-  // such a store creates a version link and stores a pointer to that link
-  // the link is tagged with a bit to indicate it is a "nullptr"
-  static V* add_null_mark(V* ptr) {return (V*) (3ul | (IT) ptr);};
-  static V* add_indirect_mark(V* ptr) {return (V*) (2ul | (IT) ptr);};
-  static V* add_unset(V* ptr) {return (V*) (4ul | (IT) ptr);};
-  static bool is_empty(IT ptr) {return ptr & 1;}
-  static bool is_indirect(IT ptr) {return (ptr >> 1) & 1;}
-  static bool is_unset(IT ptr) {return (ptr >> 2) & 1;}
-  static bool is_null(IT ptr) {return TV::value(ptr) == nullptr || is_empty(ptr);}
-  static V* strip_tag(IT ptr) {return TV::value(ptr & ~7ul);}
-  static V* get_ptr(IT ptr) {
-    return (is_indirect(ptr) ?
-	    (is_empty(ptr) ? nullptr : (V*) ((plink*) strip_tag(ptr))->value) :
-	    strip_tag(ptr));}
-  
-
+  // For an indirect pointer if its stamp is older than done_stamp
+  // then it will no longer be accessed and can be spliced out.
+  // The splice needs to be done under a lock since it can race with updates
   template <typename Lock>
   V* shortcut_indirect(IT ptr, Lock lck) {
     if (is_indirect(ptr)) {
-      V* ptr_notag = strip_tag(ptr);
-      V* newv = is_empty(ptr) ? nullptr : (V*) ((plink*) strip_tag(ptr))->value;
-      if (true) //ptr_notag->time_stamp.load() > -1)
+      auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
+      TS stamp = ptr_notag->time_stamp.load();
+      if (stamp <= done_stamp) {
+	V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
 	lck->try_with_lock([=] {
           if (TV::cas(v, ptr, newv))
-	    link_pool.pool.retire((plink*) ptr_notag);
+	    link_pool.pool.retire(ptr_notag);
 	  return true;});
-      return newv;
+	return newv;
+      }
     }
-    return strip_tag(ptr);
+    return strip_mark_and_tag(ptr);
   }
 
 public:
@@ -92,8 +97,8 @@ public:
     TS ls = local_stamp;
     if (ls != -1) 
       // chase down version chain
-      while (head != 0 && strip_tag(head)->time_stamp.load() > ls)
-    	head = (IT) strip_tag(head)->next_version;
+      while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls)
+    	head = (IT) strip_mark_and_tag(head)->next_version;
     return get_ptr(head);
   }
 
@@ -105,6 +110,7 @@ public:
   }
 
   V* read_() { return get_ptr(v.load());}
+
   void validate() {
     set_stamp(v.load());     // ensure time stamp is set
   }
@@ -112,7 +118,7 @@ public:
   void store(V* newv) {
     V* newv_marked = newv;
     IT oldv_tagged = get_val(lg);
-    V* oldv = strip_tag(oldv_tagged);
+    V* oldv = strip_mark_and_tag(oldv_tagged);
 
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
@@ -133,13 +139,23 @@ public:
     }
     newv->time_stamp = tbd;
     newv->next_version = (IT) oldv_tagged;
+
+    // swap in new pointer but marked as "unset" since time stamp is tbd
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
-    IT x = get_val(lg);
+    IT x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
+
+    // now set the stamp from tbd to a real stamp
     set_stamp((IT) newv);
+
+    // and clear the "unset" mark
     TV::cas(v, x, newv_marked);
+
+    // retire an indirect point if swapped out
     if (succeeded && is_indirect(oldv_tagged))
       link_pool.pool.retire((plink*) oldv);
-    // shortcut if appropriate
+    
+    // shortcut if appropriate, getting rid of redundant time stamps
+    // todo: might need to retire if an indirect pointer
     if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
      newv->next_version = oldv->next_version;
   }

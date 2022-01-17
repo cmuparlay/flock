@@ -5,12 +5,19 @@
 #include <parlay/random.h>
 #include <parlay/primitives.h>
 #include <unordered_set>
+#include "timestamps.h"
 
 // ***************************
 // epoch structure
 // ***************************
 
+// timestamps are distinct from epochs and are for multiversioning (snapshots)
+// any time stamps less or equal to done_stamp indicate it is safe to
+// collect them (noone will travel through them).
+  
 struct epoch_s {
+  TS prev_stamp;
+  
   struct alignas(64) announce_slot {
     std::atomic<long> last;
     announce_slot() : last(-1l) {}
@@ -22,6 +29,7 @@ struct epoch_s {
     int workers = parlay::num_workers();
     announcements = std::vector<announce_slot>(workers);
     current_epoch = 0;
+    prev_stamp = -1;
   }
 
   long get_current() {
@@ -61,8 +69,15 @@ struct epoch_s {
 	if ((announcements[i].last != -1l) &&
 	    announcements[i].last < current_e) 
 	  all_there = false;
-    if (all_there) 
-      current_epoch.compare_exchange_strong(current_e, current_e+1);
+    if (all_there) {
+      // timestamps are for multiversioning (snapshots)
+      // we set done_stamp to the stamp from the previous epoch update
+      TS current_stamp = global_stamp.get_read_stamp();
+      if (current_epoch.compare_exchange_strong(current_e, current_e+1)) {
+	done_stamp = prev_stamp;
+	prev_stamp = current_stamp;
+      }
+    }
   }
 };
 
