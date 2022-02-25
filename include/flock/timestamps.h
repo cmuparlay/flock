@@ -28,6 +28,27 @@ struct timestamp_simple {
   timestamp_simple() : stamp(0) {}
 };
 
+struct timestamp_simple_update {
+  std::atomic<TS> stamp;
+  static constexpr int delay = 800;
+
+  TS get_read_stamp() {return stamp.load();}
+
+  TS get_write_stamp() {
+    TS ts = stamp.load();
+
+    // delay to reduce contention
+    for(volatile int i = 0; i < delay; i++);
+
+    // only update timestamp if has not changed
+    if (stamp.load() == ts)
+      stamp.compare_exchange_strong(ts,ts+1);
+
+    return ts+1;
+  }
+  timestamp_simple_update() : stamp(0) {}
+};
+
 struct timestamp_multiple {
   static constexpr int slots = 4;
   static constexpr int gap = 16;
@@ -100,7 +121,7 @@ struct timestamp_read_write {
   timestamp_read_write() : stamp(0) {}
 };
 
-timestamp_read_write global_stamp;
+timestamp_simple global_stamp;
 thread_local TS local_stamp{-1};
 const TS tbd = -1;
 

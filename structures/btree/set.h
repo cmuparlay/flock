@@ -511,12 +511,12 @@ struct Set {
     return ((leaf*) c)->find(k);
   }
 
-  std::optional<V> find(node* root, K k) {
+  std::optional<V> find__(node* root, K k) {
     return with_epoch([&] {return find_internal(root, k);});
   }
 
   // snapshot version, if snapshoting enabled
-  std::optional<V> find__(node* root, K k) {
+  std::optional<V> find(node* root, K k) {
     return with_snap([&] {return find_internal(root, k);});
   }
 
