@@ -254,6 +254,7 @@ struct tagged {
       return r;
     }
   }
+
 };
 
   
@@ -284,6 +285,12 @@ public:
       TV::cam(v, old_t, newv);}
   V operator=(V b) {store(b); return b; }
 
+  // compatibility with multiversioning
+  V read_() {return read();}
+  template <typename Lock>
+  V read_fix(Lock* lck) {return read();}
+  void validate() {}
+  
   // operator V() { return load(); } // implicit conversion
 };
 

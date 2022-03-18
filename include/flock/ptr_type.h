@@ -9,14 +9,18 @@
 
 // persistent objects, ptr_type includes version chains
 #ifdef Persistent
-#include "persistent.h"
-using ll_head = persistent;
+// #ifdef noABA
+// #include "persistent_noaba.h"
+// #else
+// #include "persistent.h"
+// #endif
+// using ll_head = persistent;
 
-template <typename T>
-using ptr_type = persistent_ptr<T>;
+// template <typename T>
+// using ptr_type = persistent_ptr<T>;
 
-template <typename F>
-auto with_snap(F f) { return with_snapshot(f);};
+// template <typename F>
+// auto with_snap(F f) { return with_snapshot(f);};
 
 // normal non-persistent type
 #else

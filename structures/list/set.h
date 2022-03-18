@@ -1,7 +1,6 @@
 #include <limits>
-#include "lock.h"
-#include "lock_type.h"
-#include "ptr_type.h"
+#include <flock/lock_type.h>
+#include <flock/ptr_type.h>
 
 template <typename K, typename V>
 struct Set {
@@ -9,7 +8,7 @@ struct Set {
   K key_min = std::numeric_limits<K>::min();
   K key_max = std::numeric_limits<K>::max();
 
-  struct node : lock_type {
+  struct alignas(64) node : ll_head, lock_type {
     ptr_type<node> next;
     write_once<bool> removed;
     K key;
@@ -24,9 +23,11 @@ struct Set {
 
   auto find_location(node* root, K k) {
     node* cur = root;
-    node* nxt = (cur->next).read();
+    node* nxt = (cur->next).read_();
+    //node* nxt = (cur->next).read_fix(cur);
     while (true) {
-      node* nxt_nxt = (nxt->next).read(); // prefetch
+      //node* nxt_nxt = (nxt->next).read_fix(nxt); // prefetch
+      node* nxt_nxt = (nxt->next).read_(); // prefetch
       if (nxt->key >= k) break;
       cur = nxt;
       nxt = nxt_nxt;

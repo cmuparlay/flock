@@ -3,10 +3,9 @@
 #include <parlay/io.h>
 #include <parlay/internal/get_time.h>
 #include <parlay/internal/group_by.h>
-// #include "lock.h"
+#include <flock/defs.h>
 #include "zipfian.h"
 #include "parse_command_line.h"
-#include "defs.h"
 
 void assert_key_exists(bool b) {
   if(!b) {
@@ -156,8 +155,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
     parlay::internal::timer t;
 
-    auto tr = os.empty(buckets);
-
     // if (shuffle) { // shuffles the memory blocks in the memory allocator
     //   size_t shuffle_size = n;
     //   parlay::parallel_for(0, shuffle_size, [&] (size_t i) {os.insert(tr, a[i], 123); });
@@ -165,18 +162,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     //   parlay::parallel_for(0, shuffle_size, [&] (size_t i) {os.remove(tr, c[i]); });
     // }
     if (shuffle) os.shuffle(n);
-    
-    if (do_check) {
-      size_t len = os.check(tr);
-      if (len != 0) {
-        std::cout << "BAD LENGTH = " << len << std::endl;
-      } else if(verbose) {
-        std::cout << "CHECK PASSED" << std::endl;
-      }
-    }
 
     for (int i = 0; i < rounds; i++) {
       long len;
+      auto tr = os.empty(buckets);
+      if (do_check) {
+	size_t len = os.check(tr);
+	if (len != 0) {
+	  std::cout << "BAD LENGTH = " << len << std::endl;
+	} else if(verbose) {
+	  std::cout << "CHECK PASSED" << std::endl;
+	}
+      }
       
       // use_help = true;
       if (verbose) std::cout << "round " << i << std::endl;
@@ -273,7 +270,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       else {
         // millions of operations per second
         auto mops = [=] (double time) -> float {return m / (time * 1e6);};
-          
+
         t.start();
         parlay::parallel_for(0, m, [&] (size_t i) {
                    os.insert(tr, b[i], 123);
@@ -338,7 +335,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           if (stats) os.stats();
         }
       }
-      //os.retire(tr); // free the ord_set (should be empty)
+      os.retire(tr); // free the ord_set (should be empty, but not with arttree)
       if (clear) {
 	os.clear();
 	descriptor_pool.clear();
@@ -351,6 +348,5 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         os.stats();
       }
     }
-    os.retire(tr);
   }
 }

@@ -1,8 +1,7 @@
 #include <limits>
-#include "lock.h"
-#include "defs.h"
+#include <flock/lock_type.h>
+#include <flock/ptr_type.h>
 #include "rebalance.h"
-#include "lock_type.h"
 
 #ifdef BALANCED
 bool balanced = true;
@@ -27,14 +26,17 @@ struct Set {
   K key_min = std::numeric_limits<K>::min();
   K key_max = std::numeric_limits<K>::max();
 
-  struct head { bool is_leaf; };
+  struct head : ll_head {
+    bool is_leaf;
+    head(bool is_leaf) : is_leaf(is_leaf) {}
+  };
 
   // mutable internal node
   struct node : head, lock_type {
     write_once<bool> removed;
     K key;
-    mutable_val<node*> left;
-    mutable_val<node*> right;
+    ptr_type<node> left;
+    ptr_type<node> right;
     node(K k, node* left, node* right)
       : key(k), head{false}, left(left), right(right), removed(false) {};
   };
@@ -70,7 +72,7 @@ struct Set {
       gp_left = p_left;
       p = l;
       p_left = (k < p->key);
-      l = p_left ? (p->left).load() : (p->right).load();
+      l = p_left ? (p->left).read_fix(p) : (p->right).read_fix(p);
     }
     return std::make_tuple(gp, gp_left, p, p_left, l);
   }
