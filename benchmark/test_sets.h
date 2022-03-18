@@ -1,3 +1,7 @@
+#include <string>
+#include <iostream>
+#include <sstream>
+
 #include <parlay/primitives.h>
 #include <parlay/random.h>
 #include <parlay/io.h>
@@ -31,7 +35,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   int rounds = P.getOptionIntValue("-r", 1);
 
   // do fixed time experiment
-  bool fixed_time = P.getOption("-fixed_time");
+  bool fixed_time = !P.getOption("-insert_find_delete");
   double trial_time = P.getOptionDoubleValue("-tt", 1.0);
 
   bool balanced_tree = P.getOption("-bt");
@@ -51,7 +55,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // clear the memory pool between rounds
   bool clear = P.getOption("-clear");
 
-  // number of hash buckets for hash tables
   wait_before_retrying_lock = P.getOption("-wait");
 
   // number of samples 
@@ -68,17 +71,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   use_help = !use_locks;
 
   // use try locks
-  try_only = P.getOption("-try_lock");
+  try_only = !P.getOption("-strict_lock");
 
   // run a trivial test
   bool init_test = P.getOption("-i"); // run trivial test
 
   // use zipfian distribution
-  bool use_zipfian = P.getOption("-z"); 
-  double zipfian_param = P.getOptionDoubleValue("-zp",.75);
 
+  double zipfian_param = P.getOptionDoubleValue("-z", 0.0);
+  bool use_zipfian = (zipfian_param != 0.0);
+  
   // use numbers from 1...2n if dense otherwise sparse numbers
-  bool use_sparse = P.getOption("-sparse"); 
+  bool use_sparse = !P.getOption("-dense"); 
 
   // print memory usage statistics
   bool stats = P.getOption("-stats");
@@ -107,28 +111,16 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     os.retire(tr);
     
   } else {  // main test
-    if (verbose) {
-      std::cout << "running on " << p << " threads with n = " << n << std::endl;
-      if (use_zipfian) 
-        std::cout << "using zipfian distribution with parameter " << zipfian_param << std::endl;
-      else
-        std::cout << "using uniform distribution" << std::endl;
-      std::cout << update_percent << "% updates" << std::endl;
-      if (use_locks) std::cout << "using strict locks" << std::endl;
-      else std::cout << "using lockless locks" << std::endl;
-      if (buckets != n) std::cout << "using " << buckets << " buckets" << std::endl;
-      if (use_sparse) std::cout << "using sparse" << std::endl;
-    }
-    
+
     // generate 2*n unique numbers in random order
     parlay::sequence<unsigned int> a;
     if (use_sparse) {
-      auto x = parlay::tabulate(2*nn,[&] (size_t i) {return (unsigned int) parlay::hash64(i);});
-      auto y = parlay::random_shuffle(parlay::remove_duplicates(x));
+      auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {return (unsigned int) parlay::hash64(i);});
+      auto xx = parlay::remove_duplicates(x);
+      auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
     } else
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (unsigned int i) {return i+1;}));
-
     // parlay::parallel_for(0, nn, [&] (size_t i) { assert(a[i] != 0); });
 
     parlay::sequence<unsigned int> b;
@@ -245,9 +237,17 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
               << duration << " seconds" << std::endl;
 
         //std::cout << duration << " : " << trial_time << std::endl;
+	std::stringstream ss;
+	ss << "zipfian=" << zipfian_param;
         size_t num_ops = parlay::reduce(totals);
-        std::cout << update_percent << "%update," << n << ","
-            << num_ops / (duration * 1e6) << std::endl;
+        std::cout << std::setprecision(4)
+		  << update_percent << "%update,"
+		  << "n=" << n << ","
+		  << "p=" << p << ","
+		  << (!use_zipfian ? "uniform" : ss.str()) << ","
+		  << (use_locks ? "lock" : "lock_free") << ","
+		  << (try_only ? "try" : "strict") << ","
+		  << num_ops / (duration * 1e6) << std::endl;
         if (do_check) {
 	  size_t final_cnt = os.check(tr);
 	  long updates = parlay::reduce(addeds);
