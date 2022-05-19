@@ -1,4 +1,4 @@
-#include "lock.h"
+#include <flock/lock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>

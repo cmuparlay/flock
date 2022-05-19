@@ -1,7 +1,7 @@
 #include <limits>
 #include <algorithm>
 #include <cstdlib>
-#include "lock.h"
+#include <flock/lock.h>
 
 // no parent pointers, serach to key, doesn't work likely because violations are getting rotated off search path
 // on read only workloads, it is faster than leaftree and natarajan but slower than bronson, probably because it is external.
