@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-#include "lock.h"
+#include <flock/lock.h>
 
 /**
  * Original Harris Linked list.
