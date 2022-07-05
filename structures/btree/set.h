@@ -271,12 +271,34 @@ struct Set {
     // create left child and copy into it
     int lsize = size/2;
     leaf* new_l = leaf_pool.new_obj(lsize);
-    for (int i = 0; i < lsize; i++) new_l->keyvals[i] = get_kv(i);
-
-    // create right child and copy into it
     leaf* new_r = leaf_pool.new_obj(size-lsize);
-    for (int i = 0; i < size - lsize; i++) new_r->keyvals[i] = get_kv(i+lsize);
+    // hack to deal with broken g++-10 compiler
+    if (true) {
+      K tmpK[20];
+      V tmpV[20];
 
+      for (int i = 0; i < lsize; i++) {
+        auto [key,val] = get_kv(i);
+        tmpK[i] = key;
+        tmpV[i] = val;
+      }
+      for (int i = 0; i < lsize; i++) {
+        new_l->keyvals[i].key = tmpK[i];
+        new_l->keyvals[i].value = tmpV[i];
+      }
+      for (int i = 0; i < size - lsize; i++) {
+        auto [key,val] = get_kv(i+lsize);      
+        tmpK[i] = key;
+        tmpV[i] = val;
+      }
+      for (int i = 0; i < size - lsize; i++) {
+        new_r->keyvals[i].key = tmpK[i];
+        new_r->keyvals[i].value = tmpV[i];
+      }
+    } else {
+      for (int i = 0; i < lsize; i++) new_l->keyvals[i] = get_kv(i);
+      for (int i = 0; i < size - lsize; i++) new_r->keyvals[i] = get_kv(i+lsize);
+    }
     // separating key (first key in right child)
     K mid = get_kv(lsize).key;
     return std::make_tuple((node*) new_l, mid, (node*) new_r);
