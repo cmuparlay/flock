@@ -11,7 +11,7 @@ struct Set {
 
   struct node : ll_head, lock_type {
     ptr_type<node> next;
-    ptr_type<node> prev;
+    ptr_type_<node> prev;
     write_once<bool> removed;
     K key;
     V value;

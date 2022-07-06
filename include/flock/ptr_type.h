@@ -19,6 +19,9 @@ using ll_head = persistent;
 template <typename T>
 using ptr_type = persistent_ptr<T>;
 
+template <typename T>
+using ptr_type_ = mutable_val<T*>;
+
 template <typename F>
 auto with_snap(F f) { return with_snapshot(f);};
 
@@ -32,8 +35,12 @@ auto with_snap(F f) { return with_epoch(f);};
 #ifdef LongPtr
 template <typename T>
 using ptr_type = mutable_double<T*>;
+template <typename T>
+using ptr_type_ = mutable_double<T*>;
 #else
 template <typename T>
 using ptr_type = mutable_val<T*>;
+template <typename T>
+using ptr_type_ = mutable_val<T*>;
 #endif
 #endif
