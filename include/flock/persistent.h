@@ -70,12 +70,10 @@ private:
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
       if (stamp <= done_stamp) {
-	V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
-	lck->try_with_lock([=] {
-          if (TV::cas(v, ptr, newv))
-	    link_pool.pool.retire(ptr_notag);
-	  return true;});
-	return newv;
+	      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
+        if (TV::cas_with_same_tag(v, ptr, newv, true)) // there can't be an ABA unless indirect node is reclaimed
+	         link_pool.pool.retire(ptr_notag);
+	      return newv;
       }
     }
     return strip_mark_and_tag(ptr);
@@ -131,10 +129,10 @@ public:
       // loading timestamp needs to be idempotent
       TS ts = lg.commit_value(newv->time_stamp.load()).first;
       if (ts != -1) {
-    	plink* tmp = link_pool.pool.new_obj();
-    	tmp->value = (IT) newv;
-    	newv = (V*) tmp;
-    	newv_marked = add_indirect_mark(newv);
+      	plink* tmp = link_pool.pool.new_obj();
+      	tmp->value = (IT) newv;
+      	newv = (V*) tmp;
+      	newv_marked = add_indirect_mark(newv);
       }
     }
     newv->time_stamp = tbd;
@@ -143,6 +141,12 @@ public:
     // swap in new pointer but marked as "unset" since time stamp is tbd
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
     IT x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
+
+    // if we failed because indirect node got shortcutted out
+    if(!succeeded && TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
+      succeeded = TV::cas(v, x, add_unset(newv_marked));
+      x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
+    }
 
     // now set the stamp from tbd to a real stamp
     set_stamp((IT) newv);
