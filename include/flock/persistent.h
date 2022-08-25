@@ -64,8 +64,7 @@ private:
   // For an indirect pointer if its stamp is older than done_stamp
   // then it will no longer be accessed and can be spliced out.
   // The splice needs to be done under a lock since it can race with updates
-  template <typename Lock>
-  V* shortcut_indirect(IT ptr, Lock lck) {
+  V* shortcut_indirect(IT ptr) {
     if (is_indirect(ptr)) {
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
@@ -100,11 +99,10 @@ public:
     return get_ptr(head);
   }
 
-  template <typename Lock>
-  V* read_fix(Lock* lck) {
+  V* read_fix() {
     IT ptr = v.load();
     set_stamp(ptr);     // ensure time stamp is set
-    return shortcut_indirect(ptr, lck);
+    return shortcut_indirect(ptr);
   }
 
   V* read_() { return get_ptr(v.load());}
@@ -155,8 +153,8 @@ public:
     TV::cas(v, x, newv_marked);
 
     // retire an indirect point if swapped out
-    if (succeeded && is_indirect(oldv_tagged))
-      link_pool.pool.retire((plink*) oldv);
+    // if (succeeded && is_indirect(oldv_tagged))
+      // link_pool.pool.retire((plink*) oldv);
     
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer

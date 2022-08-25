@@ -24,9 +24,9 @@ struct Set {
   auto find_location(node* root, K k) {
     node* cur = root;
     node* nxt = (cur->next).read_();
-    //node* nxt = (cur->next).read_fix(cur);
+    //node* nxt = (cur->next).read_fix();
     while (true) {
-      //node* nxt_nxt = (nxt->next).read_fix(nxt); // prefetch
+      //node* nxt_nxt = (nxt->next).read_fix(); // prefetch
       node* nxt_nxt = (nxt->next).read_(); // prefetch
       if (nxt->key >= k) break;
       cur = nxt;

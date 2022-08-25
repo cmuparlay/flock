@@ -247,7 +247,7 @@ struct tagged {
   // a safe cas that assigns the new value a tag that no concurrent cas
   // on the same location has in its old value
   static bool cas_with_same_tag(std::atomic<IT> &loc, IT oldv, V v, bool aba_free=false) {
-    IT newv = add_tag(oldv, v);
+    IT newv = add_tag(oldv, (IT) v);
     return cas_tagged_(loc, oldv, newv, aba_free);
   }
 
@@ -299,8 +299,7 @@ public:
 
   // compatibility with multiversioning
   V read_() {return read();}
-  template <typename Lock>
-  V read_fix(Lock* lck) {return read();}
+  V read_fix() {return read();}
   void validate() {}
   
   // operator V() { return load(); } // implicit conversion
