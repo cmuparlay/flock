@@ -4,6 +4,8 @@
 // structure.  However, the hashing can create lock cycles so this
 // cannot be used with a strict lock, just a try_lock.
 
+#include "spin_lock.h"
+
 #ifdef HashLock
 struct lock_type {
   template <typename F>
@@ -16,12 +18,12 @@ struct lock_type {
   lock lck;
   template <typename F>
   bool try_with_lock(F f) {
-    return try_lock(lck, f); }
+    return lck->try_lock(f); }
   template <typename F>
   auto try_with_lock_result(F f) -> std::optional<decltype(f())> {
-    return try_lock_result(lck, f); }
-  void clear_the_lock() { clear_lock(lck); }
-  bool is_locked() { return is_locked_(lck); }
+    return lck->try_lock_result(f); }
+  void clear_the_lock() { lck->clear_lock(); }
+  bool is_locked() { return lck->is_locked; }
 };
 #endif
 
