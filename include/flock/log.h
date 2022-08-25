@@ -240,34 +240,26 @@ struct tagged {
   // a safe cas that assigns the new value a tag that no concurrent cas
   // on the same location has in its old value
   static bool cas(std::atomic<IT> &loc, IT oldv, V v, bool aba_free=false) {
-    if (lg.is_empty() || aba_free) {
-      IT newv = next(oldv, v, (IT) &loc);
-      return loc.compare_exchange_strong(oldv, newv);
-    } else {
-      bool r = false;
-      // announce the location and tag been written
-      announce_write.set(add_tag(oldv, (IT) &loc));
-      skip_if_done([&] { // skip both for correctness, and efficiency
-      	IT newv = next(oldv, v, (IT) &loc);
-      	r = loc.compare_exchange_strong(oldv, newv);});
-      // unannounce the location
-      announce_write.clear();
-      return r;
-    }
+    IT newv = next(oldv, v, (IT) &loc);
+    return cas_tagged_(loc, oldv, newv, aba_free);
   }
 
   // a safe cas that assigns the new value a tag that no concurrent cas
   // on the same location has in its old value
   static bool cas_with_same_tag(std::atomic<IT> &loc, IT oldv, V v, bool aba_free=false) {
+    IT newv = add_tag(oldv, v);
+    return cas_tagged_(loc, oldv, newv, aba_free);
+  }
+
+  // requires newV is already tagged
+  static bool cas_tagged_(std::atomic<IT> &loc, IT oldv, IT newv, bool aba_free=false) {
     if (lg.is_empty() || aba_free) {
-      IT newv = add_tag(oldv, v);
       return loc.compare_exchange_strong(oldv, newv);
     } else {
       bool r = false;
       // announce the location and tag been written
       announce_write.set(add_tag(oldv, (IT) &loc));
       skip_if_done([&] { // skip both for correctness, and efficiency
-        IT newv = add_tag(oldv, v);
         r = loc.compare_exchange_strong(oldv, newv);});
       // unannounce the location
       announce_write.clear();
