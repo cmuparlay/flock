@@ -32,8 +32,7 @@ public:
 
   // compatibility with multiversioning
   V read_() {return read();}
-  template <typename Lock>
-  V read_fix(Lock* lck) {return read();}
+  V read_fix() {return read();}
   void validate() {}
   
   // operator V() { return load(); } // implicit conversion

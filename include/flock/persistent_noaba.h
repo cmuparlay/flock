@@ -7,7 +7,7 @@
 // PPoPP 2021
 
 #pragma once
-#include "log.h"
+#include "lf_log.h"
 #include "timestamps.h"
 
 #define bad_ptr ((void*) ((1ul << 48) -1))

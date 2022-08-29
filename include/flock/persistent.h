@@ -1,5 +1,5 @@
 #pragma once
-#include "log.h"
+#include "lf_log.h"
 
 #define bad_ptr ((1ul << 48) -1)
 
@@ -64,18 +64,15 @@ private:
   // For an indirect pointer if its stamp is older than done_stamp
   // then it will no longer be accessed and can be spliced out.
   // The splice needs to be done under a lock since it can race with updates
-  template <typename Lock>
-  V* shortcut_indirect(IT ptr, Lock lck) {
+  V* shortcut_indirect(IT ptr) {
     if (is_indirect(ptr)) {
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
       if (stamp <= done_stamp) {
-	V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
-	lck->try_with_lock([=] {
-          if (TV::cas(v, ptr, newv))
-	    link_pool.pool.retire(ptr_notag);
-	  return true;});
-	return newv;
+	      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
+        if (TV::cas_with_same_tag(v, ptr, newv, true)) // there can't be an ABA unless indirect node is reclaimed
+	         link_pool.pool.retire(ptr_notag);
+	      return newv;
       }
     }
     return strip_mark_and_tag(ptr);
@@ -102,11 +99,10 @@ public:
     return get_ptr(head);
   }
 
-  template <typename Lock>
-  V* read_fix(Lock* lck) {
+  V* read_fix() {
     IT ptr = v.load();
     set_stamp(ptr);     // ensure time stamp is set
-    return shortcut_indirect(ptr, lck);
+    return shortcut_indirect(ptr);
   }
 
   V* read_() { return get_ptr(v.load());}
@@ -131,10 +127,10 @@ public:
       // loading timestamp needs to be idempotent
       TS ts = lg.commit_value(newv->time_stamp.load()).first;
       if (ts != -1) {
-    	plink* tmp = link_pool.pool.new_obj();
-    	tmp->value = (IT) newv;
-    	newv = (V*) tmp;
-    	newv_marked = add_indirect_mark(newv);
+      	plink* tmp = link_pool.pool.new_obj();
+      	tmp->value = (IT) newv;
+      	newv = (V*) tmp;
+      	newv_marked = add_indirect_mark(newv);
       }
     }
     newv->time_stamp = tbd;
@@ -144,6 +140,12 @@ public:
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
     IT x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
 
+    // if we failed because indirect node got shortcutted out
+    if(!succeeded && TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
+      succeeded = TV::cas(v, x, add_unset(newv_marked));
+      x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
+    }
+
     // now set the stamp from tbd to a real stamp
     set_stamp((IT) newv);
 
@@ -151,8 +153,8 @@ public:
     TV::cas(v, x, newv_marked);
 
     // retire an indirect point if swapped out
-    if (succeeded && is_indirect(oldv_tagged))
-      link_pool.pool.retire((plink*) oldv);
+    // if (succeeded && is_indirect(oldv_tagged))
+      // link_pool.pool.retire((plink*) oldv);
     
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer

@@ -1,3 +1,4 @@
+#pragma once
 #include <atomic>
 #include <vector>
 #include <parlay/alloc.h>
