@@ -1,7 +1,7 @@
 set(SOURCES test_sets.cpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runall
-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/runall)
+          DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "blockleaftree" "btree" "avltree" "leaftree"

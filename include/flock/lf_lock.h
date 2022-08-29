@@ -9,7 +9,8 @@
 #include "defs.h"
 #include <atomic>
 #include <functional>
-#include "log.h"
+#include "lf_log.h"
+#include "lf_types.h"
 
 // used for reentrant locks
 static thread_local size_t current_id = parlay::worker_id();
