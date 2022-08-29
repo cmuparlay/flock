@@ -1,6 +1,5 @@
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 #include "rebalance.h"
 
 #ifdef BALANCED
@@ -90,7 +89,7 @@ struct Set {
 	auto [gp, gp_left, p, p_left, l] = find_location(root, k);
 	leaf* old_l = (leaf*) l;
 	if (old_l->find(k).has_value()) return false; // already there
-	if (p->try_with_lock([=] {
+	if (p->try_lock([=] {
 	      auto ptr = (p_left) ? &(p->left) : &(p->right);
 
 	      // if p has been removed, or l has changed, then exit
@@ -147,7 +146,7 @@ struct Set {
 	if (!old_l->find(k).has_value()) return false; // not there
 	// The leaf has at least 2 keys, so the key can be removed from the leaf
 	if (old_l->size > 1) {
-	  if (p->try_with_lock([=] {
+	  if (p->try_lock([=] {
 		auto ptr = p_left ? &(p->left) : &(p->right);
 		if (p->removed.load() || ptr->load() != l) return false;
 		leaf* new_l = leaf_pool.new_obj();
@@ -173,14 +172,14 @@ struct Set {
 
 	  // We need to delete the leaf (l) and its parent (p), and point
 	  // the granparent (gp) to the other child of p.
-	  if (gp->try_with_lock([=] {
+	  if (gp->try_lock([=] {
 	      auto ptr = gp_left ? &(gp->left) : &(gp->right);
 
 	      // if p has been removed, or l has changed, then exit
 	      if (gp->removed.load() || ptr->load() != p) return false;
 
 	      // lock p and remove p and l
-	      return p->try_with_lock([=] {
+	      return p->try_lock([=] {
 		  node* ll = (p->left).load();
 		  node* lr = (p->right).load();
 		  if (p_left) std::swap(ll,lr);

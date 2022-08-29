@@ -283,8 +283,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         if (do_check) os.check(tr);
         //std::cout << len << std::endl;
         if (stats) {
-          descriptor_pool.stats();
-          log_array_pool.stats();
+          //descriptor_pool.stats();
+          //log_array_pool.stats();
           os.stats();
         }
 
@@ -338,13 +338,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       os.retire(tr); // free the ord_set (should be empty, but not with arttree)
       if (clear) {
 	os.clear();
-	descriptor_pool.clear();
-	log_array_pool.clear();
+	//descriptor_pool.clear();
+	//log_array_pool.clear();
       }
       if (stats) {
         if (clear) std::cout << "the following should be zero if no memory leak" << std::endl;
-        descriptor_pool.stats();
-        log_array_pool.stats();
+        //descriptor_pool.stats();
+        //log_array_pool.stats();
         os.stats();
       }
     }

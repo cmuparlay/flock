@@ -1,7 +1,7 @@
 #include <limits>
 #include <algorithm>
 #include <cstdlib>
-#include <flock/lock.h>
+#include <flock/flock.h>
 
 // no parent pointers, serach to key, doesn't work likely because violations are getting rotated off search path
 // on read only workloads, it is faster than leaftree and natarajan but slower than bronson, probably because it is external.
@@ -84,7 +84,7 @@ struct Set {
 
   void fixHeight(node* n) {
     // std::cout << "fixed height" << std::endl;
-    try_lock(n->lck, [=] () {
+    n->lck.try_lock([=] () {
       if(n->removed.load()) return false;
       n->lefth = height(n->left.load());
       n->righth = height(n->right.load());
@@ -96,11 +96,11 @@ struct Set {
 
   void rotate(node* p, node* n, node* l, bool rotateRight) {
     bool p_left = (p->left.load() == n);
-    try_lock(p->lck, [=] () {
+    p->lck.try_lock([=] () {
       if(p->removed.load() || n != (p_left ? p->left.load() : p->right.load())) return false;
-      return try_lock(n->lck, [=] () {
+      return n->lck.try_lock([=] () {
         if(n->removed.load() || !correctHeight(n) || l != (rotateRight ? n->left.load() : n->right.load()) || (rotateRight && balance(n) < 2) || (!rotateRight && balance(n) > -2)) return false;
-        return try_lock(l->lck, [=] () {
+        return l->lck.try_lock([=] () {
           if(l->removed.load() || (rotateRight && balance(l) < 0) || (!rotateRight && balance(l) > 0)) return false;
           node* new_n, *new_l;
           if(rotateRight) {
@@ -122,15 +122,15 @@ struct Set {
 
   void doubleRotate(node* p, node* n, node* l, bool rotateLR) {
     bool p_left = (p->left.load() == n);
-    try_lock(p->lck, [=] () {
+    p->lck.try_lock([=] () {
       if(p->removed.load() || n != (p_left ? p->left.load() : p->right.load())) return false;
-      return try_lock(n->lck, [=] () {
+      return n->lck.try_lock([=] () {
         if(n->removed.load() || !correctHeight(n) || l != (rotateLR ? n->left.load() : n->right.load()) || (rotateLR && balance(n) < 2) || (!rotateLR && balance(n) > -2)) return false;
-        return try_lock(l->lck, [=] () {
+        return l->lck.try_lock([=] () {
           if(l->removed.load() || !correctHeight(l) || (rotateLR && balance(l) >= 0) || (!rotateLR && balance(l) <= 0)) return false;
           node* cc = rotateLR ? l->right.load() : l->left.load();
           if(cc->is_leaf) return false;
-          return try_lock(cc->lck, [=] () { 
+          return cc->lck.try_lock([=] () { 
             if(cc->removed.load()) return false;
             node* new_n, *new_l, *new_cc;
             if(rotateLR) {
@@ -262,7 +262,7 @@ struct Set {
       while (true) {
         auto [gp, gp_left, p, p_left, l] = find_location(root, k);
         if (k == l->key) return false;
-        if (try_lock(p->lck, [=] () {
+        if (p->lck.try_lock([=] () {
               auto ptr = p_left ? &(p->left) : &(p->right);
               if (p->removed.load() || ptr->load() != l) return false;
               node* new_l = (node*) leaf_pool.new_obj(k, v);
@@ -292,8 +292,8 @@ struct Set {
        while (true) {
    auto [gp, gp_left, p, p_left, l] = find_location(root, k);
    if (k != l->key) return false;
-   if (try_lock(gp->lck, [=] () {
-       return try_lock(p->lck, [=] () {
+   if (gp->lck.try_lock([=] () {
+       return p->lck.try_lock([=] () {
             auto ptr = gp_left ? &(gp->left) : &(gp->right);
             if (gp->removed.load() || ptr->load() != p) return false;
             node* ll = (p->left).load();

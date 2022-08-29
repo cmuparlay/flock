@@ -1,6 +1,5 @@
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
@@ -37,31 +36,27 @@ struct Set {
 
   bool insert(node* root, K k, V v) {
     return with_epoch([=] {
-      int cnt = 0;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
 	if (nxt->key == k) return false; //already there
-	if (cur->try_with_lock([=] {
+	if (cur->try_lock([=] {
 	      if (!cur->removed.load() && (cur->next).load() == nxt) {
 		auto new_node = node_pool.new_obj(k, v, nxt);
 		cur->next = new_node; // splice in
 		return true;
 	      } else return false;}))
 	  return true;
-	// try again if unsuccessful
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       }});
   }
 
   bool remove(node* root, K k) {
     return with_epoch([=] {
-      int cnt = 0;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
 	if (k != nxt->key) return false; // not found
-        if (cur->try_with_lock([=] {
+        if (cur->try_lock([=] {
 	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
-	      return nxt->try_with_lock([=] {
+	      return nxt->try_lock([=] {
 		  node* nxtnxt = (nxt->next).load();
 		  nxt->removed = true;
 		  cur->next = nxtnxt; // shortcut
@@ -69,7 +64,6 @@ struct Set {
 		  return true;
 		});}))
 	  return true;
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       }
     });
   }

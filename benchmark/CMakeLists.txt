@@ -1,5 +1,8 @@
 set(SOURCES test_sets.cpp)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runall
+          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/runall)
+	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "blockleaftree" "btree" "avltree" "leaftree"
 		"list" "list_onelock" "dlist"
@@ -21,10 +24,10 @@ foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench}_hl ${STRUCT_DIR}/${bench} HashLock)
 endforeach()
 
-foreach(bench ${FLOCK_BENCH})
-  add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} Persistent)
-  add_benchmark(${bench}_per_hl ${STRUCT_DIR}/${bench} "Persistent;HashLock")
-endforeach()
+# foreach(bench ${FLOCK_BENCH})
+#  add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} Persistent)
+#  add_benchmark(${bench}_per_hl ${STRUCT_DIR}/${bench} "Persistent;HashLock")
+# endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})
   add_benchmark(${bench} ${OTHER_LIST_DIR}/${bench} "")

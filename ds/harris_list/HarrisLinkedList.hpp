@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-#include <flock/lock.h>
+#include <flock/epoch.h>
 
 /**
  * Original Harris Linked list.

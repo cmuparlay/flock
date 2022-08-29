@@ -1,18 +1,17 @@
 // A version with only one lock instead of two for remove.
-// Uses clear_lock to clear current owner of a lock without taking the lock.
+// Uses wait_lock to wait on current owner of a lock without taking the lock.
 // Involves a race condition between the writer of a delete flag and the reader.
-// Requires clearing prev incase it is half way through its delete
+// Requires waiting on prev in case it is half way through its delete
 // and has set removed on its next.   This would prevent progress.
 
 // Does not currently work with hashlocks due to cycles (lock a could
-// clear lock b while lock b is clearing lock a).
+// wait for lock b while lock b is waiting for lock a).
 // To make it work need to associate unhashed address with hashed lock
-// so clear_the_lock can ignore the lock if addresses do not match
+// so wait_lock can ignore the lock if addresses do not match
 // (i.e. accidental collision).
 
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
@@ -50,8 +49,8 @@ struct Set {
       while (true) {
 	auto [prev, cur, nxt] = find_location(root, k);
 	if (nxt->key == k) return false; //already there
-	if (use_help && prev != nullptr) prev->clear_the_lock(); // important to ensure lock freedom
-	if (cur->try_with_lock([=] {
+	if (use_help && prev != nullptr) prev->wait_lock(); // important to ensure lock freedom
+	if (cur->try_lock([=] {
 	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
 	      auto new_node = node_pool.new_obj(k, v, nxt);
 	      cur->next = new_node; // splice in
@@ -65,14 +64,14 @@ struct Set {
       while (true) {		 
 	auto [prev, cur, nxt] = find_location(root, k);
 	if (k != nxt->key) return false; // not found
-	if (prev != nullptr) prev->clear_the_lock();
-	nxt->clear_the_lock();
-	if (cur->try_with_lock([=] {
+	if (prev != nullptr) prev->wait_lock();
+	nxt->wait_lock();
+	if (cur->try_lock([=] {
 	      if (cur->removed.load() || (cur->next).load() != nxt
 		  || nxt->is_locked()) return false;
 	      nxt->removed = true;
 	      // important to ensure removed flag is visible
-	      nxt->clear_the_lock();
+	      nxt->wait_lock();
 	      auto a = (nxt->next).load();
 	      cur->next = a; // shortcut
 	      node_pool.retire(nxt);

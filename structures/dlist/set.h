@@ -1,7 +1,6 @@
 // doubly linked list
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
@@ -41,7 +40,7 @@ struct Set {
 	if (next->key == k) return false;
 	node* prev = (next->prev).load();
 	if (prev->key < k && // fails if something inserted before in meantime
-	    prev->try_with_lock([=] {
+	    prev->try_lock([=] {
 		if (!prev->removed.load() && (prev->next).load() == next) {
 		  auto new_node = node_pool.new_obj(k, v, next, prev);
 		  prev->next = new_node;
@@ -62,9 +61,9 @@ struct Set {
 	node* loc = find_location(root, k);
 	if (loc->key != k) return false;
 	node* prev = (loc->prev).load();
-	if (prev->try_with_lock([=] {
+	if (prev->try_lock([=] {
 	      if (prev->removed.load() || (prev->next).load() != loc) return false;
-	      return loc->try_with_lock([=] {
+	      return loc->try_lock([=] {
 		  node* next = (loc->next).load();
 		  loc->removed = true;
 		  prev->next = next;

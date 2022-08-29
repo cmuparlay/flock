@@ -1,6 +1,5 @@
 #include <parlay/primitives.h>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
@@ -116,7 +115,7 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x != nullptr && x->find(k) != -1) return false;
-      if (s->try_with_lock([=] {
+      if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = insert_to_node(x, k, v);
 	    retire_node(x);
@@ -134,7 +133,7 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
-      if (s->try_with_lock([=] {
+      if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = remove_from_node(x, k);
 	    retire_node(x);

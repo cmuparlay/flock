@@ -1,7 +1,6 @@
 #include <limits>
 #define noABA 1
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 // A top-down implementation of abtrees
@@ -342,10 +341,10 @@ struct Set {
   // copies the parent p to replace with new children and
   // updates the grandparent gp to point to the new copied parent.
   void overfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
-    gp->lck.try_with_lock([=] {
+    gp->lck.try_lock([=] {
 	// check that gp has not been removed, and p has not changed
 	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
-	return p->lck.try_with_lock([=] {
+	return p->lck.try_lock([=] {
 	    // check that c has not changed
 	    if (p->children[cidx].load() != c) return false;
 	    if (c->is_leaf) {
@@ -366,10 +365,10 @@ struct Set {
   // Copies the parent p to replace with new child or children.
   // Updates the grandparent gp to point to the new copied parent.
   void underfull_node(node* gp, int pidx, node* p, int cidx, node* c) {
-    gp->lck.try_with_lock([=] {
+    gp->lck.try_lock([=] {
 	// check that gp has not been removed, and p has not changed
 	if (gp->removed.load() || gp->children[pidx].load() != p) return false;
-	return p->lck.try_with_lock([=] {
+	return p->lck.try_lock([=] {
 	    // join with next if first in block, otherwise with previous
 	    node* other_c = p->children[(cidx == 0 ? cidx + 1 : cidx - 1)].load();
 	    auto [li, lc, rc] = ((cidx == 0) ?
@@ -387,7 +386,7 @@ struct Set {
 	    } else { // internal node
 	      K k = p->keys[li];
 	      // need to lock the other child 
-	      return other_c->lck.try_with_lock([=] {
+	      return other_c->lck.try_lock([=] {
 		  other_c->removed = true;
 		  if (lc->size + rc->size < node_join_cutoff)   // join
 		    gp->children[pidx] = join_children(p, join(lc, k, rc), li);
@@ -415,7 +414,7 @@ struct Set {
   // In both cases it updates the root to point to the new internal node
   // it takes a lock on the root
   void fix_root(node* root, node* c) {
-      root->lck.try_with_lock([=] {
+      root->lck.try_lock([=] {
 	// check that c has not changed
 	if (root->children[0].load() != c) return false;
 	if (c->status == isOver) {
@@ -481,7 +480,7 @@ struct Set {
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
 	if (l->find(k).has_value()) return false; // already there
-	if (p->lck.try_with_lock([=] {
+	if (p->lck.try_lock([=] {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) insert_leaf(l, k, v);
@@ -501,7 +500,7 @@ struct Set {
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
 	if (!l->find(k).has_value()) return false; // not there
-	if (p->lck.try_with_lock([=] {
+	if (p->lck.try_lock([=] {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) remove_leaf(l, k);

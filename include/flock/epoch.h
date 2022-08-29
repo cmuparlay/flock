@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include "timestamps.h"
 
+#pragma once
+
 // ***************************
 // epoch structure
 // ***************************
@@ -151,6 +153,14 @@ public:
     T* newv = Allocator::alloc();
     new (newv) T(args...);
     return newv;
+  }
+
+  template <typename F, typename ... Args>
+  // f is a function that initializes a new object before it is shared
+  T* new_init(F f, Args... args) {
+    T* x = new_obj(args...);
+    f(x);
+    return x;
   }
   
   void retire(T* p) {

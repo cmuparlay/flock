@@ -1,4 +1,4 @@
-#include <flock/lock.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
@@ -13,7 +13,7 @@ struct Set {
   
   struct slot {
     mutable_val<node*> head;
-    //lock lck;
+    lock_type lck;
     mutable_val<unsigned int> version_num;
     slot() : version_num(0), head(nullptr) {}
   };
@@ -52,7 +52,7 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt != nullptr) return false;
-      if (try_lock_loc(s, [=] {
+      if (s->lck.try_lock([=] {
 			    if (s->version_num.load() != vn) return false;
 			    *cur = node_pool.new_obj(k, v, nullptr);
 			    s->version_num = vn+1;
@@ -72,7 +72,7 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt == nullptr) return false;
-      if (try_lock_loc(s, [=] {
+      if (s->lck.try_lock([=] {
 			    if (s->version_num.load() != vn) return false;
 			    *cur = nxt->next.load();
 			    node_pool.retire(nxt);

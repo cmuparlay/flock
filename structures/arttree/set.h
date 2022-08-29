@@ -1,6 +1,5 @@
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
@@ -152,17 +151,17 @@ struct Set {
   // If p is copies, then gp is updated to point to it
   bool add_child(node* gp, node* p, K k, V v) {
     if (p->nt == Indirect && !is_full(p)) {
-      return p->try_with_lock([=] {
+      return p->try_lock([=] {
 	  if (p->removed.load()) return false;
 	  node* c = (node*) leaf_pool.new_obj(k, v);
 	  return ((indirect_node*) p)->add_child(k, c);
 	});
     } else {
-      return gp->try_with_lock([=] {
+      return gp->try_lock([=] {
 	  auto x = get_child(gp, p->key);
 	  if (gp->removed.load() || x->load() != p)
 	    return false;
-	  return p->try_with_lock([=] {
+	  return p->try_lock([=] {
 	      node* c = (node*) leaf_pool.new_obj(k, v);
 	      if (p->nt == Indirect) {
 		indirect_node* i_n = (indirect_node*) p;
@@ -249,7 +248,7 @@ struct Set {
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
 	  return false; // already in the tree
 	if (cptr != nullptr) { // child pointer exists
-	    if (p->try_with_lock([=] {
+	    if (p->try_lock([=] {
 		// exit and retry if state has changed
 		if (p->removed.load() || cptr->load() != c) return false;
 
@@ -280,7 +279,7 @@ struct Set {
 	// if not found return
 	if (c == nullptr || !(c->nt == Leaf && c->byte_num == byte_pos))
 	  return false;
-	if (p->try_with_lock([=] {
+	if (p->try_lock([=] {
 	      if (p->removed.load() || cptr->load() != c) return false;
 	      *cptr = nullptr; 
 	      leaf_pool.retire((leaf*) c);

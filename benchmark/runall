@@ -1,0 +1,95 @@
+#!/usr/bin/python
+#
+# run all tests
+#
+
+import os
+import sys
+
+os.system("echo HOSTNAME: `hostname`")
+
+lists = ["list", "list_onelock", "dlist", "harris_list", "harris_list_opt"]
+trees = ["leaftree", "btree", "blockleaftree", "blockleaftree -b", "hash", "hash_block",]
+rtrees = ["arttree"]
+list_sizes = [10,100,1000]
+tree_sizes = [1000,100000,10000000,100000000]
+zipfians = [0, .99]
+
+test_only = False
+if (sys.argv.count("-test") > 0):
+    print("test only")
+    test_only = True
+rounds = 3
+
+def detectCPUs():
+    """
+     Detects the number of CPUs on a system. Cribbed from pp.
+     """
+    # Linux, Unix and MacOS:
+    if hasattr(os, "sysconf"):
+       if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+           # Linux & Unix:
+           ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
+           if isinstance(ncpus, int) and ncpus > 0:
+               return ncpus
+       else: # OSX:
+           return int(os.popen2("sysctl -n hw.ncpu")[1].read())
+    # Windows:
+    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+           ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+           if ncpus > 0:
+               return ncpus
+    return 1 # Default
+
+maxcpus = detectCPUs()
+
+def getProcessors() :
+    if maxcpus == 40:
+        processors = [1,4,16,20,40]
+    elif maxcpus == 144:
+        processors = [1,4,16,32,72,144]
+    else:
+        processors = [1,4,16]+range(16,maxcpus+1,16)
+    return processors
+
+def runstring(op) :
+    os.system("echo \"" + op + "\"")
+    x = os.system(op)
+    if (x) :
+        if (os.WEXITSTATUS(x) == 0) : raise NameError("  aborted: " + op)
+        os.system("echo Failed")
+    
+def runtest(test,procs,n,z,sparse,extra) :
+    num_threads = maxcpus-1
+    r = rounds
+    strsparse = ""
+    if (sparse) : strsparse = "-sparse "
+    strzip = ""
+    if (z > 0.0) : strzip = "-z " + str(z) + " "
+    if (test_only) :
+        r = 1
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " -r " + str(r) + " " + extra + strzip + "-n " + str(n))
+
+def runtests(test,procs,n,z,sparse) :
+    runtest(test,procs,n,z,sparse,"")
+
+def run_sizes_and_zipfians(tests,sizes,sparse,zip_len) :
+    zipf = zipfians
+    if (test_only) :
+        sizes = sizes[0:1]
+        zipf = [zipfians[-1]]
+    for test in tests :
+        for n in sizes :
+            for z in zipf :
+                runtests(test, maxcpus, n, z, sparse)
+
+try :
+    processors = getProcessors()
+    os.system("make -j")
+    run_sizes_and_zipfians(lists,list_sizes,False,100)
+    run_sizes_and_zipfians(trees,tree_sizes,False,100000)
+    run_sizes_and_zipfians(rtrees,tree_sizes,True,100000)
+            
+except NameError,v :
+  x, = v
+  print "TEST TERMINATED ABNORMALLY:\n"+x

@@ -1,6 +1,5 @@
 #include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
@@ -62,7 +61,7 @@ struct Set {
 	    (upsert && prev_leaf != nullptr && prev_leaf->key == k && l != prev_leaf))
 	  return false;
 	prev_leaf = l;
-	auto r = p->try_with_lock([=] {
+	auto r = p->try_lock([=] {
 	      auto ptr = p_left ? &(p->left) : &(p->right);
 	      auto l_new = ptr->load();
 	      if (p->removed.load() || l_new != l) return false;
@@ -86,8 +85,8 @@ struct Set {
 	 if (k != l->key ||(prev_leaf != nullptr && prev_leaf != l))
 	   return false;
 	 prev_leaf = l;
-	 if (gp->try_with_lock([=] {
-	       return p->try_with_lock([=] {
+	 if (gp->try_lock([=] {
+	       return p->try_lock([=] {
 		   auto ptr = gp_left ? &(gp->left) : &(gp->right);
 		   if (gp->removed.load() || ptr->load() != p) return false;
 		   node* ll = (p->left).load();
