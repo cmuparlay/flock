@@ -45,6 +45,7 @@ struct Set {
     parlay::sequence<slot> table;
     slot* get_slot(K k) {
       size_t idx = parlay::hash64(k) & (table.size()-1u);
+      //size_t idx = (k * 0x9ddfea08eb382d69ULL) & (table.size()-1u);
       return &table[idx];
     }
     Table(size_t n) {

@@ -63,6 +63,9 @@ struct commandLine {
     return std::pair<size_t,char*>(std::atoi(argv[argc-2]),(char*) argv[argc-1]);
   }
 
+  std::string commandName() {
+    return std::string(argv[0]);}
+  
   bool getOption(std::string option) {
     for (int i = 1; i < argc; i++)
       if ((std::string) argv[i] == option) return true;

@@ -241,12 +241,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	ss << "zipfian=" << zipfian_param;
         size_t num_ops = parlay::reduce(totals);
         std::cout << std::setprecision(4)
+		  << P.commandName() << ","
 		  << update_percent << "%update,"
 		  << "n=" << n << ","
 		  << "p=" << p << ","
 		  << (!use_zipfian ? "uniform" : ss.str()) << ","
-		  << (use_locks ? "lock" : "lock_free") << ","
-		  << (try_only ? "try" : "strict") << ","
+	  // << (use_locks ? "lock" : "lock_free") << ","
+	  // << (try_only ? "try" : "strict") << ","
 		  << num_ops / (duration * 1e6) << std::endl;
         if (do_check) {
 	  size_t final_cnt = os.check(tr);
@@ -329,7 +330,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                      else if (op_type[i] == 1) os.remove(tr, b[i]);
                      else os.find(tr, b[i]);
                    });
-          std::cout << update_percent << "%update," << m << "," << mops(t.stop()) << std::endl;
+          std::cout << P.commandName() << "," << update_percent << "%update," << m << "," << mops(t.stop()) << std::endl;
           if (do_check) os.check(tr);
           //std::cout << len << std::endl;
           if (stats) os.stats();

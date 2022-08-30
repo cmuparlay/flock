@@ -7,7 +7,9 @@ set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "blockleaftree" "btree" "avltree" "leaftree"
 		"list" "list_onelock" "dlist"
 		"hash" "hash_block")
-set(FLOCK_PER_BENCH "arttree" "btree" "hash_block" "leaftree" "blockleaftree" "list" "dlist")
+set(FLOCK_PER_BENCH "arttree" "blockleaftree" "btree" "leaftree"
+		"list" "list_onelock" "dlist"
+		"hash_block")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
 set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
@@ -22,9 +24,10 @@ endfunction()
 foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench} ${STRUCT_DIR}/${bench} "")
   add_benchmark(${bench}_hl ${STRUCT_DIR}/${bench} HashLock)
+  add_benchmark(${bench}_lock ${STRUCT_DIR}/${bench} NoHelp)
 endforeach()
 
-foreach(bench ${FLOCK_BENCH})
+foreach(bench ${FLOCK_PER_BENCH})
   add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} Persistent)
   add_benchmark(${bench}_per_hl ${STRUCT_DIR}/${bench} "Persistent;HashLock")
 endforeach()

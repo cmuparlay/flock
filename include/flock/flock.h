@@ -4,13 +4,11 @@
 // structure.  However, the hashing can create lock cycles so this
 // cannot be used with a strict lock, just a try_lock.
 
-#define LockFree 1
-
-#ifdef LockFree
-#include "lf_lock.h"
-#else
+#ifdef NoHelp
 #include "spin_lock.h"
 #include "lock_types.h"
+#else
+#include "lf_lock.h"
 #endif
 #include "ptr_type.h"
 

@@ -7,13 +7,12 @@ struct Set {
   struct alignas(32) node {
     K key;
     V value;
-    mutable_val<node*> next;
+    ptr_type<node> next;
     node(K key, V value, node* next) : key(key), value(value), next(next) {};
   };
   
-  struct slot {
-    mutable_val<node*> head;
-    lock_type lck;
+  struct slot : lock_type {
+    ptr_type<node> head;
     mutable_val<unsigned int> version_num;
     slot() : version_num(0), head(nullptr) {}
   };
@@ -28,7 +27,7 @@ struct Set {
   }
 
   auto find_in_slot(slot* s, K k) {
-    mutable_val<node*>* cur = &s->head;
+    ptr_type<node>* cur = &s->head;
     node* nxt = cur->load();
     while (nxt != nullptr && nxt->key != k) {
       cur = &(nxt->next);
@@ -52,7 +51,7 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt != nullptr) return false;
-      if (s->lck.try_lock([=] {
+      if (s->try_lock([=] {
 			    if (s->version_num.load() != vn) return false;
 			    *cur = node_pool.new_obj(k, v, nullptr);
 			    s->version_num = vn+1;
@@ -72,10 +71,10 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt == nullptr) return false;
-      if (s->lck.try_lock([=] {
-			    if (s->version_num.load() != vn) return false;
-			    *cur = nxt->next.load();
-			    node_pool.retire(nxt);
+      if (s->try_lock([=] {
+			if (s->version_num.load() != vn) return false;
+			*cur = nxt->next.load();
+			node_pool.retire(nxt);
 			    s->version_num = vn+1;
 			    return true;}))
 	return true;

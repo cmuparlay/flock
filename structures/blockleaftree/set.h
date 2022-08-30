@@ -71,7 +71,7 @@ struct Set {
       gp_left = p_left;
       p = l;
       p_left = (k < p->key);
-      l = p_left ? (p->left).read_fix() : (p->right).read_fix();
+      l = p_left ? (p->left).read() : (p->right).read();
     }
     return std::make_tuple(gp, gp_left, p, p_left, l);
   }
