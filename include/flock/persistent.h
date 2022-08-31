@@ -142,7 +142,7 @@ public:
 
     // if we failed because indirect node got shortcutted out
     if(!succeeded && TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
-      succeeded = TV::cas(v, x, add_unset(newv_marked));
+      TV::cas(v, x, add_unset(newv_marked));
       x = get_val(lg); // could be avoided if TV::cas returned the tagged version of new
     }
 
@@ -153,8 +153,8 @@ public:
     TV::cas(v, x, newv_marked);
 
     // retire an indirect point if swapped out
-    // if (succeeded && is_indirect(oldv_tagged))
-      // link_pool.pool.retire((plink*) oldv);
+    if (succeeded && is_indirect(oldv_tagged))
+      link_pool.pool.retire((plink*) oldv);
     
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer
