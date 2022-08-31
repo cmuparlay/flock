@@ -94,7 +94,7 @@ def run_sizes_and_zipfians(tests,suffixes,sizes) :
 try :
     processors = getProcessors()
     os.system("make -j")
-    suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_lock_per_hl","_per_hl"]
+    suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_per_lock_hl","_per_hl"]
     suffixes_snap = ["_lock","","_per_lock","_per"]
     suffixes_other = [""]
     run_sizes_and_zipfians(lists,suffixes_all,list_sizes)

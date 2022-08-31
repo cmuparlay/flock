@@ -88,15 +88,8 @@ struct Set {
   // should not require stupid gcc attribute, but compiler screws up otherwise
   __attribute__((always_inline))
   std::optional<V> find_at(slot* s, K k) {
-#ifdef Persistent // compiler should do this, sigh
     node* x = s->ptr.read_fix();
-    //s->ptr.validate();
-    //node* x = s->ptr.read();
     if (x == nullptr) return {};
-#else 
-    node* x = s->ptr.read();
-    if (x == nullptr) return {};
-#endif
     if (x->entries[0].key == k)
       return x->entries[0].value;
     int i = x->find(k);

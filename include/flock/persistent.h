@@ -1,6 +1,8 @@
 #pragma once
 #ifdef NoHelp
 #include "no_tagged.h"
+template <typename T>
+using tagged = no_tagged<T>;
 #else
 #include "lf_log.h"
 #endif
@@ -76,7 +78,7 @@ private:
     if (is_indirect(ptr)) {
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
-      if (stamp <= done_stamp) {
+      if (stamp <= done_stamp) { // - 1000000000) {
 	      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
         if (TV::cas_with_same_tag(v, ptr, newv, true)) // there can't be an ABA unless indirect node is reclaimed
 	         link_pool.retire(ptr_notag);
@@ -93,7 +95,9 @@ public:
   void init(V* vv) {v = TV::init(vv);}
   V* load() {
     if (local_stamp != -1) return read();
-    else return get_ptr(get_val());}
+    // Guy : added set_stamp below.  Isn't it needed?
+    // Also I tried using shortcut_indirect but it does causes a seg fault
+    else return get_ptr(set_stamp(get_val()));}
 
   // reads snapshotted version
   V* read() {
@@ -109,11 +113,12 @@ public:
 
   V* read_fix() {
     IT ptr = v.load();
-    set_stamp(ptr);     // ensure time stamp is set
-    return shortcut_indirect(ptr);
+    // Guy: removed set_stamp (changed TBD to = max_long so OK?)
+    //set_stamp(ptr);     // ensure time stamp is set
+    return shortcut_indirect(v.load());
   }
 
-  V* read_() { return get_ptr(v.load());}
+  V* read_() { return get_ptr(set_stamp(v.load()));}
 
   void validate() {
     set_stamp(v.load());     // ensure time stamp is set

@@ -1,5 +1,6 @@
 #pragma once
-
+#include <limits>
+#include <atomic>
 // code for timestamps for snapshots
 
 void inc_backoff(int &bk, int max) {if (bk < max) bk = round(1.1*bk);}
@@ -122,8 +123,8 @@ struct timestamp_read_write {
 };
 
 timestamp_simple global_stamp;
+const TS tbd = std::numeric_limits<TS>::max();
 thread_local TS local_stamp{-1};
-const TS tbd = -1;
 
 // this is updated by the epoch-based reclamation
 // Whenever an epoch is incremented this is set to the stamp

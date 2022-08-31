@@ -4,7 +4,7 @@
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(32) node {
+  struct alignas(32) node : ll_head {
     K key;
     V value;
     ptr_type<node> next;

@@ -4,7 +4,7 @@
 
 // A dummy wrapper if no tagging is needed
 template <typename V>
-struct tagged {
+struct no_tagged {
   using IT = size_t;
   static inline IT init(V v) {return  (IT) v;}
   static inline V value(IT v) {return (V) v;}
