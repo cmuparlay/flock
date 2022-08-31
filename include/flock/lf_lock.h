@@ -10,6 +10,7 @@
 #include <atomic>
 #include <functional>
 #include "lf_log.h"
+#include "tagged.h"
 #include "lf_types.h"
 
 // used for reentrant locks

@@ -159,6 +159,4 @@ static V read_only(Thunk f) {
   V r = with_log(Log(), [&] {return f();});
   return lg.commit_value_safe(r).first;
 }
-
-#include "tagged.h"
   

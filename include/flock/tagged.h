@@ -48,6 +48,7 @@ write_annoucements announce_write = {};
 // A wrapper to tag a value (either a pointer or a value with up to 48 bits).
 template <typename V>
 struct tagged {
+private:
   using IT = size_t;
   static constexpr int tag_bits = 16; // number of bits to use for tag (including panic bit)
   static constexpr IT top_bit = (1ul << 63);
@@ -55,9 +56,6 @@ struct tagged {
   static constexpr IT panic_bit = (1ul << (64-tag_bits));
   static constexpr IT data_mask = panic_bit - 1;
   static constexpr IT cnt_mask = ~data_mask;
-  static inline IT init(V v) {return cnt_bit | (IT) v;}
-  static inline V value(IT v) {return (V) (v & data_mask);}
-  static inline IT get_tag(IT v) {return v & cnt_mask;}
   static inline IT add_tag(IT oldv, IT newv) {
     return newv | (oldv & cnt_mask);
   }
@@ -104,6 +102,26 @@ struct tagged {
     return ((new_count == 0) ? cnt_bit : new_count); // avoid using 0
   }
 
+  // requires newV is already tagged
+  static bool cas_tagged_(std::atomic<IT> &loc, IT oldv, IT newv, bool aba_free=false) {
+    if (lg.is_empty() || aba_free) {
+      return loc.compare_exchange_strong(oldv, newv);
+    } else {
+      bool r = false;
+      // announce the location and tag been written
+      announce_write.set(add_tag(oldv, (IT) &loc));
+      skip_if_done([&] { // skip both for correctness, and efficiency
+		     r = loc.compare_exchange_strong(oldv, newv);});
+      // unannounce the location
+      announce_write.clear();
+      return r;
+    }
+  }
+public:
+  static inline IT init(V v) {return cnt_bit | (IT) v;}
+  static inline V value(IT v) {return (V) (v & data_mask);}
+  static inline IT get_tag(IT v) {return v & cnt_mask;}
+
   // a safe cas that assigns the new value a tag that no concurrent cas
   // on the same location has in its old value
   static bool cas(std::atomic<IT> &loc, IT oldv, V v, bool aba_free=false) {
@@ -116,22 +134,6 @@ struct tagged {
   static bool cas_with_same_tag(std::atomic<IT> &loc, IT oldv, V v, bool aba_free=false) {
     IT newv = add_tag(oldv, (IT) v);
     return cas_tagged_(loc, oldv, newv, aba_free);
-  }
-
-  // requires newV is already tagged
-  static bool cas_tagged_(std::atomic<IT> &loc, IT oldv, IT newv, bool aba_free=false) {
-    if (lg.is_empty() || aba_free) {
-      return loc.compare_exchange_strong(oldv, newv);
-    } else {
-      bool r = false;
-      // announce the location and tag been written
-      announce_write.set(add_tag(oldv, (IT) &loc));
-      skip_if_done([&] { // skip both for correctness, and efficiency
-        r = loc.compare_exchange_strong(oldv, newv);});
-      // unannounce the location
-      announce_write.clear();
-      return r;
-    }
   }
 
 };
