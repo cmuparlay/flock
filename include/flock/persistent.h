@@ -12,8 +12,8 @@ using tagged = no_tagged<T>;
 using IT = size_t;
 struct persistent {
   std::atomic<TS> time_stamp;
-  IT next_version;
-  persistent() : time_stamp(-1), next_version(bad_ptr) {}
+  std::atomic<IT> next_version;
+  persistent() : time_stamp(tbd), next_version(bad_ptr) {}
 };
 
 struct plink : persistent {
@@ -112,7 +112,6 @@ public:
   }
 
   V* read_fix() {
-    IT ptr = v.load();
     // Guy: removed set_stamp (changed TBD to = max_long so OK?)
     //set_stamp(ptr);     // ensure time stamp is set
     return shortcut_indirect(v.load());
@@ -135,6 +134,7 @@ public:
       tmp->value = 0;
       newv = (V*) tmp;
       newv_marked = add_null_mark(newv);
+      newv->next_version = (IT) oldv_tagged;
     } else {
       // if newv has already been recoreded, we need to create a link for it
       // loading timestamp needs to be idempotent
@@ -143,15 +143,22 @@ public:
 #else
       TS ts = lg.commit_value(newv->time_stamp.load()).first;
 #endif
-      if (ts != -1) {
+      if (ts != tbd) {
       	plink* tmp = link_pool.new_obj();
       	tmp->value = (IT) newv;
       	newv = (V*) tmp;
       	newv_marked = add_indirect_mark(newv);
+        newv->next_version = (IT) oldv_tagged;
+      } else {
+        // TS initial_ts = -1;
+        // if(newv->time_stamp.load() == initial_ts)
+        //   newv->time_stamp.compare_exchange_strong(initial_ts, tbd);
+        IT initial_ptr = bad_ptr;
+        if(newv->next_version == initial_ptr)
+          newv->next_version.compare_exchange_strong(initial_ptr, (IT) oldv_tagged);
       }
     }
-    newv->time_stamp = tbd;
-    newv->next_version = (IT) oldv_tagged;
+    
 
     // swap in new pointer but marked as "unset" since time stamp is tbd
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
@@ -176,7 +183,7 @@ public:
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer
     if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
-     newv->next_version = oldv->next_version;
+     newv->next_version.store(oldv->next_version);
   }
   V* operator=(V* b) {store(b); return b; }
 };
