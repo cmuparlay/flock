@@ -14,13 +14,15 @@ hostname = socket.gethostname()
 print(hostname)
 print(today)
 filename = "../../timings/" + hostname + "_" + today
-os.remove(filename)
+if os.path.exists(filename) :
+    os.remove(filename)
 
 lists = ["list", "dlist"]
 lists_snap = ["list_onelock"]
 lists_other = ["harris_list", "harris_list_opt"]
 trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
 list_sizes = [10,100,1000]
+update_percents = [20]
 tree_sizes = [1000,100000,10000000,100000000]
 zipfians = [0, .99]
 
@@ -69,18 +71,21 @@ def runstring(op) :
         if (os.WEXITSTATUS(x) == 0) : raise NameError("  aborted: " + op)
         os.system("echo Failed")
     
-def runtest(test,procs,n,z,extra) :
+def runtest(test,procs,n,z,u) :
     num_threads = maxcpus-1
     r = rounds
-    strzip = "-z " + str(z) + " "
+    str_update = "-u " + str(u) + " "
+    str_zipfians = "-z " + str(z) + " "
+    str_rounds = "-r " + str(r) + " "
+    str_n = "-n " + str(n) + " "
     if (test_only) :
         r = 1
-    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " -r " + str(r) + " " + extra + strzip + "-n " + str(n))
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + str_rounds + str_n + str_update + str_zipfians)
 
 def runtests(test,procs,n,z) :
     runtest(test,procs,n,z,"")
 
-def run_sizes_and_zipfians(tests,suffixes,sizes) :
+def run_tests(tests,suffixes,sizes) :
     zipf = zipfians
     if (test_only) :
         sizes = sizes[0:1]
@@ -88,8 +93,9 @@ def run_sizes_and_zipfians(tests,suffixes,sizes) :
     for test in tests :
         for n in sizes :
             for z in zipf :
-                for suffix in suffixes:
-                    runtests(test + suffix, maxcpus, n, z)
+                for u in update_percents :
+                    for suffix in suffixes:
+                        runtest(test + suffix, maxcpus, n, z, u)
 
 try :
     processors = getProcessors()
@@ -97,10 +103,10 @@ try :
     suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_per_lock_hl","_per_hl"]
     suffixes_snap = ["_lock","","_per_lock","_per"]
     suffixes_other = [""]
-    run_sizes_and_zipfians(lists,suffixes_all,list_sizes)
-    run_sizes_and_zipfians(lists_snap,suffixes_snap,list_sizes)
-    run_sizes_and_zipfians(lists_other,suffixes_other,list_sizes)
-    run_sizes_and_zipfians(trees,suffixes_all,tree_sizes)
+    run_tests(lists,suffixes_all,list_sizes)
+    run_tests(lists_snap,suffixes_snap,list_sizes)
+    run_tests(lists_other,suffixes_other,list_sizes)
+    run_tests(trees,suffixes_all,tree_sizes)
             
 except NameError,v :
   x, = v

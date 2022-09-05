@@ -7,8 +7,13 @@
 // PPoPP 2021
 
 #pragma once
-#include "lf_log.h"
 #include "timestamps.h"
+#ifdef NoHelp
+template <typename F>
+bool skip_if_done(F f) {f(); return true;}
+#else
+#include "lf_log.h"
+#endif
 
 #define bad_ptr ((void*) ((1ul << 48) -1))
 struct persistent {
@@ -31,8 +36,12 @@ struct persistent_ptr {
     return x;
   }
 
-  V* get_val(Log &p) {
-    return set_stamp(p.commit_value_safe(v.load()).first);
+  V* get_val() {
+#ifdef NoHelp
+    return set_stamp(v.load());
+#else
+    return set_stamp(lg.commit_value_safe(v.load()).first);
+#endif
   }
 
 public:
@@ -42,7 +51,7 @@ public:
   void init(V* vv) {v = vv;}
   V* load() {
     if (local_stamp != -1) return read();
-    else return get_val(lg);}
+    else return get_val();}
 
   // reads snapshotted version
   V* read() {
@@ -60,7 +69,7 @@ public:
   void validate() { set_stamp(v.load());}
   
   void store(V* newv) {
-    V* oldv = get_val(lg);
+    V* oldv = get_val();
     skip_if_done([&] { // for efficiency, correct without it
       newv->time_stamp = tbd;
       newv->next = (void*) oldv;

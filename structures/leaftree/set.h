@@ -34,31 +34,29 @@ struct Set {
   size_t max_iters = 10000000;
   
   auto find_location(node* root, K k) {
-    int cnt = 0;
     node* gp = nullptr;
     bool gp_left = false;
     node* p = root;
     bool p_left = true;
-    node* l = (p->left).load();
+    node* l = (p->left).read();
     while (!l->is_leaf) {
-      // if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       gp = p;
       gp_left = p_left;
       p = l;
       p_left = (k < p->key);
-      l = p_left ? (p->left).load() : (p->right).load();
+      l = p_left ? (p->left).read() : (p->right).read();
     }
     return std::make_tuple(gp, gp_left, p, p_left, l);
   }
   
   bool insert(node* root, K k, V v, bool upsert=false) {
     return with_epoch([=] {
-      int cnt = 0;
       node* prev_leaf = nullptr;
       while (true) {
 	auto [gp, gp_left, p, p_left, l] = find_location(root, k);
 	if ((!upsert && l->key == k) ||
-	    (upsert && prev_leaf != nullptr && prev_leaf->key == k && l != prev_leaf))
+	    (upsert && prev_leaf != nullptr && prev_leaf->key == k &&
+	     l != prev_leaf))
 	  return false;
 	prev_leaf = l;
 	auto r = p->try_lock([=] {
@@ -72,13 +70,11 @@ struct Set {
 			   node_pool.new_obj(l->key, new_l, l));
 	      return true;});
 	if (r) return (k != l->key);
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       }});
   }
 
   bool remove(node* root, K k) {
     return with_epoch([=] {
-       int cnt = 0;
        node* prev_leaf = nullptr;
        while (true) {
 	 auto [gp, gp_left, p, p_left, l] = find_location(root, k);
@@ -99,15 +95,18 @@ struct Set {
 		   leaf_pool.retire((leaf*) l);
 		   return true; });}))
 	   return true;
-	 // if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
        }}); 
   }
 
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
-	node* l = (root->left).load();
-	while (!l->is_leaf)
-	  l = (k < l->key) ? (l->left).load() : (l->right).load();
+	auto ptr = &(root->left);
+	node* l = ptr->read();
+	while (!l->is_leaf) {
+	  auto ptr = (k < l->key) ? &(l->left) : &(l->right);
+	  l = ptr->read();
+	}
+	ptr->validate();
 	auto ll = (leaf*) l;
 	if (ll->key == k) return ll->value; 
 	else return {};

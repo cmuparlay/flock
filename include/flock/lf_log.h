@@ -152,6 +152,27 @@ bool skip_if_done(F f) {
   return false;
 }
 
+template <typename F>
+bool skip_if_done_(F f) {
+  if (lg.is_empty()) {f(); return true;}
+  log_entry* l = lg.next_entry(); // get the next log entry
+  void* v = l->load();
+  if (v == nullptr) { // check that not already completed
+    // run code
+    f();
+    // after running the code store the log location and log pointer
+    size_t x = (((size_t) lg.count) << 48) | ((size_t) lg.vals);
+    l->store((void*) x, std::memory_order::memory_order_release);
+    return true;
+  }
+  // If we skip the code retrieve log location and pointer, so we can
+  // "fast forward" to where would be in log if we ran the code.
+  size_t x = (size_t) v;
+  lg.count = (int) (x >> 48);
+  lg.vals = (log_array*) (x & ((1ul << 48) - 1));
+  return false;
+}
+
 // runs read only code without the log, and commits the result to the log
 template <typename V, typename Thunk>
 static V read_only(Thunk f) {

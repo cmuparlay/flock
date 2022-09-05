@@ -28,10 +28,10 @@ struct Set {
 
   auto find_in_slot(slot* s, K k) {
     ptr_type<node>* cur = &s->head;
-    node* nxt = cur->load();
+    node* nxt = cur->read();
     while (nxt != nullptr && nxt->key != k) {
       cur = &(nxt->next);
-      nxt = cur->load();
+      nxt = cur->read();
     }
     return std::make_pair(cur,nxt);
   }
@@ -41,6 +41,7 @@ struct Set {
     __builtin_prefetch (s);
     return with_epoch([&] () -> std::optional<V> {
 	auto [cur, nxt] = find_in_slot(s, k);
+	cur->validate();
 	if (nxt != nullptr) return nxt->value;
 	else return {};
       });
@@ -52,10 +53,10 @@ struct Set {
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt != nullptr) return false;
       if (s->try_lock([=] {
-			    if (s->version_num.load() != vn) return false;
-			    *cur = node_pool.new_obj(k, v, nullptr);
-			    s->version_num = vn+1;
-			    return true;}))
+	    if (s->version_num.load() != vn) return false;
+	    *cur = node_pool.new_obj(k, v, nullptr);
+	    s->version_num = vn+1;
+	    return true;}))
 	return true;
     }
 
@@ -72,11 +73,11 @@ struct Set {
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt == nullptr) return false;
       if (s->try_lock([=] {
-			if (s->version_num.load() != vn) return false;
-			*cur = nxt->next.load();
-			node_pool.retire(nxt);
-			    s->version_num = vn+1;
-			    return true;}))
+	    if (s->version_num.load() != vn) return false;
+	    *cur = nxt->next.load();
+	    node_pool.retire(nxt);
+	    s->version_num = vn+1;
+	    return true;}))
 	return true;
     }
   }

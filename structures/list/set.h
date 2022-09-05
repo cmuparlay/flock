@@ -22,11 +22,9 @@ struct Set {
 
   auto find_location(node* root, K k) {
     node* cur = root;
-    node* nxt = (cur->next).read_();
-    //node* nxt = (cur->next).read_fix();
+    node* nxt = (cur->next).read();
     while (true) {
-      //node* nxt_nxt = (nxt->next).read_fix(); // prefetch
-      node* nxt_nxt = (nxt->next).read_(); // prefetch
+      node* nxt_nxt = (nxt->next).read(); // prefetch
       if (nxt->key >= k) break;
       cur = nxt;
       nxt = nxt_nxt;
@@ -71,6 +69,7 @@ struct Set {
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
 	auto [cur, nxt] = find_location(root, k);
+	(cur->next).validate();
 	if (nxt->key == k) return nxt->value; 
 	else return {};
       });

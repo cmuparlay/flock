@@ -225,9 +225,8 @@ struct Set {
       node_ptr* cptr = get_child(p, k);
       if (cptr == nullptr) // has no child with given key
 	return std::make_tuple(gp, p, cptr, (node*) nullptr, byte_pos);
-      node* c = cptr->read_();
-      //node* c = cptr->load();
-      //node* c = cptr->read_fix();
+      // could be read()
+      node* c = cptr->load();
       if (c == nullptr) // has empty child with given key
 	return std::make_tuple(gp, p, cptr, c, byte_pos);
       byte_pos++;

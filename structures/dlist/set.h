@@ -23,7 +23,7 @@ struct Set {
   size_t max_iters = 10000000;
   
   auto find_location(node* root, K k) {
-    node* nxt = (root->next).load();
+    node* nxt = (root->next).read();
     while (true) {
       node* nxt_nxt = (nxt->next).read(); // prefetch
       if (nxt->key >= k) break;
@@ -34,7 +34,6 @@ struct Set {
 
   bool insert(node* root, K k, V v) {
     return with_epoch([&] {
-      int cnt = 0;		 
       while (true) {
 	node* next = find_location(root, k);
 	if (next->key == k) return false;
@@ -48,21 +47,19 @@ struct Set {
 		  return true;
 		} else return false;}))
 	  return true;
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
-	// try again if unsuccessful
       }
     });
   }
 
   bool remove(node* root, K k) {
     return with_epoch([&] {
-      int cnt = 0;		 
       while (true) {
 	node* loc = find_location(root, k);
 	if (loc->key != k) return false;
 	node* prev = (loc->prev).load();
 	if (prev->try_lock([=] {
-	      if (prev->removed.load() || (prev->next).load() != loc) return false;
+	      if (prev->removed.load() || (prev->next).load() != loc)
+		return false;
 	      return loc->try_lock([=] {
 		  node* next = (loc->next).load();
 		  loc->removed = true;
@@ -73,8 +70,6 @@ struct Set {
 		});})) {
 	  return true;
 	}
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
-	// try again if unsuccessful
       }
     });
   }

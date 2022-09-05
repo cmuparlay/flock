@@ -65,7 +65,7 @@ struct Set {
     bool gp_left = false;
     node* p = root;
     bool p_left = true;
-    node* l = (p->left).load();
+    node* l = (p->left).read();
     while (!l->is_leaf) {
       gp = p;
       gp_left = p_left;
@@ -199,6 +199,7 @@ struct Set {
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
       auto [gp, gp_left, p, p_left, l] = find_location(root, k);
+      ((p_left) ? &(p->left) : &(p->right))->validate();
       leaf* ll = (leaf*) l;
       for (int i=0; i < ll->size; i++) 
 	if (ll->keyvals[i].key == k) return ll->keyvals[i].value;

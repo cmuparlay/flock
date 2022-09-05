@@ -3,6 +3,8 @@
 #include "no_tagged.h"
 template <typename T>
 using tagged = no_tagged<T>;
+template <typename F>
+bool skip_if_done_(F f) {f(); return true;}
 #else
 #include "lf_log.h"
 #endif
@@ -78,7 +80,7 @@ private:
     if (is_indirect(ptr)) {
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
-      if (stamp <= done_stamp) { // - 1000000000) {
+      if (stamp <= done_stamp) { 
 	      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
         if (TV::cas_with_same_tag(v, ptr, newv, true)) // there can't be an ABA unless indirect node is reclaimed
 	         link_pool.retire(ptr_notag);
@@ -93,31 +95,28 @@ public:
   persistent_ptr(V* v) : v(TV::init(v)) {}
   persistent_ptr(): v(TV::init(0)) {}
   void init(V* vv) {v = TV::init(vv);}
-  V* load() {
-    if (local_stamp != -1) return read();
-    // Guy : added set_stamp below.  Isn't it needed?
-    // Also I tried using shortcut_indirect but it does causes a seg fault
-    else return get_ptr(set_stamp(get_val()));}
-
   // reads snapshotted version
-  V* read() {
-    IT head = v.load();
-    set_stamp(head);     // ensure time stamp is set
+  V* read_snapshot() {
     TS ls = local_stamp;
-    if (ls != -1) 
-      // chase down version chain
-      while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls)
-    	head = (IT) strip_mark_and_tag(head)->next_version;
+    IT head = v.load();
+    set_stamp(head);
+    // chase down version chain
+    while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls)
+      head = (IT) strip_mark_and_tag(head)->next_version;
     return get_ptr(head);
   }
 
-  V* read_fix() {
-    // Guy: removed set_stamp (changed TBD to = max_long so OK?)
-    //set_stamp(ptr);     // ensure time stamp is set
-    return shortcut_indirect(v.load());
-  }
+  V* load() {
+    if (local_stamp != -1) return read_snapshot();
+    // Guy : added set_stamp below.  Isn't it needed?
+    // Also I tried using shortcut_indirect but it causes a seg fault
+    else return get_ptr(set_stamp(get_val()));}
 
-  V* read_() { return get_ptr(set_stamp(v.load()));}
+  V* read() {
+    // should be shortcut_indirect
+    if (local_stamp != -1) read_snapshot();
+    return get_ptr(v.load());
+  }
 
   void validate() {
     set_stamp(v.load());     // ensure time stamp is set
@@ -128,6 +127,7 @@ public:
     IT oldv_tagged = get_val();
     V* oldv = strip_mark_and_tag(oldv_tagged);
 
+    skip_if_done_([&] {
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
       plink* tmp = link_pool.new_obj();
@@ -153,13 +153,15 @@ public:
         // TS initial_ts = -1;
         // if(newv->time_stamp.load() == initial_ts)
         //   newv->time_stamp.compare_exchange_strong(initial_ts, tbd);
+#ifdef NoHelp
+	newv->next_version = (IT) oldv_tagged;
+#else	
         IT initial_ptr = bad_ptr;
         if(newv->next_version == initial_ptr)
           newv->next_version.compare_exchange_strong(initial_ptr, (IT) oldv_tagged);
+#endif
       }
     }
-    
-
     // swap in new pointer but marked as "unset" since time stamp is tbd
     bool succeeded = TV::cas(v, oldv_tagged, add_unset(newv_marked));
     IT x = get_val(); // could be avoided if TV::cas returned the tagged version of new
@@ -184,6 +186,7 @@ public:
     // todo: might need to retire if an indirect pointer
     if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
      newv->next_version.store(oldv->next_version);
+		 });
   }
   V* operator=(V* b) {store(b); return b; }
 };
