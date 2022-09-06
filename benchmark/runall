@@ -76,7 +76,7 @@ def runtest(test,procs,n,z,u) :
     r = rounds
     str_update = "-u " + str(u) + " "
     str_zipfians = "-z " + str(z) + " "
-    str_rounds = "-r " + str(r) + " "
+    str_rounds = " -r " + str(r) + " "
     str_n = "-n " + str(n) + " "
     if (test_only) :
         r = 1

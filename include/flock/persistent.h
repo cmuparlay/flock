@@ -39,6 +39,7 @@ private:
   static V* add_null_mark(V* ptr) {return (V*) (3ul | (IT) ptr);};
   static V* add_indirect_mark(V* ptr) {return (V*) (2ul | (IT) ptr);};
   static V* add_unset(V* ptr) {return (V*) (4ul | (IT) ptr);};
+  static V* remove_unset(V* ptr) {return (V*) (~4ul & (IT) ptr);};
   static bool is_empty(IT ptr) {return ptr & 1;}
   static bool is_indirect(IT ptr) {return (ptr >> 1) & 1;}
   static bool is_unset(IT ptr) {return (ptr >> 2) & 1;}
@@ -81,10 +82,11 @@ private:
       auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
       if (stamp <= done_stamp) { 
-	      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
-        if (TV::cas_with_same_tag(v, ptr, newv, true)) // there can't be an ABA unless indirect node is reclaimed
-	         link_pool.retire(ptr_notag);
-	      return newv;
+	V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
+	// there can't be an ABA unless indirect node is reclaimed
+        if (TV::cas_with_same_tag(v, ptr, newv, true)) 
+	  link_pool.retire(ptr_notag);
+	return newv;
       }
     }
     return get_ptr(ptr);
@@ -108,12 +110,9 @@ public:
 
   V* load() {
     if (local_stamp != -1) return read_snapshot();
-    // Guy : added set_stamp below.  Isn't it needed?
-    // Also I tried using shortcut_indirect but it causes a seg fault
     else return shortcut_indirect(set_stamp(get_val()));}
 
   V* read() {
-    // should be shortcut_indirect
     if (local_stamp != -1) read_snapshot();
     return shortcut_indirect(v.load());
   }
@@ -126,11 +125,13 @@ public:
     V* newv_marked = newv;
     IT oldv_tagged = get_val();
     V* oldv = strip_mark_and_tag(oldv_tagged);
+    bool indirect_node_allocated = false;
 
     skip_if_done_([&] {
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
       plink* tmp = link_pool.new_obj();
+      indirect_node_allocated = true;
       tmp->value = 0;
       newv = (V*) tmp;
       newv_marked = add_null_mark(newv);
@@ -145,6 +146,7 @@ public:
 #endif
       if (ts != tbd) {
       	plink* tmp = link_pool.new_obj();
+        indirect_node_allocated = true;
       	tmp->value = (IT) newv;
       	newv = (V*) tmp;
       	newv_marked = add_indirect_mark(newv);
@@ -172,11 +174,17 @@ public:
       x = get_val(); // could be avoided if TV::cas returned the tagged version of new
     }
 
+    V* writtenv = strip_mark_and_tag(x);
+
     // now set the stamp from tbd to a real stamp
-    set_stamp((IT) newv);
+    set_stamp((IT) writtenv);
 
     // and clear the "unset" mark
-    TV::cas(v, x, newv_marked);
+    TV::cas(v, x, remove_unset(TV::value(x)));
+
+    if(writtenv != newv) { // an indirect node must have been allocated
+      link_pool.retire((plink*) newv); // could also just be free
+    }
 
     // retire an indirect point if swapped out
     if (succeeded && is_indirect(oldv_tagged))
@@ -184,8 +192,8 @@ public:
     
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer
-    if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
-     newv->next_version.store(oldv->next_version);
+    if (oldv != nullptr && writtenv->time_stamp == oldv->time_stamp)
+     writtenv->next_version.store(oldv->next_version);
 		 });
   }
   V* operator=(V* b) {store(b); return b; }
