@@ -106,13 +106,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     os.retire(tr);
     
   } else {  // main test
-    using key_type = unsigned int;
+    using key_type = unsigned long;
 
     // generate 2*n unique numbers in random order
     parlay::sequence<key_type> a;
     if (use_sparse) {
       auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
-			   return (key_type) parlay::hash64(i);});
+			 return (key_type) parlay::hash64(i);}); 
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
@@ -279,7 +279,10 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	    std::cout << "incorrect size after insert: inserted="
 		      << len << " succeeded=" << total << " found=" << lenc
 		      << std::endl;
-	    abort();
+	    //os.print(tr);
+	    auto x = parlay::sort(parlay::remove_duplicates(b));
+	    //for (auto y : x)
+	    //  std::cout << y << std::endl;
 	  }
 	}
         if (stats) {

@@ -42,9 +42,9 @@ struct Set {
       auto b = get_byte(k, header::byte_num);
       return &children[b];}
 
-    void init_child(int k, node* v) {
+    void init_child(int k, node* c) {
       auto b = get_byte(k, header::byte_num);
-      children[b].init(v);
+      children[b].init(c);
     }
 
     // an empty "full" node
@@ -78,10 +78,10 @@ struct Set {
       num_used = i+1;
     }
 
-    void init_child(K k, node* v) {
+    void init_child(K k, node* c) {
       int i = num_used.load()-1;
       idx[get_byte(k, header::byte_num)] = i;
-      ptr[i].init(v);
+      ptr[i].init(c);
     }
 
     // an empty indirect node
@@ -109,10 +109,10 @@ struct Set {
       return nullptr;
     }
 
-    void init_child(K k, node* v) {
+    void init_child(K k, node* c) {
       int kb = get_byte(k, header::byte_num);
       keys[num_used-1] = kb;
-      ptr[num_used-1].init(v);
+      ptr[num_used-1].init(c);
     }
 
     // constructor for a new sparse node with two children
@@ -167,7 +167,7 @@ struct Set {
   // If p is copied, then gp is updated to point to the new one
   // This should never be called on a full node.
   // Returns false if it fails.
-  bool add_child(node* gp, node* p, K k, V v) {
+  bool add_child(node* root, node* gp, node* p, K k, V v) {
     if (p->nt == Indirect && !is_full(p)) {
       // If non-full indirect node try to add a child pointer
       return p->try_lock([=] {
@@ -180,8 +180,8 @@ struct Set {
     } else {
       // otherwise we need to create a new node
       return gp->try_lock([=] {
-	  auto x = get_child(gp, p->key);
-	  if (gp->removed.load() || x->load() != p)
+	  auto child_ptr = get_child(gp, p->key);
+	  if (gp->removed.load() || child_ptr->load() != p)
 	    return false;
 	  return p->try_lock([=] {
               if (get_child(p,k) != nullptr) return false;
@@ -191,14 +191,22 @@ struct Set {
 		i_n->removed = true; 
 
 		// copy indirect to full
-		*x = (node*) full_pool.new_init([=] (full_node* f_n) {
+		*child_ptr = (node*) full_pool.new_init([=] (full_node* f_n) {
  		  f_n->key = i_n->key;
 		  f_n->byte_num = i_n->byte_num;
+		  int kk = 0;
 		  for (int i=0; i < 256; i++) {
 		    int j = i_n->idx[i].load();
-		    if (j != -1) f_n->children[i].init(i_n->ptr[j].load());
+		    if (j != -1) {
+		      kk++;
+		      f_n->children[i].init(i_n->ptr[j].load());
+		    }
 		  }
-		  f_n->init_child(k, c);
+
+		  // broken g++ compiler makes the following fail
+		  //f_n->init_child(k, c);
+		  auto b = get_byte(k, f_n->byte_num);
+		  f_n->children[b].init(c);
 		});
 		indirect_pool.retire(i_n);
 	      } else { // (p->nt == Sparse)
@@ -207,7 +215,7 @@ struct Set {
 		if (is_full(p)) {
 
 		  // copy sparse to indirect
-		  *x = (node*) indirect_pool.new_init([=] (indirect_node* i_n) {
+		  *child_ptr = (node*) indirect_pool.new_init([=] (indirect_node* i_n) {
   		    i_n->key = s_n->key;
 		    i_n->byte_num = s_n->byte_num;
 		    i_n->num_used.init(16 + 1);
@@ -220,7 +228,7 @@ struct Set {
 		} else {
 
 		  // copy sparse to sparse
-		  *x = (node*) sparse_pool.new_init([=] (sparse_node* s_c) {
+		  *child_ptr = (node*) sparse_pool.new_init([=] (sparse_node* s_c) {
   		    s_c->key = s_n->key;
 		    s_c->byte_num = s_n->byte_num;
 		    s_c->num_used = s_n->num_used + 1;
@@ -288,8 +296,9 @@ struct Set {
 		}
 		return true;
 	      })) return true;
-	} else // no child pointer, need to add
-	  if (add_child(gp, p, k, v)) return true;
+	} else { // no child pointer, need to add
+	  if (add_child(root, gp, p, k, v)) return true;
+	}
       } // end while
       return true; // should never get here
     });
