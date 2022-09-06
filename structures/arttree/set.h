@@ -167,7 +167,7 @@ struct Set {
   // If p is copied, then gp is updated to point to the new one
   // This should never be called on a full node.
   // Returns false if it fails.
-  bool add_child(node* root, node* gp, node* p, K k, V v) {
+  bool add_child(node* gp, node* p, K k, V v) {
     if (p->nt == Indirect && !is_full(p)) {
       // If non-full indirect node try to add a child pointer
       return p->try_lock([=] {
@@ -194,17 +194,14 @@ struct Set {
 		*child_ptr = (node*) full_pool.new_init([=] (full_node* f_n) {
  		  f_n->key = i_n->key;
 		  f_n->byte_num = i_n->byte_num;
-		  int kk = 0;
 		  for (int i=0; i < 256; i++) {
 		    int j = i_n->idx[i].load();
-		    if (j != -1) {
-		      kk++;
-		      f_n->children[i].init(i_n->ptr[j].load());
-		    }
+		    if (j != -1) f_n->children[i].init(i_n->ptr[j].load());
 		  }
 
-		  // broken g++ compiler makes the following fail
-		  //f_n->init_child(k, c);
+		  // seemingly broken g++ (10.3) compiler makes the following fail
+		  //   f_n->init_child(k, c);
+		  // inlining by hand fixes it.
 		  auto b = get_byte(k, f_n->byte_num);
 		  f_n->children[b].init(c);
 		});
@@ -297,7 +294,7 @@ struct Set {
 		return true;
 	      })) return true;
 	} else { // no child pointer, need to add
-	  if (add_child(root, gp, p, k, v)) return true;
+	  if (add_child(gp, p, k, v)) return true;
 	}
       } // end while
       return true; // should never get here
