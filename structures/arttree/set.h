@@ -9,6 +9,7 @@ struct Set {
 
   enum node_type : char {Full, Indirect, Sparse, Leaf};
 
+  // extracts byte from key at position pos
   // assumes little endian, and currently specific to integer types
   // need to generalize to character or byte strings
   static int get_byte(K key, int pos) {
@@ -19,7 +20,9 @@ struct Set {
     K key;
     node_type nt;
     write_once<bool> removed;
-    short int byte_num; // every node has a byte position in the key
+    // every node has a byte position in the key
+    // e.g. the root has byte_num = 0
+    short int byte_num; 
     header(node_type nt) : nt(nt), removed(false) {}
     header(K key, node_type nt, int byte_num)
       : key(key), nt(nt), removed(false), byte_num((short int) byte_num) {}
@@ -44,14 +47,19 @@ struct Set {
       children[b].init(v);
     }
 
-    full_node() : header(Full), children{nullptr} {}
+    // an empty "full" node
+    full_node() : header(Full) {
+      for (int i=0; i < 256; i++) children[i].init(nullptr);
+    }
   };
 
-  // up to 64 entries, with array of 256 1-byte pointers
-  // to the 64 entries.  Entries can only be added, but on deletion
-  // the entry pointer can be made null, and later refilled.
+  // up to 64 entries, with array of 256 1-byte pointers to the 64
+  // entries.  A new slot can only be added, but when the key is
+  // deleted its entry in the 64-pointer array is made null and
+  // can be refilled.  Once all 64 slots are used a new node
+  // has to be allocated.
   struct indirect_node : header, lock_type {
-    mutable_val<int> num_used; // could be aba_free
+    mutable_val<int> num_used; // could be aba_free since only increases
     write_once<char> idx[256];  // -1 means empty
     node_ptr ptr[64];
 
@@ -62,14 +70,12 @@ struct Set {
       if (i == -1) return nullptr;
       else return &ptr[i];}
 
-    bool add_child(K k, node* v) {
+    // Requires that node is not full (i.e. num_used < 64)
+    void add_child(K k, node* v) {
       int i = num_used.load();
-      if (i<64) {
-	idx[get_byte(k, header::byte_num)] = i;
-	ptr[i] = v;
-	num_used = i+1;
-	return true;
-      } return false; //overflow
+      idx[get_byte(k, header::byte_num)] = i;
+      ptr[i] = v;
+      num_used = i+1;
     }
 
     void init_child(K k, node* v) {
@@ -78,14 +84,16 @@ struct Set {
       ptr[i].init(v);
     }
 
-    indirect_node() : header(Indirect) {
+    // an empty indirect node
+    indirect_node() : header(Indirect), num_used(0) {
       for (int i=0; i < 256; i++) idx[i].init(-1);
     };
   };
 
-  // up to 16 entries each consisting of a key and pointer
-  // adding a new child requires copying
-  // updating a child can be done in place
+  // Up to 16 entries each consisting of a key and pointer.  The keys
+  // are immutable, but the pointers can be changed.  i.e. Adding a
+  // new child requires copying, but updating a child can be done in
+  // place.
   struct alignas(64) sparse_node : header, lock_type {
     int num_used; 
     unsigned char keys[16];
@@ -106,14 +114,18 @@ struct Set {
       keys[num_used-1] = kb;
       ptr[num_used-1].init(v);
     }
-    
+
+    // constructor for a new sparse node with two children
     sparse_node(int byte_num, node* v1, K k1, node* v2, K k2)
       : header(k1, Sparse, byte_num), num_used(2) {
-      keys[0] = get_byte(k1, byte_num); ptr[0].init(v1);
-      keys[1] = get_byte(k2, byte_num); ptr[1].init(v2);
+      keys[0] = get_byte(k1, byte_num);
+      ptr[0].init(v1);
+      keys[1] = get_byte(k2, byte_num);
+      ptr[1].init(v2);
     }
 
-    sparse_node() : header(Sparse) {}
+    // an empty sparse node
+    sparse_node() : header(Sparse), num_used(0) {}
   };
 
   struct leaf : header {
@@ -126,6 +138,8 @@ struct Set {
   memory_pool<sparse_node> sparse_pool;
   memory_pool<leaf> leaf_pool;
 
+  // dispatch based on node type
+  // A returned nullptr means no child matching the key
   inline node_ptr* get_child(node* x, K k) {
     switch (x->nt) {
     case Full : return ((full_node*) x)->get_child(k);
@@ -135,37 +149,46 @@ struct Set {
     return nullptr;
   }
 
+  // dispatch based on node type
   inline bool is_full(node* p) {
     switch (p->nt) {
-    case Full : return ((full_node*) p)->is_full();
+    case Full : return ((full_node*) p)->is_full(); // never full
     case Indirect : return ((indirect_node*) p)->is_full();
     case Sparse : return ((sparse_node*) p)->is_full();
     }
     return false;
   }
 		 
-  // Adds a new child to p
-  // This might involve copying p either
-  //   because p is sparse (can only be copied) or because
+  // Adds a new child to p with key k and value v
+  // gp is p's parent (i.e. grandparent)
+  // This might involve copying p either because
+  //   p is sparse (can only be copied), or because
   //   p is indirect but full
-  // If p is copies, then gp is updated to point to it
+  // If p is copied, then gp is updated to point to the new one
+  // This should never be called on a full node.
+  // Returns false if it fails.
   bool add_child(node* gp, node* p, K k, V v) {
     if (p->nt == Indirect && !is_full(p)) {
+      // If non-full indirect node try to add a child pointer
       return p->try_lock([=] {
-	  if (p->removed.load()) return false;
+          if (p->removed.load() || is_full(p) ||
+	      get_child(p, k) != nullptr) return false;
 	  node* c = (node*) leaf_pool.new_obj(k, v);
-	  return ((indirect_node*) p)->add_child(k, c);
+	  ((indirect_node*) p)->add_child(k, c);
+	  return true;
 	});
     } else {
+      // otherwise we need to create a new node
       return gp->try_lock([=] {
 	  auto x = get_child(gp, p->key);
 	  if (gp->removed.load() || x->load() != p)
 	    return false;
 	  return p->try_lock([=] {
+              if (get_child(p,k) != nullptr) return false;
 	      node* c = (node*) leaf_pool.new_obj(k, v);
 	      if (p->nt == Indirect) {
 		indirect_node* i_n = (indirect_node*) p;
-		i_n->removed = true;
+		i_n->removed = true; 
 
 		// copy indirect to full
 		*x = (node*) full_pool.new_init([=] (full_node* f_n) {
@@ -246,7 +269,7 @@ struct Set {
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
 	  return false; // already in the tree
-	if (cptr != nullptr) { // child pointer exists
+	if (cptr != nullptr) { // child pointer exists (always true for full node)
 	    if (p->try_lock([=] {
 		// exit and retry if state has changed
 		if (p->removed.load() || cptr->load() != c) return false;
@@ -257,16 +280,18 @@ struct Set {
 		// fill a null pointer with the new leaf
 		if (c == nullptr) (*cptr) = new_l;
 
-		// split an existing leaf into a sparse node with two children
+		// split an existing leaf into a sparse node with two child
+		// leaf nodes (one of them the original leaf)
 		else {
-		  *cptr = (node*) sparse_pool.new_obj(byte_pos, c, c->key, new_l, k);
+		  *cptr = (node*) sparse_pool.new_obj(byte_pos, c, c->key,
+						      new_l, k);
 		}
 		return true;
 	      })) return true;
 	} else // no child pointer, need to add
 	  if (add_child(gp, p, k, v)) return true;
       } // end while
-      return true;
+      return true; // should never get here
     });
   }
 

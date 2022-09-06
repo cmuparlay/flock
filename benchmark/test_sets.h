@@ -29,8 +29,8 @@ void insert_balanced(SetType& os, Tree& tr, Range A) {
 
 template <typename SetType>
 void test_sets(SetType& os, size_t default_size, commandLine P) {
-    // int total_procs = parlay::num_workers(); // processes to init with
-  int p = P.getOptionIntValue("-p", parlay::num_workers());  // processes to run experiments with
+  // processes to run experiments with
+  int p = P.getOptionIntValue("-p", parlay::num_workers());  
 
   int rounds = P.getOptionIntValue("-r", 1);
 
@@ -47,6 +47,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // number of hash buckets for hash tables
   int buckets = P.getOptionIntValue("-bu", n);
 
+  // shuffles the memory pool to break sharing of cache lines
+  // by neighboring tree nodes
   bool shuffle = P.getOption("-shuffle");
 
   // verbose
@@ -55,29 +57,22 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // clear the memory pool between rounds
   bool clear = P.getOption("-clear");
 
+  // only relevant to strict locks (not try locks)
   wait_before_retrying_lock = P.getOption("-wait");
 
   // number of samples 
-  // added std::min(p, 150) because with p = 250, the samples array seems to overflow the stack
   long m = P.getOptionIntValue("-m", fixed_time ? 20000000 * std::min(p, 100) : n);
-  if(parlay::num_workers() == 40)
-    m = P.getOptionIntValue("-m", fixed_time ? 10000000/4 * std::min(p, 150) : n);
     
   // check consistency, on by default
   bool do_check = ! P.getOption("-no_check");
 
-  // use non-helping locks
-  bool use_locks = P.getOption("-no_help");
-  use_help = !use_locks;
-
-  // use try locks
+  // use try locks 
   try_only = !P.getOption("-strict_lock");
 
   // run a trivial test
   bool init_test = P.getOption("-i"); // run trivial test
 
   // use zipfian distribution
-
   double zipfian_param = P.getOptionDoubleValue("-z", 0.0);
   bool use_zipfian = (zipfian_param != 0.0);
   
@@ -111,19 +106,21 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     os.retire(tr);
     
   } else {  // main test
+    using key_type = unsigned int;
 
     // generate 2*n unique numbers in random order
-    parlay::sequence<unsigned int> a;
+    parlay::sequence<key_type> a;
     if (use_sparse) {
-      auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {return (unsigned int) parlay::hash64(i);});
+      auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
+			   return (key_type) parlay::hash64(i);});
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
     } else
-      a = parlay::random_shuffle(parlay::tabulate(nn, [] (unsigned int i) {return i+1;}));
-    // parlay::parallel_for(0, nn, [&] (size_t i) { assert(a[i] != 0); });
+      a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
+					   return i+1;}));
 
-    parlay::sequence<unsigned int> b;
+    parlay::sequence<key_type> b;
     if (use_zipfian) { 
       Zipfian z(nn, zipfian_param);
       b = parlay::tabulate(m, [&] (int i) { return a[z(i)]; });
@@ -147,12 +144,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
     parlay::internal::timer t;
 
-    // if (shuffle) { // shuffles the memory blocks in the memory allocator
-    //   size_t shuffle_size = n;
-    //   parlay::parallel_for(0, shuffle_size, [&] (size_t i) {os.insert(tr, a[i], 123); });
-    //   auto c = parlay::random_shuffle(a.head(shuffle_size));
-    //   parlay::parallel_for(0, shuffle_size, [&] (size_t i) {os.remove(tr, c[i]); });
-    // }
     if (shuffle) os.shuffle(n);
 
     for (int i = 0; i < rounds; i++) {
@@ -167,7 +158,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	}
       }
       
-      // use_help = true;
       if (verbose) std::cout << "round " << i << std::endl;
       if (fixed_time) {
 	if (balanced_tree) {
@@ -191,7 +181,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
             std::cout << "CHECK PASSED" << std::endl;
           }
         }
-        // use_help = false;
         parlay::sequence<size_t> totals(p);
 	parlay::sequence<long> addeds(p);
         size_t mp = m/p;
@@ -232,7 +221,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
              }}, 1);
         double duration = t.stop();
 
-        if (finish)
+        if (finish && (duration < .5))
           std::cout << "warning out of samples, finished in "
               << duration << " seconds" << std::endl;
 
@@ -271,18 +260,28 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       else {
         // millions of operations per second
         auto mops = [=] (double time) -> float {return m / (time * 1e6);};
+	long len = parlay::remove_duplicates(b).size();
+	parlay::sequence<bool> flags(m);
 
+	
         t.start();
         parlay::parallel_for(0, m, [&] (size_t i) {
-                   os.insert(tr, b[i], 123);
-		   //os.print(tr);
+                   flags[i] = os.insert(tr, b[i], 123);
                  });
 
 	//os.print(tr);
         std::cout << "insert," << m << "," << mops(t.stop()) << std::endl;
 
-        if (do_check) os.check(tr);
-        //std::cout << len << std::endl;
+        if (do_check) {
+	  long total = parlay::count(flags, true);
+	  long lenc = os.check(tr);
+	  if (lenc != len || total != len) {
+	    std::cout << "incorrect size after insert: inserted="
+		      << len << " succeeded=" << total << " found=" << lenc
+		      << std::endl;
+	    abort();
+	  }
+	}
         if (stats) {
           //descriptor_pool.stats();
           //log_array_pool.stats();
@@ -302,16 +301,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           auto delete_seq = parlay::random_shuffle(b, parlay::random(1));
           t.start();
           parlay::parallel_for(0, m, [&] (size_t i) {
-				       //std::cout << delete_seq[i] << std::endl;
                      os.remove(tr, delete_seq[i]);
-		     //os.print(tr);
-		     //os.check(tr);
                    });
 
           std::cout << "remove," << m << "," << mops(t.stop()) << std::endl;
           if (do_check) {
             len = os.check(tr);
-	    //os.print(tr);
             if (len != 0) {
               std::cout << "BAD LENGTH = " << len << std::endl;
             } else if(verbose) {

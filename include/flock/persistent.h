@@ -87,7 +87,7 @@ private:
 	      return newv;
       }
     }
-    return strip_mark_and_tag(ptr);
+    return get_ptr(ptr);
   }
 
 public:
@@ -110,12 +110,12 @@ public:
     if (local_stamp != -1) return read_snapshot();
     // Guy : added set_stamp below.  Isn't it needed?
     // Also I tried using shortcut_indirect but it causes a seg fault
-    else return get_ptr(set_stamp(get_val()));}
+    else return shortcut_indirect(set_stamp(get_val()));}
 
   V* read() {
     // should be shortcut_indirect
     if (local_stamp != -1) read_snapshot();
-    return get_ptr(v.load());
+    return shortcut_indirect(v.load());
   }
 
   void validate() {
