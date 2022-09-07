@@ -49,9 +49,11 @@ struct Set {
       while (true) {
 	auto [prev, cur, nxt] = find_location(root, k);
 	if (nxt->key == k) return false; //already there
-	if (use_help && prev != nullptr) prev->wait_lock(); // important to ensure lock freedom
+	if (prev != nullptr)
+	  prev->wait_lock(); // important to ensure lock freedom
 	if (cur->try_lock([=] {
-	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
+	      if (cur->removed.load() || (cur->next).load() != nxt)
+		return false;
 	      auto new_node = node_pool.new_obj(k, v, nxt);
 	      cur->next = new_node; // splice in
 	      return true;

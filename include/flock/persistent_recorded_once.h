@@ -1,5 +1,7 @@
-// a version for aba_free data structures
-// pointers cannot be null
+// A version for data structures that only record once.
+// Effectively this means that an object that is pointed to
+// by a persistent_ptr can only be stored to a persistent pointer
+// once.
 
 // Based on paper:
 // Yuanhao Wei, Naama Ben-David, Guy E. Blelloch, Panagiota Fatourou, Eric Ruppert, Yihan Sun
@@ -10,7 +12,7 @@
 #include "timestamps.h"
 #ifdef NoHelp
 template <typename F>
-bool skip_if_done(F f) {f(); return true;}
+bool skip_if_done_no_log(F f) {f(); return true;}
 #else
 #include "lf_log.h"
 #endif
@@ -19,12 +21,12 @@ bool skip_if_done(F f) {f(); return true;}
 struct persistent {
   std::atomic<TS> time_stamp;
   void* next;
-  persistent() : time_stamp(0), next(bad_ptr) {}
+  persistent() : time_stamp(tbd), next(bad_ptr) {}
 };
 
 template <typename V>
 struct persistent_ptr {
-  // private:
+private:
   std::atomic<V*> v;
   // sets the timestamp in a version link if time stamp is TBD
   static V* set_stamp(V* x) {
@@ -36,42 +38,51 @@ struct persistent_ptr {
     return x;
   }
 
-  V* get_val() {
 #ifdef NoHelp
-    return set_stamp(v.load());
+  V* get_val() {return set_stamp(v.load());}
+  static TS get_stamp(V* u) { return u->time_stamp.load();}
 #else
-    return set_stamp(lg.commit_value_safe(v.load()).first);
+  V* get_val() {
+    return set_stamp(lg.commit_value_safe(v.load()).first);}
+  static TS get_stamp(V* u) {
+    return lg.commit_value(u->time_stamp.load()).first;}
 #endif
-  }
 
 public:
 
   persistent_ptr(V* v) : v(v) {}
   persistent_ptr(): v(nullptr) {}
   void init(V* vv) {v = vv;}
-  V* load() {
-    if (local_stamp != -1) return read();
-    else return get_val();}
 
-  // reads snapshotted version
-  V* read() {
+  // reads snapshotted version (ls >= 0)
+  V* read_snapshot() {
     // ensure time stamp is set
     V* head = set_stamp(v.load());
     TS ls = local_stamp;
-    if (ls != -1) 
-      // chase down version chain
-      while (head->time_stamp.load() > ls)
-	head = (V*) head->next;
+    while (head->time_stamp.load() > ls)
+      head = (V*) head->next;
     return head;
   }
 
-  V* read_() { return v.load();}
+  V* load() {
+    if (local_stamp != -1) return read_snapshot();
+    else return get_val();}
+
+  V* read() {
+    if (local_stamp != -1) return read_snapshot();
+    else return v.load();}
+
   void validate() { set_stamp(v.load());}
   
   void store(V* newv) {
     V* oldv = get_val();
-    skip_if_done([&] { // for efficiency, correct without it
-      newv->time_stamp = tbd;
+    // check that newv is only recorded once
+    if (get_stamp(newv) != tbd) {
+      std::cout << "recording a second time not allowed" << std::endl;
+      abort();
+    }
+
+    skip_if_done_no_log([&] { // for efficiency, correct without it
       newv->next = (void*) oldv;
       v.compare_exchange_strong(oldv, newv);
       set_stamp(newv);

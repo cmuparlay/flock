@@ -140,7 +140,7 @@ void inline with_log_(Log newlg, F f) {
 // Skips a chunk of code if finished by another helper on the log.
 // Uses a log entry to mark that it is completed.
 template <typename F>
-bool skip_if_done(F f) {
+bool skip_if_done_no_log(F f) {
   if (lg.is_empty()) {f(); return true;}
   log_entry* l = lg.next_entry(); // get the next log entry
   if (l->load() == nullptr) { // check that not already completed
@@ -153,7 +153,7 @@ bool skip_if_done(F f) {
 }
 
 template <typename F>
-bool skip_if_done_(F f) {
+bool skip_if_done(F f) {
   if (lg.is_empty()) {f(); return true;}
   log_entry* l = lg.next_entry(); // get the next log entry
   void* v = l->load();

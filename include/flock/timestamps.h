@@ -26,7 +26,7 @@ struct timestamp_simple {
   }
 
   TS get_write_stamp() {return stamp.load();}
-  timestamp_simple() : stamp(0) {}
+  timestamp_simple() : stamp(1) {}
 };
 
 struct timestamp_simple_update {
@@ -47,7 +47,7 @@ struct timestamp_simple_update {
 
     return ts+1;
   }
-  timestamp_simple_update() : stamp(0) {}
+  timestamp_simple_update() : stamp(1) {}
 };
 
 struct timestamp_multiple {
@@ -77,7 +77,7 @@ struct timestamp_multiple {
   }
 
   timestamp_multiple() {
-    for (int i = 0; i < slots; i++) stamps[i*gap] = 0;
+    for (int i = 0; i < slots; i++) stamps[i*gap] = 1;
   }
 };
 
@@ -119,7 +119,7 @@ struct timestamp_read_write {
 
   TS current() { return stamp.load();}
   
-  timestamp_read_write() : stamp(0) {}
+  timestamp_read_write() : stamp(1) {}
 };
 
 timestamp_simple global_stamp;

@@ -4,7 +4,7 @@
 template <typename T>
 using tagged = no_tagged<T>;
 template <typename F>
-bool skip_if_done_(F f) {f(); return true;}
+bool skip_if_done(F f) {f(); return true;}
 #else
 #include "lf_log.h"
 #endif
@@ -127,7 +127,7 @@ public:
     V* oldv = strip_mark_and_tag(oldv_tagged);
     bool indirect_node_allocated = false;
 
-    skip_if_done_([&] {
+    skip_if_done([&] {
     // if newv is null we need to allocate a version link for it and mark it
     if (newv == nullptr) {
       plink* tmp = link_pool.new_obj();

@@ -56,8 +56,6 @@ public:
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning
-  V read_() {return read();}
-  V read_fix() {return read();}
   void validate() {}
 };
 

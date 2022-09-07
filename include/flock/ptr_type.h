@@ -9,8 +9,8 @@
 
 // persistent objects, ptr_type includes version chains
 #ifdef Persistent
-#ifdef noABA
-#include "persistent_noaba.h"
+#ifdef Recorded_Once
+#include "persistent_recorded_once.h"
 #else
 #include "persistent.h"
 #endif

@@ -31,8 +31,6 @@ public:
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning
-  V read_() {return read();}
-  V read_fix() {return read();}
   void validate() {}
   
   // operator V() { return load(); } // implicit conversion
@@ -64,7 +62,7 @@ public:
     cam({cnt, v.val}, {cnt+1, newv});
 #else
     // skip if done for efficiency
-    skip_if_done([&] { cam({cnt, v.val}, {cnt+1, newv});});
+    skip_if_done_no_log([&] { cam({cnt, v.val}, {cnt+1, newv});});
 #endif
   }
   V operator=(V b) {
@@ -84,6 +82,7 @@ struct write_once {
   write_once(V initial) : v(initial) {}
   write_once() {}
   V load() {return lg.commit_value_safe(v.load()).first;}
+  V read() {return v.load();}
   void init(V vv) { v = vv; }
   void store(V vv) { v = vv; }
   V operator=(V b) { store(b); return b; }

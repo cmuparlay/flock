@@ -1,5 +1,5 @@
 #include <limits>
-#define noABA 1
+#define Recorded_Once 1
 #include <flock/flock.h>
 #include <parlay/primitives.h>
 
@@ -60,7 +60,9 @@ struct Set {
     // create with given size, to be filled in
     node(int size) :
       header{false,
-	size == node_min_size ? isUnder : (size == node_block_size ? isOver : OK),
+	(size == node_min_size
+	 ? isUnder
+	 : (size == node_block_size ? isOver : OK)),
 	size},
       removed(false) {}
 
@@ -90,6 +92,15 @@ struct Set {
       }, size);
   }
 
+  node* copy_node(node* p) {
+    node* new_r = copy(p->size,
+		       [=] (int i) {return p->keys[i];},
+		       [=] (int i) {return p->children[i].load();});
+    p->removed = true;
+    node_pool.retire(p);
+    return new_r;
+  }
+    
   // helper function for split and rebalance
   template <typename Key, typename Child>
   std::tuple<node*,K,node*> split_mid(int size, Key get_key, Child get_child) {
@@ -220,6 +231,15 @@ struct Set {
 
   memory_pool<leaf> leaf_pool;
 
+  leaf* copy_leaf(leaf* l) {
+    int size = l->size;
+    leaf* new_l = leaf_pool.new_obj(size);
+    for (int i=0; i < size; i++)
+      new_l->keyvals[i] = l->keyvals[i];
+    leaf_pool.retire(l);
+    return new_l;
+  }
+
   // Insert a new key-value pair by copying into a new leaf.
   // Old is left intact (but retired).
   // The key k must not already be present in the leaf.
@@ -243,9 +263,8 @@ struct Set {
     return new_l;
   }
 
-  // remove a key-value pair from the leaf that matches the key k
-  // this copies the values into a new leaf and retires the old one
-  // k must be in the leaf
+  // Remove a key-value pair from the leaf that matches the key k.
+  // This copies the values into a new leaf.
   leaf* remove_leaf(leaf* l, K k) {
     int size = l->size;
     assert(size > 0);
@@ -408,8 +427,13 @@ struct Set {
       underfull_node(gp, pidx, p, cidx, c);
   }
 
-  // If c (child of root) is overfull it splits it and creates a new internal node with the
-  // two split nodes as children.
+  node* copy_node_or_leaf(node* p) {
+    if (p->is_leaf) return (node*) copy_leaf((leaf*) p);
+    else return copy_node(p);
+  }
+  
+  // If c (child of root) is overfull it splits it and creates a new
+  // internal node with the two split nodes as children.
   // If c is underfull (degree 1), it removes c
   // In both cases it updates the root to point to the new internal node
   // it takes a lock on the root
@@ -427,9 +451,11 @@ struct Set {
 	  }
 	  return true;
 	} else { // c has degree 1 and not a leaf
-	  root->children[0] = c->children[0].load();
-	  node_pool.retire(c);
-	  return true;
+	  // c needs to be copied so it is not recorded a second time
+	  return c->lck.try_lock([=] {
+	      root->children[0] = copy_node_or_leaf(c->children[0].load());
+	      node_pool.retire(c);
+	      return true;});
 	}});
   }
 
@@ -446,7 +472,7 @@ struct Set {
     while (true) {
       node* p = root;
       int cidx = 0;
-      node* c = p->children[cidx].read_();
+      node* c = p->children[cidx].read();
       if (c->status == isOver || (!c->is_leaf && c->size == 1))
         fix_root(root, c);
       else while (true) {
@@ -456,8 +482,9 @@ struct Set {
         p = c;
         cidx = c->find(k);
         c = p->children[cidx].load();
-        // the following two lines are only useful if hardware prefetching is turned off
-        // they prefetch the next two cache lines
+        // The following two lines are only useful if hardware
+        // prefetching is turned off.  They prefetch the next two
+        // cache lines.
         __builtin_prefetch (((char*) c) + 64); 
         __builtin_prefetch (((char*) c) + 128);
 	if (c->status != OK) {
@@ -491,10 +518,10 @@ struct Set {
   }
 
   // Deletes by finding the leaf containing the key, and removing from
-  // the leaf.  It needs a lock on the parent in the lock needs to
+  // the leaf.  It needs a lock on the parent.  In the lock it needs to
   // check the parent has not been deleted and the child has not
-  // changed.  If the try_lock fails it tries again.
-  // returns false if not found.
+  // changed.  If the try_lock fails it tries again.  Returns false if
+  // not found.
   bool remove(node* root, K k) {
     return with_epoch([=] {
       while (true) {
@@ -504,7 +531,7 @@ struct Set {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) remove_leaf(l, k);
-        leaf_pool.retire(l);
+	      leaf_pool.retire(l);
 	      return true;
 	    })) return true;
       }});
@@ -526,10 +553,9 @@ struct Set {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
       x = &c->children[c->find(k)];
-      //c = x->read_();
       c = x->read();
     }
-    //x->validate();
+    x->validate();
     return ((leaf*) c)->find(k);
   }
 
@@ -556,7 +582,8 @@ struct Set {
     if (p->is_leaf) {
      leaf_pool.retire((leaf*) p);
     } else {
-      parlay::parallel_for(0, p->size, [&] (size_t i) {retire(p->children[i].load());});
+      parlay::parallel_for(0, p->size, [&] (size_t i) {
+	  retire(p->children[i].load());});
       node_pool.retire(p);
     }
   }
@@ -585,14 +612,17 @@ struct Set {
       return rtup(minv, maxv, l->size);
     }
     if (!is_root && p->size < node_min_size) {
-      std::cout << "size " << (int) p->size << " too small for internal node" << std::endl;
+      std::cout << "size " << (int) p->size
+		<< " too small for internal node" << std::endl;
       abort();
     }
     auto r = parlay::tabulate(p->size, [&] (size_t i) -> rtup {
-					 return check_recursive(p->children[i].load(), false);});
-    long total = parlay::reduce(parlay::map(r, [&] (auto x) {return std::get<2>(x);}));
+		return check_recursive(p->children[i].load(), false);});
+    long total = parlay::reduce(parlay::map(r, [&] (auto x) {
+		    return std::get<2>(x);}));
     parlay::parallel_for(0, p->size - 1, [&] (size_t i) {
-	if (std::get<1>(r[i]) >= p->keys[i] || p->keys[i] > std::get<0>(r[i+1])) {
+	if (std::get<1>(r[i]) >= p->keys[i] ||
+	    p->keys[i] > std::get<0>(r[i+1])) {
 	  std::cout << "keys not ordered around key: " << p->keys[i]
 		    << " max before = " << std::get<1>(r[i])
 		    << " min after = " << std::get<0>(r[i+1]) << std::endl;
@@ -603,7 +633,8 @@ struct Set {
 
   long check(node* root) {
     auto [minv, maxv, cnt] = check_recursive(root->children[0].load(), true);
-    if (verbose) std::cout << "average height = " << ((double) total_height(root) / cnt)
+    if (verbose) std::cout << "average height = "
+			   << ((double) total_height(root) / cnt)
 			   << std::endl;
     return cnt;
   }
