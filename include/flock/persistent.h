@@ -78,18 +78,19 @@ private:
   // then it will no longer be accessed and can be spliced out.
   // The splice needs to be done under a lock since it can race with updates
   V* shortcut_indirect(IT ptr) {
+    auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
     if (is_indirect(ptr)) {
-      auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
       TS stamp = ptr_notag->time_stamp.load();
-      if (stamp <= done_stamp) { 
-	V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
-	// there can't be an ABA unless indirect node is reclaimed
+      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
+      if (stamp <= done_stamp) {
+      	// there can't be an ABA unless indirect node is reclaimed
         if (TV::cas_with_same_tag(v, ptr, newv, true)) 
-	  link_pool.retire(ptr_notag);
-	return newv;
+      	  link_pool.retire(ptr_notag);
       }
+      return newv;
     }
-    return get_ptr(ptr);
+    // else return get_ptr(ptr);
+    else return (V*) ptr_notag;
   }
 
 public:
@@ -108,11 +109,11 @@ public:
     return get_ptr(head);
   }
 
-  V* load() {
+  V* load() {  // can be used anywhere
     if (local_stamp != -1) return read_snapshot();
     else return shortcut_indirect(set_stamp(get_val()));}
 
-  V* read() {
+  V* read() {  // only safe on journey
     if (local_stamp != -1) read_snapshot();
     return shortcut_indirect(v.load());
   }
@@ -183,7 +184,7 @@ public:
     TV::cas(v, x, remove_unset(TV::value(x)));
 
     if(writtenv != newv) { // an indirect node must have been allocated
-      link_pool.retire((plink*) newv); // could also just be free
+      link_pool.destruct((plink*) newv);
     }
 
     // retire an indirect point if swapped out

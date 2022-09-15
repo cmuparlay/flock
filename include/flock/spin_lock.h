@@ -39,7 +39,7 @@ private:
   std::atomic<lock_entry> lck;
 public:
   
-  lock() : lck() {}
+  lock() : lck(lock_entry()) {}
 
   bool is_locked() { return lck.load().is_locked();}
 
