@@ -68,9 +68,9 @@ private:
 
   IT get_val() {
 #ifdef NoHelp
-    return set_stamp(v.load());
+    return v.load();
 #else
-    return set_stamp(lg.commit_value(v.load()).first);
+    return lg.commit_value(v.load()).first;
 #endif
   }
 
@@ -115,6 +115,11 @@ public:
 
   V* read() {  // only safe on journey
     if (local_stamp != -1) read_snapshot();
+    return shortcut_indirect(v.load());
+  }
+
+  V* read_cur() {  // only safe on journey, outside of snapshot
+    // return read();
     return shortcut_indirect(v.load());
   }
 
@@ -180,8 +185,19 @@ public:
     // now set the stamp from tbd to a real stamp
     set_stamp((IT) writtenv);
 
-    // and clear the "unset" mark
-    TV::cas(v, x, remove_unset(TV::value(x)));
+    // TODO: following block of code could be cleaner
+    auto ptr_notag = (plink*) writtenv;
+    if (is_indirect(x)) {
+      TS stamp = ptr_notag->time_stamp.load();
+      V* newv2 = is_empty(x) ? nullptr : (V*) ptr_notag->value;
+      if (stamp <= done_stamp) {
+        // there can't be an ABA unless indirect node is reclaimed
+        if (TV::cas_with_same_tag(v, x, newv2, true)) 
+          link_pool.retire(ptr_notag);
+      } else TV::cas(v, x, remove_unset(TV::value(x)));  // and clear the "unset" mark
+    } else TV::cas(v, x, remove_unset(TV::value(x)));
+
+    // TV::cas(v, x, remove_unset(TV::value(x)));
 
     if(writtenv != newv) { // an indirect node must have been allocated
       link_pool.destruct((plink*) newv);
