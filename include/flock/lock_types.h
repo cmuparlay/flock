@@ -52,6 +52,7 @@ public:
   void init(V vv) {v = vv;}
   V load() {return v.load();}
   V read() {return v.load();}
+  V read_cur() {return v.load();}
   void store(V vv) { v = vv;}
   void cam(V oldv, V newv) {v->compare_exchange_strong(oldv,newv);}
   V operator=(V b) {store(b); return b; }

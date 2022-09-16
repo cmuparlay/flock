@@ -72,6 +72,9 @@ public:
     if (local_stamp != -1) return read_snapshot();
     else return v.load();}
 
+  V* read_cur() {
+    return v.load();}
+
   void validate() { set_stamp(v.load());}
   
   void store(V* newv) {

@@ -24,6 +24,11 @@ public:
   V load() {return TV::value(get_val(lg));}
   V read() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(lg), vv);}
+  // void store(V vv) {
+  //   auto old_v = get_val(lg);
+  //   if(v.load() == old_v) TV::cas(v, old_v, vv);
+  //   else if (!lg.is_empty()) lg.next_entry(); // because this gets called by TV::cas
+  // }
   void cam(V oldv, V newv) {
     V old_t = get_val(lg);
     if (TV::value(old_t) == oldv)
