@@ -22,7 +22,7 @@ lists_snap = ["list_onelock"]
 lists_other = ["harris_list", "harris_list_opt"]
 trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
 list_sizes = [10,100,1000]
-update_percents = [20]
+update_percents = [5, 50]
 tree_sizes = [1000,100000,10000000,100000000]
 zipfians = [0, .99]
 

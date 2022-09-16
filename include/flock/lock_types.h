@@ -1,3 +1,4 @@
+#pragma once
 #include <atomic>
 #include "epoch.h"
 // Public interface for supported data types

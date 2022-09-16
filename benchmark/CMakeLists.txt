@@ -39,3 +39,12 @@ foreach(bench ${OTHER_LIST_BENCH})
   add_benchmark(${bench} ${OTHER_LIST_DIR}/${bench} "")
 endforeach()
 
+function(add_multi NAME STRUCT_NAME DEFS)
+  add_executable(${NAME} hash_multi.cpp)
+  target_compile_definitions(${NAME} PRIVATE ${DEFS})
+  target_link_libraries(${NAME} PRIVATE flock)
+  target_include_directories(${NAME} PRIVATE ${STRUCT_NAME})
+endfunction()
+
+add_multi(hash_multi_lock ${STRUCT_DIR}/hash_block NoHelp)
+add_multi(hash_multi ${STRUCT_DIR}/hash_block "")

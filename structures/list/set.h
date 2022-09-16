@@ -7,11 +7,12 @@ struct Set {
   K key_min = std::numeric_limits<K>::min();
   K key_max = std::numeric_limits<K>::max();
 
-  struct alignas(64) node : ll_head, lock_type {
+  struct alignas(32) node : ll_head {
     ptr_type<node> next;
-    write_once<bool> removed;
     K key;
     V value;
+    lock_type lck;
+    write_once<bool> removed;
     node(K key, V value, node* next)
       : key(key), value(value), next(next), removed(false) {};
   };
@@ -37,7 +38,7 @@ struct Set {
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
 	if (nxt->key == k) return false; //already there
-	if (cur->try_lock([=] {
+	if (cur->lck.try_lock([=] {
 	      if (!cur->removed.load() && (cur->next).load() == nxt) {
 		auto new_node = node_pool.new_obj(k, v, nxt);
 		cur->next = new_node; // splice in
@@ -52,9 +53,9 @@ struct Set {
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
 	if (k != nxt->key) return false; // not found
-        if (cur->try_lock([=] {
+        if (cur->lck.try_lock([=] {
 	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
-	      return nxt->try_lock([=] {
+	      return nxt->lck.try_lock([=] {
 		  node* nxtnxt = (nxt->next).load();
 		  nxt->removed = true;
 		  cur->next = nxtnxt; // shortcut

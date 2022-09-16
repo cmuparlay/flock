@@ -138,6 +138,7 @@ public:
   void stats() { Allocator::print_stats();}
 
   void shuffle(size_t n) {
+    n = std::max(n, 1000000ul);
     auto ptrs = parlay::tabulate(n, [&] (size_t i) {return Allocator::alloc();});
     ptrs = parlay::random_shuffle(ptrs);
     parlay::parallel_for(0, n, [&] (size_t i) {Allocator::free(ptrs[i]);});

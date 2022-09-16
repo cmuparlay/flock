@@ -6,6 +6,7 @@
 // They support snapshotting via version chains, and without
 // indirection, but pointers to objects (ptr_type) must be "recorded
 // once" as described in the paper.
+#pragma once
 
 // persistent objects, ptr_type includes version chains
 #ifdef Persistent

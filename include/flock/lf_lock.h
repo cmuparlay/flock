@@ -5,6 +5,7 @@
 //   try_lock_result(thunk_returning_val) -> optional<val>
 //   wait_lock() -> void
 //   is_locked() -> bool
+//   is_self_locked() -> bool
 
 #include "defs.h"
 #include <atomic>
@@ -17,7 +18,7 @@
 static thread_local size_t current_id = parlay::worker_id();
 
 // user facing lock
-using lock_entry = size_t;
+using lock_entry_ = size_t;
 struct lock; // for back reference
 
 // stores the thunk along with the log
@@ -32,7 +33,7 @@ struct descriptor {
   // Being false just allows more efficient (i.e. immediate) reclamation.
   std::atomic<bool> acquired;   
   int thread_id; // used to detect reentrant locks, inherited by helpers
-  lock_entry current; // currently not used
+  lock_entry_ current; // currently not used
   long epoch_num; // the epoch when initially created, inherited by helpers
   log_array lg_array; // the log itself
   
@@ -80,6 +81,8 @@ memory_pool<descriptor,tagged_pool<descriptor>> descriptor_pool;
 #endif
 
 struct lock {
+public:
+    using lock_entry = lock_entry_;
 private:
   // each lock entry will be a pointer to a descriptor tagged with a counter
   // to avoid ABA issues
@@ -137,7 +140,7 @@ private:
 
 public:
   lock() : lck(Tag::init(nullptr)) {}
-
+  
   // waits until current owner of lock releases it (unless self owned)
   void wait_lock() {
     lock_entry current = load();
@@ -147,7 +150,14 @@ public:
   }
 
   bool is_locked() { return is_locked_(load());}
+  bool is_self_locked() {
+    lock_entry current = load();
+    return is_locked_(current) && lock_is_self(current);
+  }
+  lock_entry lock_load() {return load();}
+  bool unchanged(lock_entry le) {return le == load();}
 
+  
   // This is safe to be used inside of another lock (i.e. it is
   // idempotent, kind of).  The key components to making it effectively
   // idempotent is using an idempotent new_obj, and checking if it is

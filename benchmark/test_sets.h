@@ -48,7 +48,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   int buckets = P.getOptionIntValue("-bu", n);
 
   // shuffles the memory pool to break sharing of cache lines
-  // by neighboring tree nodes
+  // by neighboring list/tree nodes
   bool shuffle = P.getOption("-shuffle");
 
   // verbose
@@ -144,9 +144,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
     parlay::internal::timer t;
 
-    if (shuffle) os.shuffle(n);
-
     for (int i = 0; i < rounds; i++) {
+      if (shuffle) os.shuffle(n);
       long len;
       auto tr = os.empty(buckets);
       if (do_check) {

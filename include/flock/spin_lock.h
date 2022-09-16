@@ -16,7 +16,8 @@ static thread_local size_t current_id = parlay::worker_id();
 
 // This lock keeps track of how many times it was taken and who has it
 struct lock {
-private:
+public:
+
   // The low 32 bits are a counter of how many times lock has been
   // taken. This is mostly meant for debugging and currently not used
   // other than to indicate whether locked or not.  An odd number
@@ -36,13 +37,17 @@ private:
     bool is_self_locked() { return current_id + 1 == get_procid();}
   };
 
+private:
   std::atomic<lock_entry> lck;
 public:
-  
+
   lock() : lck() {}
 
   bool is_locked() { return lck.load().is_locked();}
-
+  bool is_self_locked() { return lck.load().is_self_locked();}
+  lock_entry lock_load() {return lck.load();}
+  bool unchanged(lock_entry le) {return le.le == lck.load().le;}
+  
   void wait_lock() {
     lock_entry current = lck.load();
     while (current.is_locked() && !current.is_self_locked())
