@@ -31,7 +31,7 @@ struct epoch_s {
     int workers = parlay::num_workers();
     announcements = std::vector<announce_slot>(workers);
     current_epoch = 0;
-    prev_stamp = -1;
+    prev_stamp = global_stamp.get_stamp();
   }
 
   long get_current() {
@@ -51,9 +51,8 @@ struct epoch_s {
   void announce() {
     size_t id = parlay::worker_id();
     long current_e = get_current();
-    //announcements[id].last = current_e;
+    // apparently an exchange is faster than a store (write and fence)
     announcements[id].last.exchange(current_e, std::memory_order_acquire);
-    //std::atomic_thread_fence(std::memory_order_seq_cst);
   }
 
   void unannounce() {
@@ -66,15 +65,17 @@ struct epoch_s {
     int workers = parlay::num_workers();
     long current_e = get_current();
     bool all_there = true;
+    // check if everyone is done with earlier epochs
     for (int j=0; j<2; j++) //do twice
       for (int i=0; i < workers; i++)
 	if ((announcements[i].last != -1l) &&
 	    announcements[i].last < current_e) 
 	  all_there = false;
+    // if so then increment current epoch
     if (all_there) {
       // timestamps are for multiversioning (snapshots)
       // we set done_stamp to the stamp from the previous epoch update
-      TS current_stamp = global_stamp.get_read_stamp();
+      TS current_stamp = global_stamp.get_stamp();
       if (current_epoch.compare_exchange_strong(current_e, current_e+1)) {
 	done_stamp = prev_stamp;
 	prev_stamp = current_stamp;
@@ -100,18 +101,20 @@ template <typename xT>
 struct mem_pool {
 private:
 
+  // each thread keeps one of these
   struct alignas(256) old_current {
-    Link* old;
-    Link* current;
-    long epoch;
-    long count;
-    old_current() : old(nullptr), current(nullptr), epoch(0) {}
+    Link* old;  // linked list of retired items from previous epoch
+    Link* current; // linked list of retired items from current epoch
+    long epoch; // epoch on last retire, updated on a retire
+    long count; // number of retires so far, reset on updating the epoch
+    old_current() : old(nullptr), current(nullptr), epoch(0), count(0) {}
   };
 
   std::vector<old_current> pools;
   int workers;
 
-  void clear_pool(Link* ptr) {
+  // destructs and frees a linked list of objects 
+  void clear_list(Link* ptr) {
     while (ptr != nullptr) {
       Link* tmp = ptr;
       ptr = ptr->next;
@@ -144,6 +147,7 @@ public:
     parlay::parallel_for(0, n, [&] (size_t i) {Allocator::free(ptrs[i]);});
   }
 
+  // destructs and frees the object immediately
   void destruct(T* p) {
      p->~T();
      Allocator::free(p);
@@ -163,34 +167,38 @@ public:
     f(x);
     return x;
   }
-  
+
+  // destruction and freeing is delayed until a future epoch
   void retire(T* p) {
-    size_t id = parlay::worker_id();
-    if (pools[id].epoch < epoch.get_current()) {
-      clear_pool(pools[id].old);
-      pools[id].old = pools[id].current;
-      pools[id].current = nullptr;
-      pools[id].epoch = epoch.get_current();
+    auto &pid = pools[parlay::worker_id()];
+    if (pid.epoch < epoch.get_current()) {
+      clear_list(pid.old);
+      pid.old = pid.current;
+      pid.current = nullptr;
+      pid.epoch = epoch.get_current();
     }
     // a heuristic
-    if (++pools[id].count % (workers*10) == 0) {
+    if (++pid.count == 10 * workers) {
+      pid.count = 0;
       epoch.update_epoch();
     }
     Link* lnk = list_allocator::alloc();
-    lnk->next = pools[id].current;
+    lnk->next = pid.current;
     lnk->value = (void*) p;
-    pools[id].current = lnk;
+    pid.current = lnk;
   }
 
+  // clears all the lists and terminates the underlying allocator
+  // to be used on termination
   void clear() {
     epoch.update_epoch();
     for (int i=0; i < pools.size(); i++) {
-      clear_pool(pools[i].old);
-      clear_pool(pools[i].current);
+      clear_list(pools[i].old);
+      clear_list(pools[i].current);
       pools[i].old = pools[i].current = nullptr;
     }
     Allocator::finish();
-  }      
+  }
 };
 
 template <typename Thunk>

@@ -9,6 +9,21 @@ bool skip_if_done(F f) {f(); return true;}
 #include "lf_log.h"
 #endif
 
+parlay::sequence<long> i_counts(parlay::num_workers()*16, 0);
+parlay::sequence<long> d_counts(parlay::num_workers()*16, 0);
+parlay::sequence<long> s_counts(parlay::num_workers()*16, 0);
+parlay::sequence<long> t_counts(parlay::num_workers()*16, 0);
+parlay::sequence<long> si_counts(parlay::num_workers()*16, 0);
+parlay::sequence<long> u_counts(parlay::num_workers()*16, 0);
+void print_counts() {
+  std::cout << "shortcuts = " << parlay::reduce(s_counts)
+	    << " si = " << parlay::reduce(si_counts)
+    	    << " updates = " << parlay::reduce(u_counts)
+	    << " tbds = " << parlay::reduce(t_counts)
+    	    << " indirect = " << parlay::reduce(i_counts)
+	    << " direct = " << parlay::reduce(d_counts) << std::endl;
+}
+
 #define bad_ptr ((1ul << 48) -1)
 
 using IT = size_t;
@@ -80,17 +95,24 @@ private:
   V* shortcut_indirect(IT ptr) {
     auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
     if (is_indirect(ptr)) {
+      //i_counts[16*parlay::worker_id()]++;
       TS stamp = ptr_notag->time_stamp.load();
       V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
       if (stamp <= done_stamp) {
       	// there can't be an ABA unless indirect node is reclaimed
-        if (TV::cas_with_same_tag(v, ptr, newv, true)) 
+        if (TV::cas_with_same_tag(v, ptr, newv, true)) {
+	  //s_counts[16*parlay::worker_id()]++;
       	  link_pool.retire(ptr_notag);
+	}
+      } else {
+	//if (stamp == tbd) t_counts[16*parlay::worker_id()]++;
+	//else std::cout << done_stamp << ", " << (void*) stamp << std::endl;
       }
       return newv;
     }
     // else return get_ptr(ptr);
-    else return (V*) ptr_notag;
+    //d_counts[16*parlay::worker_id()]++;
+    return (V*) ptr_notag;
   }
 
 public:
@@ -151,6 +173,7 @@ public:
       TS ts = lg.commit_value(newv->time_stamp.load()).first;
 #endif
       if (ts != tbd) {
+	//u_counts[16*parlay::worker_id()]++;
       	plink* tmp = link_pool.new_obj();
         indirect_node_allocated = true;
       	tmp->value = (IT) newv;
@@ -183,7 +206,7 @@ public:
     V* writtenv = strip_mark_and_tag(x);
 
     // now set the stamp from tbd to a real stamp
-    set_stamp((IT) writtenv);
+    set_stamp(x);
 
     // TODO: following block of code could be cleaner
     auto ptr_notag = (plink*) writtenv;
@@ -192,25 +215,30 @@ public:
       V* newv2 = is_empty(x) ? nullptr : (V*) ptr_notag->value;
       if (stamp <= done_stamp) {
         // there can't be an ABA unless indirect node is reclaimed
-        if (TV::cas_with_same_tag(v, x, newv2, true)) 
+        if (TV::cas_with_same_tag(v, x, newv2, true)) {
+	  //si_counts[16*parlay::worker_id()]++;
           link_pool.retire(ptr_notag);
+	}
       } else TV::cas(v, x, remove_unset(TV::value(x)));  // and clear the "unset" mark
     } else TV::cas(v, x, remove_unset(TV::value(x)));
 
     // TV::cas(v, x, remove_unset(TV::value(x)));
 
+    // Guy: Had to comment out since it was causing seg faults
     if(writtenv != newv) { // an indirect node must have been allocated
-      link_pool.destruct((plink*) newv);
+      //link_pool.destruct((plink*) newv);
     }
 
     // retire an indirect point if swapped out
     if (succeeded && is_indirect(oldv_tagged))
       link_pool.retire((plink*) oldv);
-    
+
+    // Guy: had to change writtenv to newv otherwise segmentation fault
+    // todo: figure out correct change
     // shortcut if appropriate, getting rid of redundant time stamps
     // todo: might need to retire if an indirect pointer
-    if (oldv != nullptr && writtenv->time_stamp == oldv->time_stamp)
-     writtenv->next_version.store(oldv->next_version);
+    if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
+      newv->next_version.store(oldv->next_version);
 		 });
   }
   V* operator=(V* b) {store(b); return b; }

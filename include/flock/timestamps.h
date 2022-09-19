@@ -12,6 +12,8 @@ struct timestamp_simple {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
 
+  TS get_stamp() {return stamp.load();}
+      
   TS get_read_stamp() {
     TS ts = stamp.load();
 
@@ -129,7 +131,7 @@ thread_local TS local_stamp{-1};
 // this is updated by the epoch-based reclamation
 // Whenever an epoch is incremented this is set to the stamp
 // from the previous increment (which is now safe to collect).
-TS done_stamp = -1;
+TS done_stamp = global_stamp.get_stamp();
 
 template <typename F>
 auto with_snapshot(F f) {
