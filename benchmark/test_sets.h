@@ -61,7 +61,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   wait_before_retrying_lock = P.getOption("-wait");
 
   // number of samples 
-  long m = P.getOptionIntValue("-m", fixed_time ? 20000000 * std::min(p, 100) : n);
+  long m = P.getOptionIntValue("-m", fixed_time ? (long) (trial_time * 10000000 * std::min(p, 100)) : n);
     
   // check consistency, on by default
   bool do_check = ! P.getOption("-no_check");
