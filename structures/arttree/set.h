@@ -49,7 +49,7 @@ struct Set {
 
     // an empty "full" node
     full_node() : header(Full) {
-      for (int i=0; i < 256; i++) children[i].init(nullptr);
+      //for (int i=0; i < 256; i++) children[i].init(nullptr);
     }
   };
 
