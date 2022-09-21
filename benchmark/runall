@@ -2,36 +2,66 @@
 #
 # run all tests
 #
-
 import os
 import sys
 import socket
 from datetime import date
+
+short = False
+if (sys.argv.count("-short") > 0) : short = True
+
+if short :
+    update_percents = [5, 50]
+    zipfians = [0, .99]
+    rounds = 3
+    time = 1.0
+    lists = ["list"]
+    list_sizes = [10,1000]
+    trees = ["leaftree", "btree", "hash_block", "arttree"]
+    tree_sizes = [1000,10000000]
+    suffixes_all = ["_lock","","_per_lock","_per"]
+    lists_snap = []
+    suffixes_snap = []
+    lists_other = []
+    suffixes_other = []
+else :
+    update_percents = [5,50]
+    zipfians = [0, .99]
+    rounds = 3
+    time = 2.0
+    lists = ["list", "dlist"]
+    list_sizes = [10,100,1000]
+    trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
+    tree_sizes = [1000,100000,10000000,100000000]
+    suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_per_lock_hl","_per_hl"]
+    lists_snap = ["list_onelock"]
+    suffixes_snap = ["_lock","","_per_lock","_per"]
+    lists_other = ["harris_list", "harris_list_opt"]
+    suffixes_other = [""]
 
 today = date.today().strftime("%m_%d_%y")
 hostname = socket.gethostname()
 
 print(hostname)
 print(today)
-filename = "../../timings/" + hostname + "_" + today
+if short :
+    filename = "../../timings/short_" + hostname + "_" + today
+else :
+    filename = "../../timings/" + hostname + "_" + today
+    
 if os.path.exists(filename) :
     os.remove(filename)
 
-lists = ["list", "dlist"]
-lists_snap = ["list_onelock"]
-lists_other = ["harris_list", "harris_list_opt"]
-trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
-list_sizes = [10,100,1000]
-update_percents = [20]
-tree_sizes = [1000,100000,10000000,100000000]
-zipfians = [0, .99]
-
 test_only = False
 if (sys.argv.count("-test") > 0):
-    print("test only")
     test_only = True
-rounds = 3
-
+    rounds = 1
+    time = .1
+    zipfians = [.99]
+    update_percents = [50]
+    tree_sizes = [100,10000000]
+    list_sizes = [10,1000]
+    
 def detectCPUs():
     """
      Detects the number of CPUs on a system. Cribbed from pp.
@@ -64,7 +94,10 @@ def getProcessors() :
     return processors
 
 def runstring(op) :
-    cmd = op + " >> " + filename
+    if test_only :
+        cmd = op
+    else :
+        cmd = op + " >> " + filename
     os.system("echo \"" + cmd + "\"")
     x = os.system(cmd)
     if (x) :
@@ -76,20 +109,16 @@ def runtest(test,procs,n,z,u) :
     r = rounds
     str_update = "-u " + str(u) + " "
     str_zipfians = "-z " + str(z) + " "
-    str_rounds = " -r " + str(r) + " "
+    str_rounds = "-r " + str(r) + " "
+    str_time = "-tt " + str(time) + " "
     str_n = "-n " + str(n) + " "
-    if (test_only) :
-        r = 1
-    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + str_rounds + str_n + str_update + str_zipfians)
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians)
 
 def runtests(test,procs,n,z) :
     runtest(test,procs,n,z,"")
 
 def run_tests(tests,suffixes,sizes) :
     zipf = zipfians
-    if (test_only) :
-        sizes = sizes[0:1]
-        zipf = [zipfians[-1]]
     for test in tests :
         for n in sizes :
             for z in zipf :
@@ -100,9 +129,6 @@ def run_tests(tests,suffixes,sizes) :
 try :
     processors = getProcessors()
     os.system("make -j")
-    suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_per_lock_hl","_per_hl"]
-    suffixes_snap = ["_lock","","_per_lock","_per"]
-    suffixes_other = [""]
     run_tests(lists,suffixes_all,list_sizes)
     run_tests(lists_snap,suffixes_snap,list_sizes)
     run_tests(lists_other,suffixes_other,list_sizes)

@@ -134,7 +134,7 @@ public:
     V* newv = newv_;
     V* newv_marked = newv;
 
-    //skip_if_done([&] {
+    skip_if_done([&] {
     if (newv_ == nullptr || commit(newv_->time_stamp.load() != tbd)) {
       newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
       newv_marked = ((newv_ == nullptr)
@@ -175,7 +175,7 @@ public:
     // free if allocated link was not used
     if (!succeeded && is_indirect((IT) newv_marked))
       link_pool.destruct((plink*) newv);
-    //		 });
+    		 });
   }
   
   V* operator=(V* b) {store(b); return b; }
