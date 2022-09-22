@@ -48,7 +48,7 @@ public:
   static_assert(sizeof(V) <= 4 || std::is_pointer<V>::value,
     "Type for mutable must be a pointer or at most 4 bytes");
   mutable_val(V v) : v(v) {}
-  mutable_val() {}
+  mutable_val() : v(0) {}
   void init(V vv) {v = vv;}
   V load() {return v.load();}
   V read() {return v.load();}
