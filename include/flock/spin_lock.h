@@ -55,6 +55,8 @@ public:
 
   template <typename Thunk>
   auto try_lock_result(Thunk f) {
+    // delay if fails, empirically picked best across data structures
+    const int delay = 600;  
     using RT = decltype(f());
     lock_entry current = lck.load();
     if (!current.is_locked()) { // unlocked
@@ -63,10 +65,14 @@ public:
 	RT result = f();
 	lck = newl.release_lock();  // release lock
 	return std::optional<RT>(result); 
-      } else return std::optional<RT>(); // fail
+      } else {
+	for (volatile int i = 0; i < delay; i++);
+	return std::optional<RT>(); // fail
+      }
     } else if (current.is_self_locked()) {// reentry
       return std::optional<RT>(f());
     } else {
+      for (volatile int i = 0; i < delay; i++);
       return std::optional<RT>(); // fail
     }
   }

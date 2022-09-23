@@ -220,7 +220,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
              }}, 1);
         double duration = t.stop();
 
-        if (finish && (duration < .5))
+        if (finish && (duration < trial_time/4))
           std::cout << "warning out of samples, finished in "
               << duration << " seconds" << std::endl;
 

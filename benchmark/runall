@@ -15,11 +15,11 @@ if short :
     zipfians = [0, .99]
     rounds = 3
     time = 1.0
-    lists = ["list"]
+    lists = ["list", "list_ro"]
     list_sizes = [10,1000]
     trees = ["leaftree", "btree", "hash_block", "arttree"]
     tree_sizes = [1000,10000000]
-    suffixes_all = ["_lock","","_per_lock","_per"]
+    suffixes_all = ["_lock","_per_lock","","_per"]
     lists_snap = []
     suffixes_snap = []
     lists_other = []
@@ -29,11 +29,11 @@ else :
     zipfians = [0, .99]
     rounds = 3
     time = 2.0
-    lists = ["list", "dlist"]
+    lists = ["list", "list_ro", "dlist"]
     list_sizes = [10,100,1000]
     trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
     tree_sizes = [1000,100000,10000000,100000000]
-    suffixes_all = ["_lock","","_per_lock","_per","_lock_hl","_hl","_per_lock_hl","_per_hl"]
+    suffixes_all = ["_lock","_per_lock","","_per","_lock_hl","_per_lock_hl","_hl","_per_hl"]
     lists_snap = ["list_onelock"]
     suffixes_snap = ["_lock","","_per_lock","_per"]
     lists_other = ["harris_list", "harris_list_opt"]
@@ -113,9 +113,6 @@ def runtest(test,procs,n,z,u) :
     str_time = "-tt " + str(time) + " "
     str_n = "-n " + str(n) + " "
     runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians)
-
-def runtests(test,procs,n,z) :
-    runtest(test,procs,n,z,"")
 
 def run_tests(tests,suffixes,sizes) :
     zipf = zipfians

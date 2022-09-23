@@ -7,21 +7,24 @@
 // Yuanhao Wei, Naama Ben-David, Guy E. Blelloch, Panagiota Fatourou, Eric Ruppert, Yihan Sun
 // Constant-time snapshots with applications to concurrent data structures
 // PPoPP 2021
-
 #pragma once
 #include "timestamps.h"
 #ifdef NoHelp
 template <typename F>
 bool skip_if_done_no_log(F f) {f(); return true;}
+template <typename T>
+T commit(T v) {return v;}
 #else
 #include "lf_log.h"
+template <typename T>
+T commit(T v) {return lg.commit_value(v).first;}
 #endif
 
 #define bad_ptr ((void*) ((1ul << 48) -1))
 struct persistent {
   std::atomic<TS> time_stamp;
-  void* next;
-  persistent() : time_stamp(tbd), next(bad_ptr) {}
+  void* next_version;
+  persistent() : time_stamp(tbd), next_version(bad_ptr) {}
 };
 
 template <typename V>
@@ -30,6 +33,7 @@ private:
   std::atomic<V*> v;
   // sets the timestamp in a version link if time stamp is TBD
   static V* set_stamp(V* x) {
+    assert(x != nullptr);
     if (x->time_stamp.load() == tbd) {
       TS ts = global_stamp.get_write_stamp();
       long old = tbd;
@@ -37,16 +41,6 @@ private:
     }
     return x;
   }
-
-#ifdef NoHelp
-  V* get_val() {return set_stamp(v.load());}
-  static TS get_stamp(V* u) { return u->time_stamp.load();}
-#else
-  V* get_val() {
-    return set_stamp(lg.commit_value_safe(v.load()).first);}
-  static TS get_stamp(V* u) {
-    return lg.commit_value(u->time_stamp.load()).first;}
-#endif
 
 public:
 
@@ -60,13 +54,13 @@ public:
     V* head = set_stamp(v.load());
     TS ls = local_stamp;
     while (head->time_stamp.load() > ls)
-      head = (V*) head->next;
+      head = (V*) head->next_version;
     return head;
   }
 
   V* load() {
     if (local_stamp != -1) return read_snapshot();
-    else return get_val();}
+    else return set_stamp(commit(v.load()));}
 
   V* read() {
     if (local_stamp != -1) return read_snapshot();
@@ -78,21 +72,26 @@ public:
   void validate() { set_stamp(v.load());}
   
   void store(V* newv) {
-    V* oldv = get_val();
+    V* oldv = commit(v.load());
+    if (newv == nullptr) {
+      std::cout << "recording with nullptr not allowed" << std::endl;
+      abort();
+    }
     // check that newv is only recorded once
-    if (get_stamp(newv) != tbd) {
+    if (commit(newv->time_stamp.load()) != tbd) {
       std::cout << "recording a second time not allowed" << std::endl;
       abort();
     }
 
     skip_if_done_no_log([&] { // for efficiency, correct without it
-      newv->next = (void*) oldv;
+      newv->next_version = (void*) oldv;
       v.compare_exchange_strong(oldv, newv);
       set_stamp(newv);
       // shortcut if appropriate
       if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
-	newv->next = oldv->next;
+	newv->next_version = oldv->next_version;
     });
   }
+
   V* operator=(V* b) {store(b); return b; }
 };

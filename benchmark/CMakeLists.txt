@@ -5,10 +5,10 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runall
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "blockleaftree" "btree" "avltree" "leaftree"
-		"list" "list_onelock" "dlist"
+		"list" "list_ro" "list_onelock" "dlist"
 		"hash" "hash_block")
 set(FLOCK_PER_BENCH "arttree" "blockleaftree" "btree" "leaftree"
-		"list" "list_onelock" "dlist"
+		"list" "list_ro" "list_onelock" "dlist"
 		"hash" "hash_block")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
