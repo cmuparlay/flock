@@ -116,7 +116,7 @@ public:
     else return shortcut_indirect(set_stamp(commit(v.load()))).first;}
 
   V* read() {  // only safe on journey
-    if (local_stamp != -1) read_snapshot();
+    //if (local_stamp != -1) read_snapshot();
     return shortcut_indirect(v.load()).first;
   }
 

@@ -126,6 +126,7 @@ def run_tests(tests,suffixes,sizes) :
 try :
     processors = getProcessors()
     os.system("make -j")
+    runstring("git rev-parse --short HEAD")
     run_tests(lists,suffixes_all,list_sizes)
     run_tests(lists_snap,suffixes_snap,list_sizes)
     run_tests(lists_other,suffixes_other,list_sizes)

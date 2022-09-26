@@ -63,8 +63,8 @@ public:
     else return set_stamp(commit(v.load()));}
 
   V* read() {
-    if (local_stamp != -1) return read_snapshot();
-    else return v.load();}
+    //if (local_stamp != -1) return read_snapshot();
+    return v.load();}
 
   V* read_cur() {
     return v.load();}
