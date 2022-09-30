@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 #include <parlay/primitives.h>
 #include <parlay/random.h>
@@ -39,6 +40,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   double trial_time = P.getOptionDoubleValue("-tt", 1.0);
 
   bool balanced_tree = P.getOption("-bt");
+  int range_size = P.getOptionIntValue("-a",0)*2;
   
   // number of distinct keys (keys will be selected among 2n distinct keys)
   long n = P.getOptionIntValue("-n", default_size);
@@ -107,6 +109,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
   } else {  // main test
     using key_type = unsigned long;
+    key_type max_key = std::numeric_limits<key_type>::max();
 
     // generate 2*n unique numbers in random order
     parlay::sequence<key_type> a;
@@ -116,10 +119,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
-    } else
+    } else {
+      max_key = nn;
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
 					   return i+1;}));
-
+    }
+    key_type gap = max_key/nn*range_size;
+    
     parlay::sequence<key_type> b;
     if (use_zipfian) { 
       Zipfian z(nn, zipfian_param);
@@ -128,7 +134,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       b = parlay::tabulate(m, [&] (int i) {return a[parlay::hash64(i) % nn]; });
 
     // parlay::parallel_for(0, m, [&] (size_t i) { assert(b[i] != 0); });
-
+    
     // initially set to all finds (0 = insert, 1 = delete, 2 = find)
     parlay::sequence<char> op_type(m, 2);
 
@@ -143,9 +149,9 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     }
     
     parlay::internal::timer t;
+    if (shuffle) os.shuffle(n);
 
     for (int i = 0; i < rounds; i++) {
-      if (shuffle) os.shuffle(n);
       long len;
       auto tr = os.empty(buckets);
       if (do_check) {
@@ -211,10 +217,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                  return;
                  //j = i*mp;
                }
-               if (op_type[j] == 0) {if (os.insert(tr, b[j], 123)) added++;}
-	       else if (op_type[j] == 1) {if (os.remove(tr, b[j])) added--;}
-               else {os.find(tr, b[j]);}
-               j++;
+	       if (op_type[j] == 2 && range_size == 0)
+		 os.find(tr, b[j]);
+	       else if (op_type[j] == 0) {
+		 if (os.insert(tr, b[j], 123)) added++;}
+	       else if (op_type[j] == 1) {
+		 if (os.remove(tr, b[j])) added--;}
+	       else {
+#ifdef Range_Search
+		 os.range(tr, b[j], std::min(b[j] + gap, max_key));
+#endif
+	       }
+	       j++;
                cnt++;
                total++;
              }}, 1);

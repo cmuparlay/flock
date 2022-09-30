@@ -46,15 +46,19 @@ public:
 
   persistent_ptr(V* v) : v(v) {}
   persistent_ptr(): v(nullptr) {}
-  void init(V* vv) {v = vv;}
+  void init(V* vv) {v = set_stamp(vv);}
 
   // reads snapshotted version (ls >= 0)
   V* read_snapshot() {
     // ensure time stamp is set
     V* head = set_stamp(v.load());
     TS ls = local_stamp;
-    while (head->time_stamp.load() > ls)
+    if (head == nullptr) abort();
+    while (head->time_stamp.load() > ls) {
+      if (head->next_version == bad_ptr) 
+	std::cout << "bad pointer: " << head->time_stamp.load() << ", " << ls << std::endl;
       head = (V*) head->next_version;
+    }
     return head;
   }
 
@@ -63,7 +67,7 @@ public:
     else return set_stamp(commit(v.load()));}
 
   V* read() {
-    //if (local_stamp != -1) return read_snapshot();
+    if (local_stamp != -1) return read_snapshot();
     return v.load();}
 
   V* read_cur() {
@@ -88,8 +92,8 @@ public:
       v.compare_exchange_strong(oldv, newv);
       set_stamp(newv);
       // shortcut if appropriate
-      if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
-	newv->next_version = oldv->next_version;
+      //if (oldv != nullptr && newv->time_stamp == oldv->time_stamp)
+      //newv->next_version = oldv->next_version;
     });
   }
 

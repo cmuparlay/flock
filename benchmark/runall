@@ -7,37 +7,64 @@ import sys
 import socket
 from datetime import date
 
-short = False
-if (sys.argv.count("-short") > 0) : short = True
+def getOption(str) :
+    return sys.argv.count(str) > 0
+
+def getArg(str, default) :
+  a = sys.argv
+  l = len(a)
+  for i in range(1, l) :
+    if (a[i] == str and  (i+1 != l)) :
+        return sys.argv[i+1]
+  return default
+
+all = getOption("-all")
+short = getOption("-short")
+
+suffixes_all = ["_lock","_per_lock","","_per"]
+if getOption("-hl") :
+    suffixes_all = suffixes_all + [s + "_hl" for s in suffixes_all]
+
+update_percents = [5, 50]
+if getOption("-twenty") : update_percents = [20]
+
+rounds = int(getArg("-r", 3));
+
+time = float(getArg("-t", 1.0));
+
+shuffle = getOption("-shuffle");
+
+if (getOption("-help") or getOption("-help")) :
+    print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
+
+zipfians = [0, .99]
+
+suffixes_other = []
 
 if short :
-    update_percents = [5, 50]
-    zipfians = [0, .99]
-    rounds = 3
-    time = 1.0
     lists = ["list", "list_ro"]
     list_sizes = [10,1000]
-    trees = ["leaftree", "btree", "hash_block", "arttree"]
+    trees = ["btree", "hash_block", "arttree"]
     tree_sizes = [1000,10000000]
-    suffixes_all = ["_lock","_per_lock","","_per"]
     lists_snap = []
     suffixes_snap = []
     lists_other = []
-    suffixes_other = []
-else :
-    update_percents = [5,50]
-    zipfians = [0, .99]
-    rounds = 3
-    time = 2.0
+elif all :
     lists = ["list", "list_ro", "dlist"]
     list_sizes = [10,100,1000]
     trees = ["leaftree", "btree", "blockleaftree", "hash", "hash_block", "arttree"]
     tree_sizes = [1000,100000,10000000,100000000]
-    suffixes_all = ["_lock","_per_lock","","_per","_lock_hl","_per_lock_hl","_hl","_per_hl"]
     lists_snap = ["list_onelock"]
-    suffixes_snap = ["_lock","","_per_lock","_per"]
+    suffixes_snap = ["_lock","_per_lock","","_per"]
     lists_other = ["harris_list", "harris_list_opt"]
-    suffixes_other = [""]
+else :
+    lists = ["list", "list_ro", "dlist"]
+    list_sizes = [10,100,1000]
+    trees = ["leaftree", "btree", "hash_block", "arttree"]
+    tree_sizes = [1000,100000,10000000]
+    lists_snap = []
+    suffixes_snap = []
+    lists_other = []
 
 today = date.today().strftime("%m_%d_%y")
 hostname = socket.gethostname()
@@ -106,21 +133,22 @@ def runstring(op) :
     
 def runtest(test,procs,n,z,u) :
     num_threads = maxcpus-1
-    r = rounds
     str_update = "-u " + str(u) + " "
     str_zipfians = "-z " + str(z) + " "
-    str_rounds = "-r " + str(r) + " "
+    str_rounds = "-r " + str(rounds) + " "
     str_time = "-tt " + str(time) + " "
     str_n = "-n " + str(n) + " "
-    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians)
+    if shuffle : str_other = "-shuffle "
+    else : str_other = ""
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians + str_other)
 
 def run_tests(tests,suffixes,sizes) :
     zipf = zipfians
     for test in tests :
         for n in sizes :
-            for z in zipf :
-                for u in update_percents :
-                    for suffix in suffixes:
+            for u in update_percents :
+                for suffix in suffixes:
+                    for z in zipf :
                         runtest(test + suffix, maxcpus, n, z, u)
 
 try :

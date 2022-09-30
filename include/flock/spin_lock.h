@@ -6,6 +6,8 @@
 //   wait_lock() -> void
 //   is_locked() -> bool
 
+#include <parlay/parallel.h> // needed for worker_id
+
 #include "defs.h"
 #include <atomic>
 #include<chrono>

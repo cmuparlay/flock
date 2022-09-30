@@ -95,7 +95,9 @@ struct timestamp_read_write {
   // these were picked empirically for a particular machine (aware)
   //static constexpr int write_delay = 1500;
   //static constexpr int read_delay = 150;
-  
+
+  TS get_stamp() {return stamp.load();}
+
   inline TS get_write_stamp() {
     TS s = stamp.load();
     if (s % 2 == 1) return s;
@@ -124,7 +126,8 @@ struct timestamp_read_write {
   timestamp_read_write() : stamp(1) {}
 };
 
-timestamp_simple global_stamp;
+//timestamp_simple global_stamp;
+timestamp_read_write global_stamp;
 const TS tbd = std::numeric_limits<TS>::max();
 thread_local TS local_stamp{-1};
 

@@ -1,5 +1,6 @@
 #include <limits>
 #define Recorded_Once 1
+#define Range_Search 1
 #include <flock/flock.h>
 #include <parlay/primitives.h>
 
@@ -51,8 +52,7 @@ struct Set {
     ptr_type<node> children[node_block_size];
     lock_type lck;
     
-    int find(K k) {
-      uint i=0;
+    int find(K k, uint i=0) {
       while (i < header::size-1 && keys[i] <= k) i++;
       return i;
     }
@@ -223,6 +223,11 @@ struct Set {
       else return keyvals[i].value;
     }
 
+    int prev(K k, int i=0) {
+      while (i < header::size && keyvals[i].key < k) i++;
+      return i;
+    }
+    
     leaf(int size) :
       header{true,
 	size == leaf_min_size ? isUnder : (size == leaf_block_size ? isOver : OK),
@@ -537,6 +542,63 @@ struct Set {
       }});
   }
 
+  void range_internal_(node* a, int& accum,
+  		      std::optional<K> start, std::optional<K> end) {
+    if (a->is_leaf) {
+      leaf* la = (leaf*) a;
+      int s = 0;
+      int e = la->size;
+      if (start.has_value()) s = la->prev(start.value(), s);
+      if (end.has_value()) e = la->prev(end.value(), s);
+      for (int i = s; i < e; i++) accum++; // accum.push_back(la->keyvals[i]);
+    } else {
+      int s = 0;
+      int e = a->size;
+      if (start.has_value()) s = a->find(start.value(), s);
+      if (end.has_value()) e = a->find(end.value(), s);
+      if (s == e) range_internal_(a->children[s].read(),accum,start,end);
+      else {
+  	std::optional<K> empty = {};
+  	range_internal_(a->children[s].read(), accum, start, empty);
+  	for (int i = s+1; i < e; i++)
+  	  range_internal_(a->children[s].read(), accum, empty, empty);
+  	range_internal_(a->children[e].read(), accum, empty, end);
+      }
+    }
+  }
+
+  void range_internal(node* a, int& accum, K start, K end) {
+    while (true) {
+      if (a->is_leaf) {
+	leaf* la = (leaf*) a;
+	int s = la->prev(start, 0);
+	int e = la->prev(end, s);
+	for (int i = s; i < e; i++) accum++;
+	//accum.push_back(la->keyvals[i]);
+	return;
+      }
+      int s = a->find(start);
+      int e = a->find(end, s);
+      if (s == e) a = a->children[s].read();
+      else {
+	for (int i = s; i <= e; i++) 
+	  range_internal(a->children[i].read(), accum, start, end);
+	return;
+      }
+    }
+  }
+
+  auto range(node* root, K start, K end) {
+    return with_snap([=] {
+			   //std::vector<KV> result;
+      int result = 0;
+      //range_internal_(root, result, std::optional<K>(start),
+      //std::optional<K>(end));
+      range_internal(root, result, start, end);
+      return result;
+    });
+  }
+    
   // old version, not used
   std::optional<V> find_(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
