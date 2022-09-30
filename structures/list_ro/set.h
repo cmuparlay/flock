@@ -1,3 +1,13 @@
+// A "recorded once" version of concurrent linked lists. A pointer to
+// every node is only stored once into a previous existing node.  This
+// requires an extra copy on the remove.  In particular the node after
+// the node being removed is copied so it is not recorded a second
+// time.
+
+// Currently uses max possible key as sentinal.  Should probably
+// change in case user needs the max possible key, and to make generic
+// acros key types.
+
 #include <limits>
 #define Recorded_Once 1
 #include <flock/flock.h>
@@ -5,22 +15,24 @@
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-  K key_max = std::numeric_limits<K>::max();
+  constexpr static K key_max = std::numeric_limits<K>::max();
 
   struct alignas(32) node : ll_head {
     ptr_type<node> next;
     K key;
     V value;
-    lock_type lck;
+    bool is_end;
     write_once<bool> removed;
-    node(K key, V value, node* next)
-      : key(key), value(value), next(next), removed(false) {};
+    lock_type lck;
+    node(K key, V value, node* next, bool is_end)
+      : key(key), value(value), next(next), is_end(is_end), removed(false) {}
+    node() : key(key_max), is_end(false), removed(false) {}
+    node(node* n) // copy from pointer
+      : key(n->key), value(n->value), is_end(n->is_end), removed(false),
+      next(n->is_end ? nullptr : n->next.load()) {}
   };
 
   memory_pool<node> node_pool;
-
-  size_t max_iters = 10000000;
 
   auto find_location(node* root, K k) {
     node* cur = root;
@@ -38,10 +50,10 @@ struct Set {
     return with_epoch([=] {
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
-	if (nxt->key == k) return false; //already there
+	if (!nxt->is_end && nxt->key == k) return false; //already there
 	if (cur->lck.try_lock([=] {
 	      if (!cur->removed.load() && (cur->next).load() == nxt) {
-		auto new_node = node_pool.new_obj(k, v, nxt);
+		auto new_node = node_pool.new_obj(k, v, nxt, false);
 		cur->next = new_node; // splice in
 		return true;
 	      } else return false;}))
@@ -53,7 +65,8 @@ struct Set {
     return with_epoch([=] {
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
-	if (k != nxt->key) return false; // not found
+	if (nxt->is_end || k != nxt->key) return false; // not found
+	// triply nested lock to grab cur, nxt, and nxt->next
         if (cur->lck.try_lock([=] {
           if (cur->removed.load() || (cur->next).load() != nxt) return false;
 	  return nxt->lck.try_lock([=] {
@@ -61,11 +74,7 @@ struct Set {
 	    return nxtnxt->lck.try_lock([=] {
 	      nxt->removed = true;
 	      nxtnxt->removed = true;
-	      auto new_node = node_pool.new_init([=] (node* r) {
-			   // if tail then need to point to self
-			   if (r->next.read() == nxtnxt) r->next.init(r);},
-		nxtnxt->key, nxtnxt->value, nxtnxt->next.load());
-	      cur->next = new_node; // splice in
+	      cur->next = node_pool.new_obj(nxtnxt); // copy nxt->next
 	      node_pool.retire(nxt);
 	      node_pool.retire(nxtnxt); 
 	      return true;
@@ -79,22 +88,24 @@ struct Set {
     return with_epoch([&] () -> std::optional<V> {
 	auto [cur, nxt] = find_location(root, k);
 	(cur->next).validate();
-	if (nxt->key == k) return nxt->value; 
+	if (!nxt->is_end && nxt->key == k) return nxt->value; 
 	else return {};
       });
   }
 
   node* empty() {
-    node* tail = node_pool.new_obj(key_max, 0, nullptr);
-    tail->next = tail;
-    return node_pool.new_obj(key_min, 0, tail);
+    node* tail = node_pool.new_obj();
+    tail->is_end = true;
+    node* head = node_pool.new_obj();
+    head->next.init(tail);
+    return head;
   }
 
   node* empty(size_t n) { return empty(); }
 
   void print(node* p) {
     node* ptr = (p->next).load();
-    while (ptr->key != key_max) {
+    while (!ptr->is_end) {
       std::cout << ptr->key << ", ";
       ptr = (ptr->next).load();
     }
@@ -102,17 +113,17 @@ struct Set {
   }
 
   void retire(node* p) {
-    node* nxt = p->next.load();
-    if (nxt != p) retire(nxt);
+    if (!p->is_end) retire(p->next.load());
     node_pool.retire(p);
   }
   
   long check(node* p) {
-    if (p->key != key_min) std::cout << "bad head" << std::endl;
     node* ptr = (p->next).load();
-    K k = key_min;
-    long i = 0;
-    while (ptr->key != key_max) {
+    if (ptr->is_end) return 0;
+    K k = ptr->key;
+    ptr = (ptr->next).load();
+    long i = 1;
+    while (!ptr->is_end) {
       i++;
       if (ptr->key <= k) {
 	std::cout << "bad key: " << k << ", " << ptr->key << std::endl;
@@ -121,7 +132,6 @@ struct Set {
       k = ptr->key;
       ptr = (ptr->next).load();
     }
-    if (ptr == nullptr) std::cout << "bad tail: " << std::endl;
     return i;
   }
 

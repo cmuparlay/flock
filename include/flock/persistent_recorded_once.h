@@ -46,7 +46,8 @@ public:
 
   persistent_ptr(V* v) : v(v) {}
   persistent_ptr(): v(nullptr) {}
-  void init(V* vv) {v = set_stamp(vv);}
+  void init(V* vv) {
+    v = set_stamp(vv);}
 
   // reads snapshotted version (ls >= 0)
   V* read_snapshot() {
