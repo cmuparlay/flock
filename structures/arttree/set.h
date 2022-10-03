@@ -1,11 +1,8 @@
-#include <limits>
 #include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
 struct Set {
-
-  K key_min = std::numeric_limits<K>::min();
 
   enum node_type : char {Full, Indirect, Sparse, Leaf};
 

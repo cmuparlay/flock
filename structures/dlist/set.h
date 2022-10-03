@@ -1,44 +1,49 @@
 // doubly linked list
-#include <limits>
 #include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-  K key_max = std::numeric_limits<K>::max();
-
-  struct node : ll_head, lock_type {
-    ptr_type<node> next;
-    ptr_type_<node> prev;
+  struct alignas(64) node : ll_head, lock_type {
+    bool is_end;
     write_once<bool> removed;
+    ptr_type_<node> prev;
+    ptr_type<node> next;
     K key;
     V value;
     node(K key, V value, node* next, node* prev)
-      : key(key), value(value), removed(false), next(next), prev(prev) {};
+      : key(key), value(value), is_end(false), removed(false),
+      next(next), prev(prev) {};
+    node(node* next)
+      : is_end(true), removed(false), next(next), prev(nullptr) {}
   };
 
   memory_pool<node> node_pool;
 
-  size_t max_iters = 10000000;
-  
   auto find_location(node* root, K k) {
     node* nxt = (root->next).read();
     while (true) {
       node* nxt_nxt = (nxt->next).read(); // prefetch
-      if (nxt->key >= k) break;
+      if (nxt->is_end || nxt->key >= k) break;
       nxt = nxt_nxt;
     }
     return nxt;
   }
 
+  
+
+  static constexpr int init_delay=200;
+  static constexpr int max_delay=2000;
+
   bool insert(node* root, K k, V v) {
     return with_epoch([&] {
+      int delay = init_delay;
       while (true) {
 	node* next = find_location(root, k);
-	if (next->key == k) return false;
+	if (!next->is_end && next->key == k) return false;
 	node* prev = (next->prev).load();
-	if (prev->key < k && // fails if something inserted before in meantime
+	// fails if something inserted before in meantime
+	if ((prev->is_end || prev->key < k) && 
 	    prev->try_lock([=] {
 		if (!prev->removed.load() && (prev->next).load() == next) {
 		  auto new_node = node_pool.new_obj(k, v, next, prev);
@@ -47,15 +52,18 @@ struct Set {
 		  return true;
 		} else return false;}))
 	  return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }
     });
   }
 
   bool remove(node* root, K k) {
     return with_epoch([&] {
+      int delay = init_delay;
       while (true) {
 	node* loc = find_location(root, k);
-	if (loc->key != k) return false;
+	if (loc->is_end || loc->key != k) return false;
 	node* prev = (loc->prev).load();
 	if (prev->try_lock([=] {
 	      if (prev->removed.load() || (prev->next).load() != loc)
@@ -67,9 +75,10 @@ struct Set {
 		  next->prev = prev;
 		  node_pool.retire(loc);
 		  return true;
-		});})) {
+		});}))
 	  return true;
-	}
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }
     });
   }
@@ -77,15 +86,14 @@ struct Set {
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
 	node* loc = find_location(root, k);
-	if (loc->key == k) return loc->value; 
+	if (!loc->is_end && loc->key == k) return loc->value; 
 	else return {};
       });
   }
 
   node* empty() {
-    node* tail = node_pool.new_obj(key_max, 0, nullptr, nullptr);
-    node* head = node_pool.new_obj(key_min, 0, tail, nullptr);
-    tail->next = tail;
+    node* tail = node_pool.new_obj(nullptr);
+    node* head = node_pool.new_obj(tail);
     tail->prev = head;
     return head;
   }
@@ -94,25 +102,25 @@ struct Set {
 
   void print(node* p) {
     node* ptr = (p->next).load();
-    while (ptr->key != key_max) {
+    while (!ptr->is_end) {
       std::cout << ptr->key << ", ";
       ptr = (ptr->next).load();
     }
     std::cout << std::endl;
   }
 
-  void retire(node* p) {
-    node* nxt = p->next.load();
-    if (nxt != p) retire(nxt);
+  void retire(node* p, bool is_start = true) {
+    if (is_start || !p->is_end) retire(p->next.load(), false);
     node_pool.retire(p);
   }
-  
+
   long check(node* p) {
-    if (p->key != key_min) std::cout << "bad head" << std::endl;
     node* ptr = (p->next).load();
-    K k = key_min;
-    long i = 0;
-    while (ptr != nullptr && ptr->key != key_max) {
+    if (ptr->is_end) return 0;
+    K k = ptr->key;
+    ptr = (ptr->next).load();
+    long i = 1;
+    while (!ptr->is_end) {
       i++;
       if (ptr->key <= k) {
 	std::cout << "bad key: " << k << ", " << ptr->key << std::endl;
@@ -121,7 +129,6 @@ struct Set {
       k = ptr->key;
       ptr = (ptr->next).load();
     }
-    if (ptr == nullptr) std::cout << "bad tail: " << std::endl;
     return i;
   }
 

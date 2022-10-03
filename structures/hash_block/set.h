@@ -104,8 +104,11 @@ struct Set {
     return x;
   }
   
+  static constexpr int init_delay=200;
+  static constexpr int max_delay=2000;
 
   bool insert_at(slot* s, K k, V v) {
+    int delay = init_delay;
     while (true) {
       node* x = s->ptr.load();
       if (x != nullptr && x->find(k) != -1) return false;
@@ -115,6 +118,8 @@ struct Set {
 	    retire_node(x);
 	    return true;}))
 	return true;
+      	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
     }
   }
 
@@ -124,6 +129,7 @@ struct Set {
   }
   
   bool remove_at(slot* s, K k) {
+    int delay = init_delay;
     while (true) {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
@@ -133,6 +139,8 @@ struct Set {
 	    retire_node(x);
 	    return true;}))
 	return true;
+      for (volatile int i=0; i < delay; i++);
+      delay = std::min(2*delay, max_delay);
     }
   }
 

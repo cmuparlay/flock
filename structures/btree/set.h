@@ -1,4 +1,3 @@
-#include <limits>
 #define Recorded_Once 1
 #define Range_Search 1
 #include <flock/flock.h>
@@ -500,6 +499,9 @@ struct Set {
     }
   }
 
+  static constexpr int init_delay=200;
+  static constexpr int max_delay=2000;
+
   // Inserts by finding the leaf containing the key, and inserting
   // into the leaf.  Since the find ensures the leaf is not full,
   // there will be space for the new key.  It needs a lock on the
@@ -509,6 +511,7 @@ struct Set {
   // returns false and does no update if already in tree
   bool insert(node* root, K k, V v) {
     return with_epoch([=] {
+      int delay = init_delay;
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
 	if (l->find(k).has_value()) return false; // already there
@@ -516,9 +519,11 @@ struct Set {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
 		return false;
 	      p->children[cidx] = (node*) insert_leaf(l, k, v);
-        leaf_pool.retire(l);
+	      leaf_pool.retire(l);
 	      return true;
 	    })) return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
 
@@ -529,8 +534,9 @@ struct Set {
   // not found.
   bool remove(node* root, K k) {
     return with_epoch([=] {
+      int delay = init_delay;
       while (true) {
-	auto [p, cidx, l] = find_and_fix(root, k);
+        auto [p, cidx, l] = find_and_fix(root, k);
 	if (!l->find(k).has_value()) return false; // not there
 	if (p->lck.try_lock([=] {
 	      if (p->removed.load() || (leaf*) p->children[cidx].load() != l)
@@ -539,6 +545,8 @@ struct Set {
 	      leaf_pool.retire(l);
 	      return true;
 	    })) return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
 
@@ -665,9 +673,9 @@ struct Set {
   rtup check_recursive(node* p, bool is_root) {
     if (p->is_leaf) {
       leaf* l = (leaf*) p;
-      K minv = std::numeric_limits<K>::max();
-      K maxv = std::numeric_limits<K>::min();
-      for (int i=0; i < l->size; i++) {
+      K minv = l->keyvals[0].key;
+      K maxv = l->keyvals[0].key;
+      for (int i=1; i < l->size; i++) {
 	minv = std::min(minv, l->keyvals[i].key);
 	maxv = std::max(minv, l->keyvals[i].key);
       }

@@ -1,18 +1,18 @@
-#include <limits>
 #include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-
   // common header for internal nodes and leaves
   struct header : ll_head {
     K key;
     bool is_leaf;
+    bool is_sentinal;
     write_once<bool> removed; // not used for leaves, but fits here
     header(K key, bool is_leaf)
-      : key(key), is_leaf(is_leaf), removed(false) {}
+      : key(key), is_leaf(is_leaf), is_sentinal(false), removed(false) {}
+    header(bool is_sentinal) :
+      is_leaf(is_sentinal), is_sentinal(is_sentinal), removed(false) {}
   };
 
   // internal node
@@ -21,11 +21,14 @@ struct Set {
     ptr_type<node> right;
     node(K k, node* left, node* right)
       : header{k,false}, left(left), right(right) {};
+    node(node* left) // for the root, only has a left pointer
+      : header{false}, left(left), right(nullptr) {};
   };
 
   struct leaf : header {
     V value;
     leaf(K k, V v) : header{k,true}, value(v) {};
+    leaf() : header{true} {}; // for the sentinal leaf
   };
 
   memory_pool<node> node_pool;
@@ -54,9 +57,10 @@ struct Set {
       node* prev_leaf = nullptr;
       while (true) {
 	auto [gp, gp_left, p, p_left, l] = find_location(root, k);
-	if ((!upsert && l->key == k) ||
-	    (upsert && prev_leaf != nullptr && prev_leaf->key == k &&
-	     l != prev_leaf))
+	if (!l->is_sentinal &&
+	    ((!upsert && l->key == k) ||
+	     (upsert && prev_leaf != nullptr && prev_leaf->key == k &&
+	      l != prev_leaf)))
 	  return false;
 	prev_leaf = l;
 	auto r = p->try_lock([=] {
@@ -65,7 +69,7 @@ struct Set {
 	      if (p->removed.load() || l_new != l) return false;
 	      node* new_l = (node*) leaf_pool.new_obj(k, v);
 	      if (k == l->key) *ptr = new_l; // update existing key (only if upsert)
-	      else *ptr = ((k > l->key) ?
+	      else *ptr = ((l->is_sentinal || k > l->key) ?
 			   node_pool.new_obj(k, l, new_l) :
 			   node_pool.new_obj(l->key, new_l, l));
 	      return true;});
@@ -78,7 +82,8 @@ struct Set {
        node* prev_leaf = nullptr;
        while (true) {
 	 auto [gp, gp_left, p, p_left, l] = find_location(root, k);
-	 if (k != l->key ||(prev_leaf != nullptr && prev_leaf != l))
+	 if (l->is_sentinal || k != l->key ||
+	     (prev_leaf != nullptr && prev_leaf != l))
 	   return false;
 	 prev_leaf = l;
 	 if (gp->try_lock([=] {
@@ -108,14 +113,13 @@ struct Set {
 	}
 	ptr->validate();
 	auto ll = (leaf*) l;
-	if (ll->key == k) return ll->value; 
+	if (!ll->is_sentinal && ll->key == k) return ll->value; 
 	else return {};
     });
   }
 
   node* empty() {
-    node* l = (node*) leaf_pool.new_obj(key_min, 0);
-    return node_pool.new_obj(0, l, nullptr);
+      return node_pool.new_obj((node*) leaf_pool.new_obj());
   }
 
   node* empty(size_t n) { return empty(); }
@@ -160,18 +164,20 @@ struct Set {
     using rtup = std::tuple<K, K, long>;
     std::function<rtup(node*)> crec;
     crec = [&] (node* p) {
+	     if (p->is_sentinal) return rtup(p->key, p->key, 0);
 	     if (p->is_leaf) return rtup(p->key, p->key, 1);
 	     K lmin,lmax,rmin,rmax;
 	     long lsum, rsum;
 	     parlay::par_do([&] () { std::tie(lmin,lmax,lsum) = crec((p->left).load());},
 			    [&] () { std::tie(rmin,rmax,rsum) = crec((p->right).load());});
-	     if (lmax >= p->key || rmin < p->key)
+	     if ((lsum !=0 && lmax >= p->key) || rmin < p->key)
 	       std::cout << "out of order key: " << lmax << ", " << p->key << ", " << rmin << std::endl;
-	     return rtup(lmin, rmax, lsum + rsum);
+	     if (lsum == 0) return rtup(p->key, rmax, rsum);
+	     else return rtup(lmin, rmax, lsum + rsum);
 	   };
     auto [minv, maxv, cnt] = crec(p->left.load());
     if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
-    return cnt-1;
+    return cnt;
   }
 
   void clear() {

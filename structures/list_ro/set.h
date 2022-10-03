@@ -8,14 +8,11 @@
 // change in case user needs the max possible key, and to make generic
 // acros key types.
 
-#include <limits>
 #define Recorded_Once 1
 #include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
-
-  constexpr static K key_max = std::numeric_limits<K>::max();
 
   struct alignas(32) node : ll_head {
     ptr_type<node> next;
@@ -26,10 +23,10 @@ struct Set {
     lock_type lck;
     node(K key, V value, node* next, bool is_end)
       : key(key), value(value), next(next), is_end(is_end), removed(false) {}
-    node() : key(key_max), is_end(false), removed(false) {}
+    node() : is_end(false), removed(false) {}
     node(node* n) // copy from pointer
-      : key(n->key), value(n->value), is_end(n->is_end), removed(false),
-      next(n->is_end ? nullptr : n->next.load()) {}
+      : key(n->key), value(n->value), is_end(n->is_end), removed(false) {
+      if (!n->is_end) next.init(n->next.load()); }
   };
 
   memory_pool<node> node_pool;
@@ -39,16 +36,20 @@ struct Set {
     node* nxt = (cur->next).read();
     while (true) {
       node* nxt_nxt = (nxt->next).read(); // prefetch
-      if (nxt->key >= k) break;
+      if (nxt->is_end || nxt->key >= k) break;
       cur = nxt;
       nxt = nxt_nxt;
     }
     return std::make_pair(cur, nxt);
   }
 
+  static constexpr int init_delay=200;
+  static constexpr int max_delay=2000;
+
   bool insert(node* root, K k, V v) {
     return with_epoch([=] {
       while (true) {
+	int delay = init_delay;
 	auto [cur, nxt] = find_location(root, k);
 	if (!nxt->is_end && nxt->key == k) return false; //already there
 	if (cur->lck.try_lock([=] {
@@ -58,11 +59,14 @@ struct Set {
 		return true;
 	      } else return false;}))
 	  return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
 
   bool remove(node* root, K k) {
     return with_epoch([=] {
+      int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
 	if (nxt->is_end || k != nxt->key) return false; // not found
@@ -80,6 +84,8 @@ struct Set {
 	      return true;
 	    });});}))
 	  return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }
     });
   }
