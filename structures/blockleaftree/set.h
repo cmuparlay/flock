@@ -1,4 +1,3 @@
-#include <limits>
 #include <flock/flock.h>
 #include "rebalance.h"
 
@@ -22,22 +21,23 @@ struct Set {
   static constexpr int block_size= 368/sizeof(KV) - 1; // to fit in 384 bytes
   //static constexpr int block_size= 240/sizeof(KV) - 1; // to fit in 256 bytes
 
-  K key_min = std::numeric_limits<K>::min();
-  K key_max = std::numeric_limits<K>::max();
-
   struct head : ll_head {
     bool is_leaf;
-    head(bool is_leaf) : is_leaf(is_leaf) {}
+    bool is_sentinal; // only used by leaf
+    write_once<bool> removed; // only used by node
+    head(bool is_leaf)
+      : is_leaf(is_leaf), is_sentinal(false), removed(false) {}
   };
 
   // mutable internal node
   struct node : head, lock_type {
-    write_once<bool> removed;
     K key;
     ptr_type<node> left;
     ptr_type<node> right;
     node(K k, node* left, node* right)
-      : key(k), head{false}, left(left), right(right), removed(false) {};
+      : key(k), head{false}, left(left), right(right) {};
+    node(node* left) // root node
+      : head{false}, left(left), right(nullptr) {};
   };
 
   // immutable leaf
@@ -95,6 +95,13 @@ struct Set {
 	      // if p has been removed, or l has changed, then exit
 	      if (p->removed.load() || ptr->load() != l) return false;
 	      leaf* new_l = leaf_pool.new_obj();
+	      // if the leaf is the left sentinal then create new node
+	      if (old_l->is_sentinal) {
+		new_l->size = 1;
+		new_l->keyvals[0] = KV(k,v);
+		(*ptr) = node_pool.new_obj(k, l, (node*) new_l);
+		return true;
+	      }
 
 	      // first insert into a new block
 	      int i=0;
@@ -118,7 +125,8 @@ struct Set {
 		  new_ll->keyvals[i] = new_l->keyvals[i+(block_size+1)/2];
 		new_l->size = (block_size+1)/2;
 		new_ll->size = block_size/2 + 1;
-		(*ptr) = node_pool.new_obj(new_ll->keyvals[0].key, (node*) new_l, (node*) new_ll);
+		(*ptr) = node_pool.new_obj(new_ll->keyvals[0].key,
+					   (node*) new_l, (node*) new_ll);
 	      } else {
 		new_l->size = old_l->size + offset;
 		(*ptr) = (node*) new_l;
@@ -212,9 +220,9 @@ struct Set {
 
   node* empty() {
     leaf* l = leaf_pool.new_obj();
-    l->size = 1;
-    l->keyvals[0] = KV(key_min, V());
-    return node_pool.new_obj(key_max, (node*) l, nullptr);
+    l->size = 0;
+    l->is_sentinal = true;
+    return node_pool.new_obj((node*) l);
   }
 
   node* empty(size_t n) { return empty(); }
@@ -248,9 +256,9 @@ struct Set {
     crec = [&] (node* p) {
 	     if (p->is_leaf) {
 	       leaf* l = (leaf*) p;
-	       K minv = key_max;
-	       K maxv = key_min;
-	       for (int i=0; i < l->size; i++) {
+	       K minv = l->keyvals[0].key;
+	       K maxv = l->keyvals[0].key;
+	       for (int i=1; i < l->size; i++) {
 		 minv = std::min(minv, l->keyvals[i].key);
 		 maxv = std::max(minv, l->keyvals[i].key);
 	       }
@@ -262,16 +270,17 @@ struct Set {
 	     long lsum,rsum;
 	     parlay::par_do([&] () { std::tie(lmin,lmax,lsum) = crec(l);},
 			    [&] () { std::tie(rmin,rmax,rsum) = crec(r);});
-	     if (lmax >= p->key || rmin < p->key) {
+	     if ((lsum > 0 && lmax >= p->key) || rmin < p->key) {
 	       std::cout << "bad value: " << lmax << ", " << p->key << ", " << rmin << std::endl;
 	       bad_val = true;
 	     }
 	     if (balanced) balance.check_balance(p, l, r);
-	     return rtup(lmin, rmax, lsum + rsum);
+	     if (lsum == 0) return rtup(p->key, rmax, rsum);
+	     else return rtup(lmin, rmax, lsum + rsum);
 	   };
     auto [minv, maxv, cnt] = crec(p->left.load());
     if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
-    return bad_val ? -1 : cnt-1;
+    return bad_val ? -1 : cnt;
   }
 
   void print(node* p) {
