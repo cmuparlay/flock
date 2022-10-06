@@ -225,7 +225,9 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 if (os.remove(tr, b[j])) added--;}
 	       else {
 #ifdef Range_Search
-		 os.range(tr, b[j], std::min(b[j] + gap, max_key));
+		 long count;
+		 auto addf = [&] (auto x) {count++;};
+		 os.range(tr, addf, b[j], std::min(b[j] + gap, max_key));
 #endif
 	       }
 	       j++;
