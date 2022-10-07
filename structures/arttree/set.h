@@ -1,5 +1,6 @@
 #include <flock/flock.h>
 #include <parlay/primitives.h>
+#define Range_Search 1
 
 template <typename K, typename V>
 struct Set {
@@ -34,7 +35,7 @@ struct Set {
     node_ptr children[256];
 
     bool is_full() {return false;}
-    
+
     node_ptr* get_child(K k) {
       auto b = get_byte(k, header::byte_num);
       return &children[b];}
@@ -271,7 +272,7 @@ struct Set {
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
 	  return false; // already in the tree
-	if (cptr != nullptr) { // child pointer exists (always true for full node)
+	if (cptr != nullptr) {// child pointer exists, always true for full node
 	    if (p->try_lock([=] {
 		// exit and retry if state has changed
 		if (p->removed.load() || cptr->load() != c) return false;
@@ -325,6 +326,62 @@ struct Set {
 	if (ll != nullptr) return std::optional<V>(ll->value); 
 	else return {};
       });
+  }
+
+  template<typename AddF>
+  void range_internal(node* a, AddF& add,
+		      std::optional<K> start, std::optional<K> end, int pos) {
+    if (a == nullptr) return;
+    std::optional<K> empty;
+    for (int i = pos; i < a->byte_num; i++) {
+      if (start == empty && end == empty) break;
+      if (start.has_value() && get_byte(start.value(), i) > get_byte(a->key, i)
+	  || end.has_value() && get_byte(end.value(), i) < get_byte(a->key, i))
+	return;
+      if (start.has_value() && get_byte(start.value(), i) < get_byte(a->key,i)) 
+	start = empty;
+      if (end.has_value() && get_byte(end.value(), i) > get_byte(a->key, i)) {
+	end = empty;
+      }
+    }
+    if (a->nt == Leaf) {
+      add(a->key, ((leaf*) a)->value);
+      return;
+    }
+    int sb = start.has_value() ? get_byte(start.value(), a->byte_num) : 0;
+    int eb = end.has_value() ? get_byte(end.value(), a->byte_num) : 255;
+    if (a->nt == Full) {
+      for (int i = sb; i <= eb; i++) 
+	range_internal(((full_node*) a)->children[i].read(), add,
+		       start, end, a->byte_num);
+    } else if (a->nt == Indirect) {
+      for (int i = sb; i < eb; i++) {
+	indirect_node* ai = (indirect_node*) a;
+	int o = ai->idx[i].read();
+	if (o != -1) range_internal(ai->ptr[o].read(), add,
+				    start, end, a->byte_num);
+      }
+    } else { // Sparse
+      sparse_node* as = (sparse_node*) a;
+      for (int i = 0; i < as->num_used; i++) {
+	int b = get_byte(as->keys[i], a->byte_num);
+	if (b >= sb && b <= eb)
+	  range_internal(as->ptr[i].read(), add, start, end, a->byte_num);
+      }
+    }
+  }		       
+
+  template<typename AddF>
+  void range(node* root, AddF& add, K start, K end) {
+    if (start > end) {
+      std::cout << "Error: range query with start > end" << std::endl;
+      abort();
+    }
+    with_snap([=] {
+      range_internal(root, add,
+		     std::optional<K>(start), std::optional<K>(end), 0);
+      return true;
+    });
   }
 
   node* empty() {

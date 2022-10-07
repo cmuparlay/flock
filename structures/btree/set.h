@@ -94,7 +94,7 @@ struct Set {
   node* copy_node(node* p) {
     node* new_r = copy(p->size,
 		       [=] (int i) {return p->keys[i];},
-		       [=] (int i) {return p->children[i].read();});
+		       [=] (int i) {return p->children[i].load();});
     p->removed = true;
     node_pool.retire(p);
     return new_r;
@@ -123,7 +123,7 @@ struct Set {
     assert(p->size == node_block_size);
     auto result = split_mid(p->size,
 			    [=] (int i) {return p->keys[i];},
-			    [=] (int i) {return p->children[i].read();});
+			    [=] (int i) {return p->children[i].load();});
     return result;
   }
 
@@ -134,8 +134,8 @@ struct Set {
 		     else if (i == c1->size-1) return k;
 		     else return c2->keys[i-c1->size];};
     auto get_child = [=] (int i) {
-		       if (i < c1->size) return c1->children[i].read();
-		       else return c2->children[i-c1->size].read();};
+		       if (i < c1->size) return c1->children[i].load();
+		       else return c2->children[i-c1->size].load();};
     auto result = split_mid(c1->size + c2->size, get_key, get_child);
     return result;
   }
@@ -148,8 +148,8 @@ struct Set {
 		     else if (i == c1->size-1) return k;
 		     else return c2->keys[i-c1->size];};
     auto get_child = [=] (int i) {
-		       if (i < c1->size) return c1->children[i].read();
-		       else return c2->children[i-c1->size].read();};
+		       if (i < c1->size) return c1->children[i].load();
+		       else return c2->children[i-c1->size].load();};
     node* new_p = copy(size, get_key, get_child); 
     return new_p;
   }
@@ -164,10 +164,10 @@ struct Set {
 		     else if (i == pos) return k;
 		     else return p->keys[i-1];};
     auto get_child = [=] (int i) {
-		       if (i < pos) return p->children[i].read();
+		       if (i < pos) return p->children[i].load();
 		       else if (i == pos) return c1;
 		       else if (i == pos+1) return c2;
-		       else return p->children[i-1].read();};
+		       else return p->children[i-1].load();};
     node* new_p = copy(size+1, get_key, get_child);
     p->removed = true;
     return new_p;
@@ -181,9 +181,9 @@ struct Set {
 		     if (i < pos) return p->keys[i];
 		     else return p->keys[i+1];};
     auto get_child = [=] (int i) {
-		       if (i < pos) return p->children[i].read();
+		       if (i < pos) return p->children[i].load();
 		       else if (i == pos) return c;
-		       else return p->children[i+1].read();};
+		       else return p->children[i+1].load();};
     node* new_p = copy(size-1, get_key, get_child);
     p->removed = true;
     return new_p;
@@ -200,7 +200,7 @@ struct Set {
     auto get_child = [=] (int i) {
 		       if (i == pos) return c1;
 		       else if (i == pos+1) return c2;
-		       else return p->children[i].read();};
+		       else return p->children[i].load();};
     node* new_p = copy(size, get_key, get_child);
     p->removed = true;
     return new_p;
@@ -557,7 +557,7 @@ struct Set {
 	leaf* la = (leaf*) a;
 	int s = la->prev(start, 0);
 	int e = la->prev(end, s);
-	for (int i = s; i < e; i++) add(la->keyvals[i]);
+	for (int i = s; i < e; i++) add(la->keyvals[i].key, la->keyvals[i].value);
 	return;
       }
       int s = a->find(start);

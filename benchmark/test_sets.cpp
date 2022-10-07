@@ -1,5 +1,5 @@
-using K = long;
-using V = long;
+using K = unsigned long;
+using V = unsigned long;
 
 #include "set.h"
 #include "test_sets.h"

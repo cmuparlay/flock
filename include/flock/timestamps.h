@@ -3,9 +3,6 @@
 #include <atomic>
 // code for timestamps for snapshots
 
-void inc_backoff(int &bk, int max) {if (bk < max) bk = round(1.1*bk);}
-void dec_backoff(int &bk) {if (bk > 1) bk = round(.9*bk);}
-
 using TS = long;
 
 struct timestamp_simple {
@@ -34,6 +31,8 @@ struct timestamp_simple {
 struct timestamp_simple_update {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
+
+  TS get_stamp() {return stamp.load();}
 
   TS get_read_stamp() {return stamp.load();}
 
@@ -101,7 +100,6 @@ struct timestamp_read_write {
   inline TS get_write_stamp() {
     TS s = stamp.load();
     if (s % 2 == 1) return s;
-    //for(volatile int j = 0; j < write_delay ; j++);
     for(volatile int j = 0; j < round(write_backoff) ; j++);
     if (s != stamp.load()) return s;
     if (stamp.compare_exchange_strong(s,s+1)) {
@@ -126,9 +124,10 @@ struct timestamp_read_write {
   timestamp_read_write() : stamp(1) {}
 };
 
-//timestamp_simple global_stamp;
+//timestamp_simple_update global_stamp;
 timestamp_read_write global_stamp;
 const TS tbd = std::numeric_limits<TS>::max();
+const TS zero_stamp = 0;
 thread_local TS local_stamp{-1};
 
 // this is updated by the epoch-based reclamation

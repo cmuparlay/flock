@@ -188,6 +188,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         }
         parlay::sequence<size_t> totals(p);
 	parlay::sequence<long> addeds(p);
+	parlay::sequence<long> range_counts(p);
         size_t mp = m/p;
         t.start();
         auto start = std::chrono::system_clock::now();
@@ -197,6 +198,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
              size_t j = i*mp;
              size_t total = 0;
 	     long added = 0;
+	     long range_count = 0;
              while (true) {
                // every once in a while check if time is over
                if (cnt == 100) { 
@@ -206,6 +208,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                  if (duration > trial_time || finish) {
                    totals[i] = total;
 		   addeds[i] = added;
+		   range_counts[i] = range_count;
                    return;
                  }
                }
@@ -214,8 +217,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                  finish = true;
                  totals[i] = total;
 		 addeds[i] = added;
+		 range_counts[i] = range_count;
                  return;
-                 //j = i*mp;
                }
 	       if (op_type[j] == 2 && range_size == 0)
 		 os.find(tr, b[j]);
@@ -225,9 +228,9 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 if (os.remove(tr, b[j])) added--;}
 	       else {
 #ifdef Range_Search
-		 long count;
-		 auto addf = [&] (auto x) {count++;};
-		 os.range(tr, addf, b[j], std::min(b[j] + gap, max_key));
+		 auto addf = [&] (K x, V y) {range_count++;};
+		 key_type end = (b[j] > max_key - gap) ? max_key : b[j] + gap;
+		 os.range(tr, addf, b[j], end);
 #endif
 	       }
 	       j++;
@@ -256,6 +259,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         if (do_check) {
 	  size_t final_cnt = os.check(tr);
 	  long updates = parlay::reduce(addeds);
+	  if (range_size > 0) {
+	    long range_sum = parlay::reduce(range_counts);
+	    long num_queries = num_ops * (100 - update_percent) / 100;
+	    std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
+	  }
+
 	  if (n + updates != final_cnt) {
 	    std::cout << "bad size: intial size = " << n 
 		      << ", added " << updates
