@@ -8,12 +8,12 @@ struct mutable_val {
 private:
   using IT = size_t;
   using TV = tagged<V>;
-  std::atomic<IT> v;
 
   IT get_val(Log &p) {
     return p.commit_value(v.load()).first; }
 
 public:
+  std::atomic<IT> v;
   static_assert(sizeof(V) <= 4 || std::is_pointer<V>::value,
     "Type for mutable must be a pointer or at most 4 bytes");
 
@@ -24,15 +24,14 @@ public:
   V load() {return TV::value(get_val(lg));}
   V read() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(lg), vv);}
-  // void store(V vv) {
-  //   auto old_v = get_val(lg);
-  //   if(v.load() == old_v) TV::cas(v, old_v, vv);
-  //   else if (!lg.is_empty()) lg.next_entry(); // because this gets called by TV::cas
-  // }
+  bool single_cas(V old_v, V new_v) {
+    IT old_t = v.load();
+    return (TV::value(old_t) == old_v &&
+	    TV::cas(v, old_t, new_v, true));}
   void cam(V oldv, V newv) {
-    V old_t = get_val(lg);
+    IT old_t = get_val(lg);
     if (TV::value(old_t) == oldv)
-      TV::cam(v, old_t, newv);}
+      TV::cas(v, old_t, newv);}
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning

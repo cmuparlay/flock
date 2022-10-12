@@ -352,13 +352,13 @@ struct Set {
     int eb = end.has_value() ? get_byte(end.value(), a->byte_num) : 255;
     if (a->nt == Full) {
       for (int i = sb; i <= eb; i++) 
-	range_internal(((full_node*) a)->children[i].read(), add,
+	range_internal(((full_node*) a)->children[i].read_snapshot(), add,
 		       start, end, a->byte_num);
     } else if (a->nt == Indirect) {
       for (int i = sb; i < eb; i++) {
 	indirect_node* ai = (indirect_node*) a;
-	int o = ai->idx[i].read();
-	if (o != -1) range_internal(ai->ptr[o].read(), add,
+	int o = ai->idx[i].read_snapshot();
+	if (o != -1) range_internal(ai->ptr[o].read_snapshot(), add,
 				    start, end, a->byte_num);
       }
     } else { // Sparse
@@ -366,7 +366,7 @@ struct Set {
       for (int i = 0; i < as->num_used; i++) {
 	int b = get_byte(as->keys[i], a->byte_num);
 	if (b >= sb && b <= eb)
-	  range_internal(as->ptr[i].read(), add, start, end, a->byte_num);
+	  range_internal(as->ptr[i].read_snapshot(), add, start, end, a->byte_num);
       }
     }
   }		       

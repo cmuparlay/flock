@@ -41,7 +41,7 @@ struct Set {
 	if (!nxt->is_end && nxt->key == k) return false; //already there
 	if (cur->lck.try_lock([=] {
 	      if (!cur->removed.load() && (cur->next).load() == nxt) {
-		auto new_node = node_pool.new_obj(k, v, nxt);
+		node* new_node = node_pool.new_obj(k, v, nxt);
 		cur->next = new_node; // splice in
 		return true;
 	      } else return false;}))

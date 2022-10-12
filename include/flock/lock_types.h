@@ -54,7 +54,10 @@ public:
   V read() {return v.load();}
   V read_cur() {return v.load();}
   void store(V vv) { v = vv;}
-  void cam(V oldv, V newv) {v->compare_exchange_strong(oldv,newv);}
+  bool single_cas(V old_v, V new_v) {
+    return v.compare_exchange_strong(old_v,new_v);}
+  void cam(V oldv, V newv) {
+    v.compare_exchange_strong(oldv,newv);}
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning

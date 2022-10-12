@@ -127,7 +127,7 @@ struct timestamp_read_write {
 //timestamp_simple_update global_stamp;
 timestamp_read_write global_stamp;
 const TS tbd = std::numeric_limits<TS>::max();
-const TS zero_stamp = 0;
+const TS zero_stamp = 1;
 thread_local TS local_stamp{-1};
 
 // this is updated by the epoch-based reclamation
