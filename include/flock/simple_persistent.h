@@ -84,7 +84,7 @@ public:
     set_stamp(head);
     while (head != nullptr && head->read_stamp() > ls)
       head = (V*) head->get_next();
-    return head->is_indirect() ? (V*) head->value : head;
+    return ((head != nullptr) && head->is_indirect()) ? (V*) ((plink*) head)->value : head;
   }
 
   V* load() {  // can be used anywhere
@@ -107,7 +107,7 @@ public:
   void store(V* ptr) {
     V* old_v = v.load();
     V* new_v = ptr;
-      
+
     if (ptr == nullptr || ptr->load_stamp() != tbd)
       new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
     else ptr->next_version = old_v;
@@ -115,8 +115,8 @@ public:
     v.cam(old_v, new_v);
     V* val = v.load();
     
-    if (old_v->is_indirect()) 
-      if (val != (V*) old_v->value)
+    if (old_v != nullptr && old_v->is_indirect()) 
+      if (val != (V*) ((plink*) old_v)->value)
 	link_pool.retire((plink*) old_v);
       else v.cam(val, new_v);
     

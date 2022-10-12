@@ -562,10 +562,10 @@ struct Set {
       }
       int s = a->find(start);
       int e = a->find(end, s);
-      if (s == e) a = a->children[s].read();
+      if (s == e) a = a->children[s].read_snapshot();
       else {
 	for (int i = s; i <= e; i++) 
-	  range_internal(a->children[i].read(), add, start, end);
+	  range_internal(a->children[i].read_snapshot(), add, start, end);
 	return;
       }
     }

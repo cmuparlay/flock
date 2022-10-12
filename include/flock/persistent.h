@@ -77,6 +77,12 @@ private:
     return newv;
   }
 
+  static V* set_zero(V* ptr) {
+    if (ptr != nullptr && ptr->time_stamp.load() == tbd)
+      ptr->time_stamp = zero_stamp;
+    return ptr;
+  }
+
   // For an indirect pointer if its stamp is older than done_stamp
   // then it will no longer be accessed and can be spliced out.
   // The splice needs to be done under a lock since it can race with updates
@@ -97,17 +103,17 @@ private:
 
 public:
 
-  persistent_ptr(V* v) : v(TV::init(v)) {}
+  persistent_ptr(V* v) : v(TV::init(set_zero(v))) {}
   persistent_ptr(): v(TV::init(0)) {}
-  void init(V* vv) {v = TV::init(vv);}
+  void init(V* vv) {v = TV::init(set_zero(vv));}
   // reads snapshotted version
   V* read_snapshot() {
     TS ls = local_stamp;
     IT head = v.load();
     set_stamp(head);
     // chase down version chain
-    while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls)
-      head = (IT) strip_mark_and_tag(head)->next_version;
+    while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls) 
+      head = strip_mark_and_tag(head)->next_version.load();
     return get_ptr(head);
   }
 

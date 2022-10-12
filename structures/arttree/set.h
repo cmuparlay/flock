@@ -357,7 +357,7 @@ struct Set {
     } else if (a->nt == Indirect) {
       for (int i = sb; i < eb; i++) {
 	indirect_node* ai = (indirect_node*) a;
-	int o = ai->idx[i].read_snapshot();
+	int o = ai->idx[i].read();
 	if (o != -1) range_internal(ai->ptr[o].read_snapshot(), add,
 				    start, end, a->byte_num);
       }

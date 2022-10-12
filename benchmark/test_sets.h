@@ -41,6 +41,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 
   bool balanced_tree = P.getOption("-bt");
   int range_size = P.getOptionIntValue("-a",0)*2;
+#ifndef Range_Search
+  if (range_size > 0) {
+    std::cout << "range search not implemented for this structure" << std::endl;
+    return;
+  }
+#endif
   
   // number of distinct keys (keys will be selected among 2n distinct keys)
   long n = P.getOptionIntValue("-n", default_size);

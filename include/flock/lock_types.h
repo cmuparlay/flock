@@ -52,6 +52,7 @@ public:
   void init(V vv) {v = vv;}
   V load() {return v.load();}
   V read() {return v.load();}
+  V read_snapshot() {return v.load();}
   V read_cur() {return v.load();}
   void store(V vv) { v = vv;}
   bool single_cas(V old_v, V new_v) {

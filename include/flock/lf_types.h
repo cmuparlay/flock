@@ -23,6 +23,7 @@ public:
   void init(V vv) {v = TV::init(vv);}
   V load() {return TV::value(get_val(lg));}
   V read() {return TV::value(v.load());}
+  V read_snapshot() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(lg), vv);}
   bool single_cas(V old_v, V new_v) {
     IT old_t = v.load();
