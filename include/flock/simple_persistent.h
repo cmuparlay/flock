@@ -113,15 +113,16 @@ public:
     else ptr->next_version = old_v;
 
     v.cam(old_v, new_v);
-    V* val = v.load();
     
-    if (old_v != nullptr && old_v->is_indirect()) 
+    if (old_v != nullptr && old_v->is_indirect()) {
+      V* val = v.load();
       if (val != (V*) ((plink*) old_v)->value)
 	link_pool.retire((plink*) old_v);
       else v.cam(val, new_v);
+    }
     
-    set_stamp(val);
-    shortcut_indirect(val);
+    set_stamp(new_v);
+    shortcut_indirect(new_v);
   }
   
   V* operator=(V* b) {store(b); return b; }
