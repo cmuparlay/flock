@@ -52,49 +52,34 @@ private:
     return ptr;
   }
 
-  #ifdef alwaysIndirect
-  static V* set_zero_stamp(V* ptr) {
-    V* new_v = (V*) link_pool.new_obj((persistent*) nullptr, ptr);
-    new_v->time_stamp = zero_stamp;
-    return new_v;
-  }
-#else
   static V* set_zero_stamp(V* ptr) {
     if (ptr != nullptr && ptr->read_stamp() == tbd)
       ptr->time_stamp = zero_stamp;
     return ptr;
   }
-#endif
 
   V* shortcut(plink* ptr) {
-    if (ptr->read_stamp() <= done_stamp)
-      if (v.single_cas((V*) ptr, (V*) pptr->value))
+    if (ptr->read_stamp() <= done_stamp) {
+      if (v.single_cas((V*) ptr, (V*) ptr->value))
 #ifdef NoHelp
-      	  link_pool.retire(pptr);
+      	  link_pool.retire(ptr);
 #else
-      link_pool.pool.retire(pptr);
+      link_pool.pool.retire(ptr);
 #endif
-      return (V*) pptr->value;
+      return (V*) ptr->value;
     }
-    return ptr;
+    return (V*) ptr;
   }
 
-#ifdef alwaysIndirect
-  V* get_ptr(V* ptr) { return ((plink*) ptr)->value;}
-#elseif NoShortcut
 V* get_ptr(V* ptr) {
   if (ptr != nullptr && ptr->is_indirect()) 
+#ifdef NoShortcut
     return (plink*) ptr->value;
-  else return ptr;
-}
 #else
-V* get_ptr(V* ptr) {
-  if (ptr != nullptr && ptr->is_indirect()) 
     return shortcut((plink*) ptr->value);
+#endif
   else return ptr;
 }
-#endif
-
 
 public:
 
@@ -127,15 +112,7 @@ public:
     set_stamp(v.load());     // ensure time stamp is set
   }
 
-#ifdef Indirect
-  void store(V* ptr) {
-    V* old_v = v.load();
-    V* new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
-    v.cam(old_v, new_v);
-    link_pool.retire((plink*) old_v);    
-    set_stamp(new_v);
-  }
-#elseif NoShortcut
+#ifdef NoShortcut
   void store(V* ptr) {
     V* old_v = v.load();
     V* new_v = ptr;
