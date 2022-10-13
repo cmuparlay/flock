@@ -1,5 +1,6 @@
 #pragma once
 using IT = size_t;
+#define NoShortcut 1
 
 #ifdef NoHelp
 template <typename F>
@@ -58,32 +59,28 @@ private:
     return ptr;
   }
 
-  V* shortcut(plink* ptr) {
-    if (ptr->read_stamp() <= done_stamp) {
-      if (v.single_cas((V*) ptr, (V*) ptr->value))
+  void shortcut(plink* ptr) {
+      if (ptr->read_stamp() <= done_stamp)
+        if (v.single_cas((V*) ptr, (V*) ptr->value))
 #ifdef NoHelp
       	  link_pool.retire(ptr);
 #else
       link_pool.pool.retire(ptr);
 #endif
-      return (V*) ptr->value;
-    }
-    return (V*) ptr;
   }
 
-V* get_ptr(V* ptr) {
-  if (ptr != nullptr && ptr->is_indirect()) 
-#ifdef NoShortcut
-    return (plink*) ptr->value;
-#else
-    return shortcut((plink*) ptr->value);
+  V* get_ptr(V* ptr) {
+    if (ptr != nullptr && ptr->is_indirect()) {
+#ifndef NoShortcut
+      shortcut((plink*) ptr);
 #endif
-  else return ptr;
-}
+      return (V*) ((plink*) ptr)->value;
+    } else return ptr;
+  }
 
 public:
 
-  persistent_ptr(): v(nullptr) {}
+  persistent_ptr(): v(0) {}
   persistent_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
   void init(V* ptr) {v = set_zero_stamp(ptr);}
   V* read_snapshot() {
@@ -111,24 +108,7 @@ public:
   void validate() {
     set_stamp(v.load());     // ensure time stamp is set
   }
-
-#ifdef NoShortcut
-  void store(V* ptr) {
-    V* old_v = v.load();
-    V* new_v = ptr;
-
-    if (ptr == nullptr || ptr->load_stamp() != tbd)
-      new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
-    else ptr->next_version = old_v;
-
-    v.cam(old_v, new_v);
-    
-    if (old_v != nullptr && old_v->is_indirect())
-      link_pool.retire((plink*) old_v);
-    
-    set_stamp(new_v);
-  }
-#else
+  
   void store(V* ptr) {
     V* old_v = v.load();
     V* new_v = ptr;
@@ -139,17 +119,23 @@ public:
     else ptr->next_version = old_v;
 
     v.cam(old_v, new_v);
-    
+
     if (old_v != nullptr && old_v->is_indirect()) {
+#ifdef NoShortcut
+      link_pool.retire((plink*) old_v);
+#else
       V* val = v.load();
       if (val != (V*) ((plink*) old_v)->value)
 	link_pool.retire((plink*) old_v);
       else v.cam(val, new_v);
+#endif
     }
     
     set_stamp(new_v);
+#ifndef NoShortcut
     if (use_indirect) shortcut((plink*) new_v);
-  }
 #endif
+  }
+  
   V* operator=(V* b) {store(b); return b; }
 };
