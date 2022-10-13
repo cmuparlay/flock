@@ -13,7 +13,7 @@
 #ifdef Recorded_Once
 #include "persistent_recorded_once.h"
 #else
-#include "simple_persistent.h"
+#include "persistent.h"
 #endif
 using ll_head = persistent;
 
