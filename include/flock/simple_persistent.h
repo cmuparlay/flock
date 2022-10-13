@@ -52,17 +52,23 @@ private:
     return ptr;
   }
 
+  #ifdef alwaysIndirect
+  static V* set_zero_stamp(V* ptr) {
+    V* new_v = (V*) link_pool.new_obj((persistent*) nullptr, ptr);
+    new_v->time_stamp = zero_stamp;
+    return new_v;
+  }
+#else
   static V* set_zero_stamp(V* ptr) {
     if (ptr != nullptr && ptr->read_stamp() == tbd)
       ptr->time_stamp = zero_stamp;
     return ptr;
   }
+#endif
 
-  V* shortcut_indirect(V* ptr) {
-    if (ptr != nullptr && ptr->is_indirect()) {
-      plink* pptr = (plink*) ptr;
-      if (ptr->read_stamp() <= done_stamp)
-        if (v.single_cas(ptr, (V*) pptr->value))
+  V* shortcut(plink* ptr) {
+    if (ptr->read_stamp() <= done_stamp)
+      if (v.single_cas((V*) ptr, (V*) pptr->value))
 #ifdef NoHelp
       	  link_pool.retire(pptr);
 #else
@@ -73,9 +79,26 @@ private:
     return ptr;
   }
 
+#ifdef alwaysIndirect
+  V* get_ptr(V* ptr) { return ((plink*) ptr)->value;}
+#elseif NoShortcut
+V* get_ptr(V* ptr) {
+  if (ptr != nullptr && ptr->is_indirect()) 
+    return (plink*) ptr->value;
+  else return ptr;
+}
+#else
+V* get_ptr(V* ptr) {
+  if (ptr != nullptr && ptr->is_indirect()) 
+    return shortcut((plink*) ptr->value);
+  else return ptr;
+}
+#endif
+
+
 public:
 
-  persistent_ptr(): v(0) {}
+  persistent_ptr(): v(nullptr) {}
   persistent_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
   void init(V* ptr) {v = set_zero_stamp(ptr);}
   V* read_snapshot() {
@@ -89,26 +112,52 @@ public:
 
   V* load() {  // can be used anywhere
     if (local_stamp != -1) return read_snapshot();
-    else return shortcut_indirect(set_stamp(v.load()));
+    else return get_ptr(set_stamp(v.load()));
   }
   
   V* read() {  // only safe on journey
-    return shortcut_indirect(v.read());
+    return get_ptr(v.read());
   }
 
   V* read_cur() {  // only safe on journey, outside of snapshot
-    return shortcut_indirect(v.read());
+    return get_ptr(v.read());
   }
 
   void validate() {
     set_stamp(v.load());     // ensure time stamp is set
   }
-  
+
+#ifdef Indirect
+  void store(V* ptr) {
+    V* old_v = v.load();
+    V* new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
+    v.cam(old_v, new_v);
+    link_pool.retire((plink*) old_v);    
+    set_stamp(new_v);
+  }
+#elseif NoShortcut
   void store(V* ptr) {
     V* old_v = v.load();
     V* new_v = ptr;
 
     if (ptr == nullptr || ptr->load_stamp() != tbd)
+      new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
+    else ptr->next_version = old_v;
+
+    v.cam(old_v, new_v);
+    
+    if (old_v != nullptr && old_v->is_indirect())
+      link_pool.retire((plink*) old_v);
+    
+    set_stamp(new_v);
+  }
+#else
+  void store(V* ptr) {
+    V* old_v = v.load();
+    V* new_v = ptr;
+    bool use_indirect = (ptr == nullptr || ptr->load_stamp() != tbd);
+
+    if (use_indirect)
       new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
     else ptr->next_version = old_v;
 
@@ -122,8 +171,8 @@ public:
     }
     
     set_stamp(new_v);
-    shortcut_indirect(new_v);
+    if (use_indirect) shortcut((plink*) new_v);
   }
-  
+#endif
   V* operator=(V* b) {store(b); return b; }
 };
