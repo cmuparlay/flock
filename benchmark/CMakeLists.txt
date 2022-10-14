@@ -4,12 +4,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runall
           DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
-set(FLOCK_BENCH "arttree" "blockleaftree" "btree" "avltree" "leaftree"
-		"list" "list_ro" "list_onelock" "dlist"
-		"hash" "hash_block")
-set(FLOCK_PER_BENCH "arttree" "blockleaftree" "btree" "leaftree"
-		"list" "list_ro" "list_onelock" "dlist"
-		"hash" "hash_block")
+set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist"
+		"hash_block")
+set(FLOCK_BENCH_RECORDED_ONCE "btree" "list_ro")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
 set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
@@ -21,30 +18,22 @@ function(add_benchmark NAME STRUCT_NAME DEFS)
   target_include_directories(${NAME} PRIVATE ${STRUCT_NAME})
 endfunction()
 
-foreach(bench ${FLOCK_BENCH})
-  add_benchmark(${bench} ${STRUCT_DIR}/${bench} "")
-#  add_benchmark(${bench}_hl ${STRUCT_DIR}/${bench} HashLock)
-  add_benchmark(${bench}_lock ${STRUCT_DIR}/${bench} NoHelp)
-#  add_benchmark(${bench}_lock_hl ${STRUCT_DIR}/${bench} "NoHelp;HashLock")
-endforeach()
 
-foreach(bench ${FLOCK_PER_BENCH})
-  add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} Persistent)
-  add_benchmark(${bench}_per_lock ${STRUCT_DIR}/${bench} "Persistent;NoHelp")
-#  add_benchmark(${bench}_per_hl ${STRUCT_DIR}/${bench} "Persistent;HashLock")
-#  add_benchmark(${bench}_per_lock_hl ${STRUCT_DIR}/${bench} "Persistent;NoHelp;HashLock")
+foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
+  add_benchmark(${bench}_ro ${STRUCT_DIR}/${bench} Recorded_Once)
 endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})
   add_benchmark(${bench} ${OTHER_LIST_DIR}/${bench} "")
 endforeach()
 
-function(add_multi NAME STRUCT_NAME DEFS)
-  add_executable(${NAME} hash_multi.cpp)
-  target_compile_definitions(${NAME} PRIVATE ${DEFS})
-  target_link_libraries(${NAME} PRIVATE flock)
-  target_include_directories(${NAME} PRIVATE ${STRUCT_NAME})
-endfunction()
+foreach(bench ${FLOCK_BENCH})
+  add_benchmark(${bench} ${STRUCT_DIR}/${bench} "")
+  add_benchmark(${bench}_indirect ${STRUCT_DIR}/${bench} "Persistent;FullyIndirect")
+  add_benchmark(${bench}_noshortcut ${STRUCT_DIR}/${bench} "Persistent;Simple;NoShortcut")
+  add_benchmark(${bench}_simple ${STRUCT_DIR}/${bench} "Persistent;Simple")
+  add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} "Persistent")
+  add_benchmark(${bench}_lock ${STRUCT_DIR}/${bench} "Persistent;NoHelp")
+endforeach()
 
-add_multi(hash_multi_lock ${STRUCT_DIR}/hash_block NoHelp)
-add_multi(hash_multi ${STRUCT_DIR}/hash_block "")
+

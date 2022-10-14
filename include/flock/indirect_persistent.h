@@ -33,6 +33,10 @@ private:
   mutable_val<plink*> v;
 
   static plink* set_stamp(plink* ptr) {
+    if (ptr == nullptr) {
+      std::cout << "should not be null in set_stamp" << std::endl;
+      abort();
+    }
     if (ptr->time_stamp.load() == tbd) {
       TS old_t = tbd;
       TS new_t = global_stamp.get_write_stamp();
@@ -51,6 +55,10 @@ public:
 
   persistent_ptr(): v(nullptr) {}
   persistent_ptr(V* ptr) : v(init_ptr(ptr)) {}
+  ~persistent_ptr() {
+    plink* x = v.read();
+    if (x != nullptr) link_pool.pool.retire(x);
+  }
   void init(V* ptr) {v = init_ptr(ptr);}
   V* read_snapshot() {
     TS ls = local_stamp;
@@ -80,7 +88,7 @@ public:
   void store(V* ptr) {
     plink* old_v = v.load();
     plink* new_v = link_pool.new_obj(tbd, old_v, (void*) ptr);
-    v.cam(old_v, new_v);
+    v = new_v;
     link_pool.retire(old_v);    
     set_stamp(new_v);
   }

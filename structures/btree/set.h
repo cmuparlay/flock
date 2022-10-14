@@ -1,4 +1,3 @@
-#define Recorded_Once 1
 #define Range_Search 1
 #include <flock/flock.h>
 #include <parlay/primitives.h>

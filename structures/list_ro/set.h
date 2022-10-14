@@ -8,7 +8,6 @@
 // change in case user needs the max possible key, and to make generic
 // acros key types.
 
-#define Recorded_Once 1
 #include <flock/flock.h>
 
 template <typename K, typename V>

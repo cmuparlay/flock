@@ -105,6 +105,12 @@ public:
 
   persistent_ptr(V* v) : v(TV::init(set_zero(v))) {}
   persistent_ptr(): v(TV::init(0)) {}
+  ~persistent_ptr() {
+    IT ptr = v.load();
+    if (is_indirect(ptr))
+      link_pool.retire((plink*) strip_mark_and_tag(ptr));
+  }
+
   void init(V* vv) {v = TV::init(set_zero(vv));}
   // reads snapshotted version
   V* read_snapshot() {

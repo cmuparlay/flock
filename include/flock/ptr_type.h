@@ -12,8 +12,12 @@
 #ifdef Persistent
 #ifdef Recorded_Once
 #include "persistent_recorded_once.h"
-#else
+#elif FullyIndirect
+#include "indirect_persistent.h"
+#elif Simple
 #include "simple_persistent.h"
+#else
+#include "persistent.h"
 #endif
 using ll_head = persistent;
 

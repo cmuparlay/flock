@@ -18,12 +18,12 @@ void print_counts() {
 struct persistent {
   size_t foo;
   std::atomic<TS> time_stamp;
-  write_once<persistent*> next_version;
+  persistent* next_version;
   static constexpr size_t init_ptr =(1ul << 48) - 2;
   persistent* add_tag(persistent* v, bool tag) {
     return (persistent*) ((size_t) v + tag);}
-  bool is_indirect() {return (IT) next_version.load() & 1;}
-  persistent* get_next() {return (persistent*) ((IT) next_version.load() & ~1ul);}
+  bool is_indirect() {return (IT) next_version & 1;}
+  persistent* get_next() {return (persistent*) ((IT) next_version & ~1ul);}
   TS read_stamp() {return time_stamp.load();}
   TS load_stamp() {return commit(time_stamp.load());}
   void set_stamp(TS t) {
@@ -82,7 +82,15 @@ public:
 
   persistent_ptr(): v(0) {}
   persistent_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
+
+  ~persistent_ptr() {
+    plink* ptr = (plink*) v.read();
+    if (ptr != nullptr && ptr->is_indirect())
+      link_pool.pool.retire(ptr);
+  }
+
   void init(V* ptr) {v = set_zero_stamp(ptr);}
+
   V* read_snapshot() {
     TS ls = local_stamp;
     V* head = v.load();
@@ -118,18 +126,19 @@ public:
       new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
     else ptr->next_version = old_v;
 
+#ifdef NoShortcut
+    v = new_v;
+#else
     v.cam(old_v, new_v);
 
     if (old_v != nullptr && old_v->is_indirect()) {
-#ifdef NoShortcut
       link_pool.retire((plink*) old_v);
-#else
       V* val = v.load();
       if (val != (V*) ((plink*) old_v)->value)
 	link_pool.retire((plink*) old_v);
       else v.cam(val, new_v);
-#endif
     }
+#endif
     
     set_stamp(new_v);
 #ifndef NoShortcut
