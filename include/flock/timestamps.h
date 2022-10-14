@@ -5,7 +5,7 @@
 
 using TS = long;
 
-struct timestamp_simple {
+struct timestamp_read {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
 
@@ -25,10 +25,10 @@ struct timestamp_simple {
   }
 
   TS get_write_stamp() {return stamp.load();}
-  timestamp_simple() : stamp(1) {}
+  timestamp_read() : stamp(1) {}
 };
 
-struct timestamp_simple_update {
+struct timestamp_write {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
 
@@ -48,7 +48,7 @@ struct timestamp_simple_update {
 
     return ts+1;
   }
-  timestamp_simple_update() : stamp(1) {}
+  timestamp_write() : stamp(1) {}
 };
 
 struct timestamp_multiple {
@@ -124,8 +124,14 @@ struct timestamp_read_write {
   timestamp_read_write() : stamp(1) {}
 };
 
-//timestamp_simple_update global_stamp;
+#ifdef ReadStamp
+timestamp_read global_stamp;
+#elif WriteStamp
+timestamp_write global_stamp;
+#else
 timestamp_read_write global_stamp;
+#endif
+
 const TS tbd = std::numeric_limits<TS>::max();
 const TS zero_stamp = 1;
 thread_local TS local_stamp{-1};

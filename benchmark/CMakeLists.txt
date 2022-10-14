@@ -33,6 +33,8 @@ foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench}_noshortcut ${STRUCT_DIR}/${bench} "Persistent;Simple;NoShortcut")
   add_benchmark(${bench}_simple ${STRUCT_DIR}/${bench} "Persistent;Simple")
   add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} "Persistent")
+  add_benchmark(${bench}_read_stamp ${STRUCT_DIR}/${bench} "Persistent;ReadStamp")
+  add_benchmark(${bench}_write_stamp ${STRUCT_DIR}/${bench} "Persistent;WriteStamp")
   add_benchmark(${bench}_lock ${STRUCT_DIR}/${bench} "Persistent;NoHelp")
 endforeach()
 
