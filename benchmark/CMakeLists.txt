@@ -2,6 +2,8 @@ set(SOURCES test_sets.cpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runall
           DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/runtests
+          DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist"
@@ -35,7 +37,7 @@ foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench}_per ${STRUCT_DIR}/${bench} "Persistent")
   add_benchmark(${bench}_read_stamp ${STRUCT_DIR}/${bench} "Persistent;ReadStamp")
   add_benchmark(${bench}_write_stamp ${STRUCT_DIR}/${bench} "Persistent;WriteStamp")
-  add_benchmark(${bench}_lock ${STRUCT_DIR}/${bench} "Persistent;NoHelp")
+  add_benchmark(${bench}_per_lock ${STRUCT_DIR}/${bench} "Persistent;NoHelp")
 endforeach()
 
 

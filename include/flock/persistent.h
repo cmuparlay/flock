@@ -89,7 +89,7 @@ private:
   std::pair<V*,bool> shortcut_indirect(IT ptr) {
     auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
     if (is_indirect(ptr)) {
-      i_counts[16*parlay::worker_id()]++;
+      //i_counts[16*parlay::worker_id()]++;
       TS stamp = ptr_notag->time_stamp.load();
       V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
       if (stamp <= done_stamp) {

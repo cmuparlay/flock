@@ -1,4 +1,5 @@
 #define Range_Search 1
+#define Multi_Find 1
 #include <flock/flock.h>
 #include <parlay/primitives.h>
 
@@ -578,35 +579,22 @@ struct Set {
     });
   }
     
-  // old version, not used
-  std::optional<V> find_(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	auto [p, cidx, l] = find_and_fix(root, k);
-	return l->find(k);
-      });
-  }
-
   // a wait-free version that does not split on way down
-  std::optional<V> find_internal(node* root, K k) {
+  std::optional<V> find_(node* root, K k) {
     node* c = root;
     ptr_type<node>* x;
     while (!c->is_leaf) {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
       x = &c->children[c->find(k)];
-      c = x->read();
+      c = x->load();
     }
     x->validate();
     return ((leaf*) c)->find(k);
   }
 
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] {return find_internal(root, k);});
-  }
-
-  // snapshot version, if snapshoting enabled
-  std::optional<V> find__(node* root, K k) {
-    return with_snap([&] {return find_internal(root, k);});
+    return with_epoch([&] {return find_(root, k);});
   }
 
   // An empty tree is an empty leaf along with a root pointing tho the

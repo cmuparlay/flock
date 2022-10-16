@@ -28,6 +28,8 @@ void insert_balanced(SetType& os, Tree& tr, Range A) {
                  [&] {insert_balanced(os, tr, A.cut(mid+1,A.size()));});
 }
 
+enum op_type : char {Find, Insert, Remove, Range, MultiFind};
+
 template <typename SetType>
 void test_sets(SetType& os, size_t default_size, commandLine P) {
   // processes to run experiments with
@@ -40,9 +42,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   double trial_time = P.getOptionDoubleValue("-tt", 1.0);
 
   bool balanced_tree = P.getOption("-bt");
-  int range_size = P.getOptionIntValue("-a",0)*2;
+  int range_size = P.getOptionIntValue("-rs",16);
+  int range_percent = P.getOptionIntValue("-range",0);
+  int multifind_percent = P.getOptionIntValue("-mfind",0);
+  
 #ifndef Range_Search
-  if (range_size > 0) {
+  if (range_percent > 0) {
     std::cout << "range search not implemented for this structure" << std::endl;
     return;
   }
@@ -130,7 +135,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
 					   return i+1;}));
     }
-    key_type gap = max_key/nn*range_size;
+    key_type range_gap = (max_key/n)*range_size;
     
     parlay::sequence<key_type> b;
     if (use_zipfian) { 
@@ -141,16 +146,19 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 
     // parlay::parallel_for(0, m, [&] (size_t i) { assert(b[i] != 0); });
     
-    // initially set to all finds (0 = insert, 1 = delete, 2 = find)
-    parlay::sequence<char> op_type(m, 2);
+    // initially set to all finds
+    parlay::sequence<op_type> op_types(m, Find);
 
     if (update_percent > 0) {
       int cnt = 2 * 100/update_percent;
-      op_type = parlay::tabulate(m, [&] (size_t i) -> char {
-              auto h = parlay::hash64(m+i);
-              if (h % cnt == 0) return 0; //insert 
-              else if (h % cnt == 1) return 1; //delete
-              else return 2; //find
+      op_types = parlay::tabulate(m, [&] (size_t i) -> op_type {
+              auto h = parlay::hash64(m+i)%200;
+              if (h < update_percent) return Insert; 
+              else if (h < 2*update_percent) return Remove;
+	      else if (h < 2*update_percent + 2*range_percent) return Range;
+	      else if (h < 2*update_percent + 2*range_percent + 2*multifind_percent)
+		return MultiFind;
+              else return Find;
             });
     }
     
@@ -207,7 +215,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	     long range_count = 0;
              while (true) {
                // every once in a while check if time is over
-               if (cnt == 100) { 
+               if (cnt >= 100) { 
                  cnt = 0;
 		 auto current = std::chrono::system_clock::now();
 		 double duration = std::chrono::duration_cast<std::chrono::seconds>(current - start).count();
@@ -218,28 +226,35 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                    return;
                  }
                }
-               // quit early if out of samples
-               if (j == (i+1)*mp) {
-                 finish = true;
-                 totals[i] = total;
-		 addeds[i] = added;
-		 range_counts[i] = range_count;
-                 return;
-               }
-	       if (op_type[j] == 2 && range_size == 0)
+               // check that no overflow
+               if (j >= (i+1)*mp) abort();
+	       
+	       if (op_types[j] == Find)
 		 os.find(tr, b[j]);
-	       else if (op_type[j] == 0) {
+	       else if (op_types[j] == Insert) {
 		 if (os.insert(tr, b[j], 123)) added++;}
-	       else if (op_type[j] == 1) {
+	       else if (op_types[j] == Remove) {
 		 if (os.remove(tr, b[j])) added--;}
-	       else {
+	       else if (op_types[j] == Range) {
 #ifdef Range_Search
 		 auto addf = [&] (K x, V y) {range_count++;};
-		 key_type end = (b[j] > max_key - gap) ? max_key : b[j] + gap;
+		 key_type end = (b[j] > max_key - range_gap) ? max_key : b[j] + range_gap;
 		 os.range(tr, addf, b[j], end);
 #endif
+	       } else { // multifind
+#ifdef Multi_Find
+                 with_snap([&] {
+		   for (int k = 0; k < range_size; k++) {
+		     os.find_(tr, b[j]);
+		     if (++j >= (i+1)*mp) j -= mp;
+		     cnt++;
+		     total++;
+		   }
+		   return true;});
+		 continue;
+#endif
 	       }
-	       j++;
+	       if (++j >= (i+1)*mp) j -= mp;
                cnt++;
                total++;
              }}, 1);
@@ -256,16 +271,17 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         std::cout << std::setprecision(4)
 		  << P.commandName() << ","
 		  << update_percent << "%update,"
+		  << range_percent << "%range,"
+		  << multifind_percent << "%mfind,"
+		  << "rs=" << range_size << ","
 		  << "n=" << n << ","
 		  << "p=" << p << ","
-		  << (!use_zipfian ? "uniform" : ss.str()) << ","
-	  // << (use_locks ? "lock" : "lock_free") << ","
-	  // << (try_only ? "try" : "strict") << ","
+		  << "z=" << ss.str() << ","
 		  << num_ops / (duration * 1e6) << std::endl;
         if (do_check) {
 	  size_t final_cnt = os.check(tr);
 	  long updates = parlay::reduce(addeds);
-	  if (range_size > 0) {
+	  if (range_percent > 0) {
 	    long range_sum = parlay::reduce(range_counts);
 	    long num_queries = num_ops * (100 - update_percent) / 100;
 	    std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
@@ -347,21 +363,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
             }
           }
           //if (stats) os.stats();
-        }
-
-        if (false) {
-          int cnt = 2 * 100/update_percent;
-          parlay::parallel_for(0, m, [&] (size_t i) {os.insert(tr, b[i], i+1); });
-          t.start();
-          parlay::parallel_for(0, m, [&] (size_t i) {
-                     if (op_type[i] == 0) os.insert(tr, b[i], 123);
-                     else if (op_type[i] == 1) os.remove(tr, b[i]);
-                     else os.find(tr, b[i]);
-                   });
-          std::cout << P.commandName() << "," << update_percent << "%update," << m << "," << mops(t.stop()) << std::endl;
-          if (do_check) os.check(tr);
-          //std::cout << len << std::endl;
-          if (stats) os.stats();
         }
       }
       os.retire(tr); // free the ord_set (should be empty, but not with arttree)

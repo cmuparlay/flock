@@ -1,0 +1,158 @@
+#!/usr/bin/python
+#
+# run all tests
+#
+import os
+import sys
+import socket
+from datetime import date
+
+def getOption(str) :
+    return sys.argv.count(str) > 0
+
+def getArg(str, default) :
+  a = sys.argv
+  l = len(a)
+  for i in range(1, l) :
+    if (a[i] == str and  (i+1 != l)) :
+        return sys.argv[i+1]
+  return default
+
+all = getOption("-all")
+short = getOption("-short")
+
+suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_read_stamp","_write_stamp", "_lock"]
+suffixes_ro = suffixes_all + ["_ro"]
+
+update_percents = [5, 50]
+if getOption("-twenty") : update_percents = [20]
+
+rounds = int(getArg("-r", 3));
+
+time = float(getArg("-t", 1.0));
+
+shuffle = getOption("-shuffle");
+
+if (getOption("-help") or getOption("-help")) :
+    print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
+
+zipfians = [0, .99]
+
+suffixes_other = []
+
+if short :
+    lists = ["list", "list_ro"]
+    list_sizes = [10,1000]
+    trees = ["btree", "hash_block", "arttree"]
+    tree_sizes = [1000,10000000]
+elif all :
+    lists = ["list", "list_ro", "dlist"]
+    list_sizes = [10,100,1000]
+    trees = ["btree", "hash_block", "arttree"]
+    tree_sizes = [100,1000,100000,1000000,10000000,100000000]
+else :
+    lists = ["list", "dlist"]
+    lists_ro = ["list_ro"]
+    list_sizes = [10,100,1000]
+    trees = ["hash_block", "arttree"]
+    trees_ro = ["btree"]
+    tree_sizes = [1000,100000,10000000]
+
+
+today = date.today().strftime("%m_%d_%y")
+hostname = socket.gethostname()
+
+print(hostname)
+print(today)
+if short :
+    filename = "../../timings/short_" + hostname + "_" + today
+else :
+    filename = "../../timings/" + hostname + "_" + today
+    
+if os.path.exists(filename) :
+    os.remove(filename)
+
+test_only = False
+if (sys.argv.count("-test") > 0):
+    test_only = True
+    rounds = 1
+    time = .1
+    zipfians = [.99]
+    update_percents = [50]
+    tree_sizes = [100,10000000]
+    list_sizes = [10,1000]
+    
+def detectCPUs():
+    """
+     Detects the number of CPUs on a system. Cribbed from pp.
+     """
+    # Linux, Unix and MacOS:
+    if hasattr(os, "sysconf"):
+       if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+           # Linux & Unix:
+           ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
+           if isinstance(ncpus, int) and ncpus > 0:
+               return ncpus
+       else: # OSX:
+           return int(os.popen2("sysctl -n hw.ncpu")[1].read())
+    # Windows:
+    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+           ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+           if ncpus > 0:
+               return ncpus
+    return 1 # Default
+
+maxcpus = detectCPUs()
+
+def getProcessors() :
+    if maxcpus == 40:
+        processors = [1,4,16,20,40]
+    elif maxcpus == 144:
+        processors = [1,4,16,32,72,144]
+    else:
+        processors = [1,4,16]+range(16,maxcpus+1,16)
+    return processors
+
+def runstring(op) :
+    if test_only :
+        cmd = op
+    else :
+        cmd = op + " >> " + filename
+    os.system("echo \"" + cmd + "\"")
+    x = os.system(cmd)
+    if (x) :
+        if (os.WEXITSTATUS(x) == 0) : raise NameError("  aborted: " + op)
+        os.system("echo Failed")
+    
+def runtest(test,procs,n,z,u) :
+    num_threads = maxcpus-1
+    str_update = "-u " + str(u) + " "
+    str_zipfians = "-z " + str(z) + " "
+    str_rounds = "-r " + str(rounds) + " "
+    str_time = "-tt " + str(time) + " "
+    str_n = "-n " + str(n) + " "
+    if shuffle : str_other = "-shuffle "
+    else : str_other = ""
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians + str_other)
+
+def run_tests(tests,suffixes,sizes) :
+    zipf = zipfians
+    for test in tests :
+        for n in sizes :
+            for u in update_percents :
+                for suffix in suffixes:
+                    for z in zipf :
+                        runtest(test + suffix, maxcpus, n, z, u)
+
+try :
+    processors = getProcessors()
+    os.system("make -j")
+    runstring("git rev-parse --short HEAD")
+    run_tests(lists,suffixes_all,list_sizes)
+    run_tests(lists_ro,suffixes_ro,list_sizes)
+    run_tests(trees,suffixes_all,tree_sizes)
+    run_tests(trees_ro,suffixes_ro,tree_sizes)
+            
+except NameError,v :
+  x, = v
+  print "TEST TERMINATED ABNORMALLY:\n"+x

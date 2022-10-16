@@ -22,10 +22,10 @@ struct Set {
     lock_type lck;
     node(K key, V value, node* next, bool is_end)
       : key(key), value(value), next(next), is_end(is_end), removed(false) {}
-    node() : is_end(false), removed(false) {}
+    node() : is_end(false), next(nullptr), removed(false) {} // for head and tail
     node(node* n) // copy from pointer
-      : key(n->key), value(n->value), is_end(n->is_end), removed(false) {
-      if (!n->is_end) next.init(n->next.load()); }
+      : key(n->key), value(n->value), next(n->next.load()),
+      is_end(n->is_end), removed(false) {}
   };
 
   memory_pool<node> node_pool;
