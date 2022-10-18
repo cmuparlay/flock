@@ -204,18 +204,17 @@ struct Set {
     });
   }
 
+  std::optional<V> find_(node* root, K k) {
+    auto [gp, gp_left, p, p_left, l] = find_location(root, k);
+    ((p_left) ? &(p->left) : &(p->right))->validate();
+    leaf* ll = (leaf*) l;
+    // note brute force is faster than binary search
+    if (ll->keyvals[i].key == k) return ll->keyvals[i].value;
+    return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-      auto [gp, gp_left, p, p_left, l] = find_location(root, k);
-      ((p_left) ? &(p->left) : &(p->right))->validate();
-      leaf* ll = (leaf*) l;
-      for (int i=0; i < ll->size; i++) 
-	if (ll->keyvals[i].key == k) return ll->keyvals[i].value;
-      return {};
-      // note brute force is faster than binary search
-      //auto loc = std::lower_bound(ll->keyvals, ll->keyvals + ll->size, k);
-      //return (loc < ll->keyvals+ll->size && *loc == k);
-      });
+    return with_epoch([&] { return find_(root, k);});
   }
 
   node* empty() {

@@ -97,13 +97,18 @@ struct Set {
     else return x->entries[i].value;
   }
   
+  std::optional<V> find_(Table& table, K k) {
+    slot* s = table.get_slot(k);
+    return find_at(s, k);
+  }
+
   std::optional<V> find(Table& table, K k) {
     slot* s = table.get_slot(k);
     __builtin_prefetch (s);
     auto x = with_epoch([&] { return find_at(s, k);});
     return x;
   }
-  
+
   static constexpr int init_delay=200;
   static constexpr int max_delay=2000;
 

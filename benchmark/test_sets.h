@@ -304,13 +304,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 if (os.remove(tr, b[j])) added--;}
 	       else if (op_types[j] == Range) {
 #ifdef Range_Search
-		 auto addf = [&] (K x, V y) {range_count++;};
-		 key_type end = (b[j] > max_key - range_gap) ? max_key : b[j] + range_gap;
+		 auto addf = [&] (K x, V y) { range_count++;};
+		 key_type end = ((b[j] > max_key - range_gap)
+				 ? max_key : b[j] + range_gap);
 		 os.range(tr, addf, b[j], end);
 #endif
 	       } else { // multifind
-#ifdef Multi_Find
-                 with_snap([&] {
+                 with_snapshot([&] {
 		   for (int k = 0; k < range_size; k++) {
 		     os.find_(tr, b[j]);
 		     if (++j >= (i+1)*mp) j -= mp;
@@ -319,7 +319,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		   }
 		   return true;});
 		 continue;
-#endif
 	       }
 	       if (++j >= (i+1)*mp) j -= mp;
                cnt++;
@@ -350,7 +349,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	  long updates = parlay::reduce(addeds);
 	  if (range_percent > 0) {
 	    long range_sum = parlay::reduce(range_counts);
-	    long num_queries = num_ops * (100 - update_percent) / 100;
+	    long num_queries = num_ops * range_percent / 100;
 	    std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
 	  }
 

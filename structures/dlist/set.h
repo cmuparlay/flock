@@ -83,12 +83,14 @@ struct Set {
     });
   }
   
+  std::optional<V> find_(node* root, K k) {
+    node* loc = find_location(root, k);
+    if (!loc->is_end && loc->key == k) return loc->value; 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	node* loc = find_location(root, k);
-	if (!loc->is_end && loc->key == k) return loc->value; 
-	else return {};
-      });
+    return with_epoch([&] { return find_(root, k);});
   }
 
   node* empty() {

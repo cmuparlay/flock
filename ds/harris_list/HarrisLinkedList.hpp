@@ -144,8 +144,7 @@ public:
      * <p>
      * Progress Condition: Lock-Free
      */
-    std::optional<V> find(T key) {
-        return with_epoch([&] () -> std::optional<V> {
+    std::optional<V> find_(T key) {
             Node* right_node;
             Node* left_node;
             right_node = search (key, left_node);
@@ -153,7 +152,10 @@ public:
                 return {};
             else
                 return right_node->value;
-        });
+    }
+
+    std::optional<V> find(T key) {
+      return with_epoch([&] { return find_(key);});
     }
 
 

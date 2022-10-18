@@ -89,15 +89,17 @@ struct Set {
     });
   }
 
-  std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	auto [cur, nxt] = find_location(root, k);
-	(cur->next).validate();
-	if (!nxt->is_end && nxt->key == k) return nxt->value; 
-	else return {};
-      });
+  std::optional<V> find_(node* root, K k) {
+    auto [cur, nxt] = find_location(root, k);
+    (cur->next).validate();
+    if (!nxt->is_end && nxt->key == k) return nxt->value; 
+    else return {};
   }
 
+  std::optional<V> find(node* root, K k) {
+    return with_epoch([&] { return find_(root, k);});
+  }
+	
   node* empty() {
     node* tail = node_pool.new_obj();
     tail->is_end = true;

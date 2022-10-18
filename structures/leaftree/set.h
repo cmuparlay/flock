@@ -103,19 +103,21 @@ struct Set {
        }}); 
   }
 
+  std::optional<V> find_(node* root, K k) {
+    auto ptr = &(root->left);
+    node* l = ptr->read();
+    while (!l->is_leaf) {
+      auto ptr = (k < l->key) ? &(l->left) : &(l->right);
+      l = ptr->read();
+    }
+    ptr->validate();
+    auto ll = (leaf*) l;
+    if (!ll->is_sentinal && ll->key == k) return ll->value; 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	auto ptr = &(root->left);
-	node* l = ptr->read();
-	while (!l->is_leaf) {
-	  auto ptr = (k < l->key) ? &(l->left) : &(l->right);
-	  l = ptr->read();
-	}
-	ptr->validate();
-	auto ll = (leaf*) l;
-	if (!ll->is_sentinal && ll->key == k) return ll->value; 
-	else return {};
-    });
+    return with_epoch([&] { return find_(root, k);});
   }
 
   node* empty() {
