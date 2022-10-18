@@ -23,6 +23,10 @@ public:
 
   std::optional<V> find(adapter_t* ds, const K key) {
     return ds->find(key);
+  }
+
+  std::optional<V> find_(adapter_t* ds, const K key) {
+    return ds->find_(key);
   } 
 
   V insert(adapter_t* ds, K key, const V val) {

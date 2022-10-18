@@ -1,5 +1,4 @@
 #define Range_Search 1
-#define Multi_Find 1
 #include <flock/flock.h>
 #include <parlay/primitives.h>
 

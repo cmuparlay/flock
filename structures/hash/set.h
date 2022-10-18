@@ -47,6 +47,14 @@ struct Set {
       });
   }
 
+  std::optional<V> find_(Table& table, K k) {
+    slot* s = get_slot(table, k);
+    auto [cur, nxt] = find_in_slot(s, k);
+    cur->validate();
+    if (nxt != nullptr) return nxt->value;
+    else return {};
+  }
+
   bool insert_at(slot* s, K k, V v) {
     while (true) {
       unsigned int vn = s->version_num.load();

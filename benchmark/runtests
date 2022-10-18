@@ -24,8 +24,8 @@ short = getOption("-short")
 suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_read_stamp","_write_stamp", "_lock"]
 suffixes_ro = suffixes_all + ["_ro"]
 
-update_percents = [5, 50]
-if getOption("-twenty") : update_percents = [20]
+# updates, multifind, range (rest are queries
+mix_percents = [[5,0,0], [5,5,0], [50,0,0], [50,50,0]]
 
 rounds = int(getArg("-r", 3));
 
@@ -78,7 +78,7 @@ if (sys.argv.count("-test") > 0):
     rounds = 1
     time = .1
     zipfians = [.99]
-    update_percents = [50]
+    mix_percents = [[50,5,5]]
     tree_sizes = [100,10000000]
     list_sizes = [10,1000]
     
@@ -124,25 +124,27 @@ def runstring(op) :
         if (os.WEXITSTATUS(x) == 0) : raise NameError("  aborted: " + op)
         os.system("echo Failed")
     
-def runtest(test,procs,n,z,u) :
+def runtest(test,procs,n,z,mix) :
     num_threads = maxcpus-1
-    str_update = "-u " + str(u) + " "
+    str_mix = "-u " + str(mix[0]) + " -mfind " + str(mix[1]) + " -range " + str(mix[2]) + " "
     str_zipfians = "-z " + str(z) + " "
     str_rounds = "-r " + str(rounds) + " "
     str_time = "-tt " + str(time) + " "
     str_n = "-n " + str(n) + " "
+    if (test[0:12] == "./hash_block") : str_dense = "-dense "
+    else : str_dense = ""
     if shuffle : str_other = "-shuffle "
     else : str_other = ""
-    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_update + str_zipfians + str_other)
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_mix + str_zipfians + str_dense + str_other)
 
 def run_tests(tests,suffixes,sizes) :
     zipf = zipfians
     for test in tests :
         for n in sizes :
-            for u in update_percents :
+            for mix in mix_percents :
                 for suffix in suffixes:
                     for z in zipf :
-                        runtest(test + suffix, maxcpus, n, z, u)
+                        runtest(test + suffix, maxcpus, n, z, mix)
 
 try :
     processors = getProcessors()

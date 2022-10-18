@@ -6,7 +6,7 @@ struct persistent {};
 
 struct version_link {
   std::atomic<TS> time_stamp;
-  write_once<version_link*> next_version;
+  version_link* next_version;
   void* value;
   version_link() : time_stamp(tbd) {}
   version_link(TS time, version_link* next, void* value) :
@@ -43,7 +43,7 @@ public:
   V* read_snapshot() {
     version_link* head = set_stamp(v.load());
     while (head->time_stamp.load() > local_stamp)
-      head = head->next_version.load();
+      head = head->next_version;
     return (V*) head->value;
   }
 
@@ -51,14 +51,11 @@ public:
     if (local_stamp != -1) return read_snapshot();
     else return (V*) set_stamp(v.load())->value;
   }
-  
-  V* read() {  // only safe on journey
-    return (V*) v.read()->value;
-  }
 
-  void validate() {
-    set_stamp(v.load());     // ensure time stamp is set
-  }
+  // only safe on journey
+  V* read() {  return (V*) v.read()->value; }
+
+  void validate() { set_stamp(v.load()); }
 
   void store(V* ptr) {
     version_link* old_v = v.load();

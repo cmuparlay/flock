@@ -318,14 +318,16 @@ struct Set {
     });
   }	       
 
+  std::optional<V> find_(node* root, K k) {
+    auto [gp, p, cptr, l, pos] = find_location(root, k);
+    if (cptr != nullptr) cptr->validate();
+    auto ll = (leaf*) l;
+    if (ll != nullptr) return std::optional<V>(ll->value); 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	auto [gp, p, cptr, l, pos] = find_location(root, k);
-	if (cptr != nullptr) cptr->validate();
-	auto ll = (leaf*) l;
-	if (ll != nullptr) return std::optional<V>(ll->value); 
-	else return {};
-      });
+    return with_epoch([&] {return find_(root, k);});
   }
 
   template<typename AddF>
@@ -355,16 +357,18 @@ struct Set {
 	range_internal(((full_node*) a)->children[i].read_snapshot(), add,
 		       start, end, a->byte_num);
     } else if (a->nt == Indirect) {
-      for (int i = sb; i < eb; i++) {
+      for (int i = sb; i <= eb; i++) {
 	indirect_node* ai = (indirect_node*) a;
 	int o = ai->idx[i].read();
-	if (o != -1) range_internal(ai->ptr[o].read_snapshot(), add,
+	if (o != -1) {
+	  range_internal(ai->ptr[o].read_snapshot(), add,
 				    start, end, a->byte_num);
+	}
       }
     } else { // Sparse
       sparse_node* as = (sparse_node*) a;
       for (int i = 0; i < as->num_used; i++) {
-	int b = get_byte(as->keys[i], a->byte_num);
+	int b = as->keys[i];
 	if (b >= sb && b <= eb)
 	  range_internal(as->ptr[i].read_snapshot(), add, start, end, a->byte_num);
       }

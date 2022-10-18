@@ -144,21 +144,21 @@ public:
      * <p>
      * Progress Condition: Lock-Free
      */
-    std::optional<V> find(T key) {
-        return with_epoch([&] () -> std::optional<V> {
-            Node* node = head->next;
-            while(node != tail) {
-                if(node->key >= key) break;
-                node = getUnmarked(node->next);
-            } 
-            if ((node == tail) || (node->key != key))
-                return {};
-            else
-                return node->value;
-        });
+    std::optional<V> find_(T key) {
+      Node* node = head->next;
+      while(node != tail) {
+	if(node->key >= key) break;
+	node = getUnmarked(node->next);
+      } 
+      if ((node == tail) || (node->key != key))
+	return {};
+      else
+	return node->value;
     }
 
-
+    std::optional<V> find(T key) {
+      return with_epoch([&] {return find_(key);});
+    }
 private:
 
     /**
