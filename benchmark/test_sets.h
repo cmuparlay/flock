@@ -74,7 +74,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   wait_before_retrying_lock = P.getOption("-wait");
 
   // number of samples 
-  long m = P.getOptionIntValue("-m", fixed_time ? (long) (trial_time * 10000000 * std::min(p, 100)) : n);
+  long m = P.getOptionIntValue("-m", fixed_time ? (long) (trial_time * 5000000 * std::min(p, 100)) : n);
     
   // check consistency, on by default
   bool do_check = ! P.getOption("-no_check");
@@ -149,18 +149,14 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     // initially set to all finds
     parlay::sequence<op_type> op_types(m, Find);
 
-    if (update_percent > 0) {
-      int cnt = 2 * 100/update_percent;
-      op_types = parlay::tabulate(m, [&] (size_t i) -> op_type {
-              auto h = parlay::hash64(m+i)%200;
-              if (h < update_percent) return Insert; 
-              else if (h < 2*update_percent) return Remove;
-	      else if (h < 2*update_percent + 2*range_percent) return Range;
-	      else if (h < 2*update_percent + 2*range_percent + 2*multifind_percent)
-		return MultiFind;
-              else return Find;
-            });
-    }
+    op_types = parlay::tabulate(m, [&] (size_t i) -> op_type {
+        auto h = parlay::hash64(m+i)%200;
+	if (h < update_percent) return Insert; 
+	else if (h < 2*update_percent) return Remove;
+	else if (h < 2*update_percent + 2*range_percent) return Range;
+	else if (h < 2*update_percent + 2*range_percent + 2*multifind_percent)
+	  return MultiFind;
+	else return Find; });
     
     parlay::internal::timer t;
     if (shuffle) os.shuffle(n);
@@ -203,6 +199,9 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         parlay::sequence<size_t> totals(p);
 	parlay::sequence<long> addeds(p);
 	parlay::sequence<long> range_counts(p);
+	parlay::sequence<long> mfind_counts(p);
+	parlay::sequence<long> update_counts(p);
+	parlay::sequence<long> query_counts(p);
         size_t mp = m/p;
         t.start();
         auto start = std::chrono::system_clock::now();
@@ -213,27 +212,37 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
              size_t total = 0;
 	     long added = 0;
 	     long range_count = 0;
+	     long mfind_count = 0;
+	     long update_count = 0;
+	     long query_count = 0;
              while (true) {
                // every once in a while check if time is over
                if (cnt >= 100) { 
                  cnt = 0;
 		 auto current = std::chrono::system_clock::now();
-		 double duration = std::chrono::duration_cast<std::chrono::seconds>(current - start).count();
-                 if (duration > trial_time || finish) {
+		 double duration = std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
+                 if (duration > 1000*trial_time || finish) {
                    totals[i] = total;
 		   addeds[i] = added;
 		   range_counts[i] = range_count;
+		   mfind_counts[i] = mfind_count;
+		   update_counts[i] = update_count;
+		   query_counts[i] = query_count;
                    return;
                  }
                }
                // check that no overflow
                if (j >= (i+1)*mp) abort();
 	       
-	       if (op_types[j] == Find)
+	       if (op_types[j] == Find) {
+		 query_count++;
 		 os.find(tr, b[j]);
+	       }
 	       else if (op_types[j] == Insert) {
+		 update_count++;
 		 if (os.insert(tr, b[j], 123)) added++;}
 	       else if (op_types[j] == Remove) {
+		 update_count++;
 		 if (os.remove(tr, b[j])) added--;}
 	       else if (op_types[j] == Range) {
 #ifdef Range_Search
@@ -243,6 +252,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 os.range(tr, addf, b[j], end);
 #endif
 	       } else { // multifind
+		 mfind_count++;
                  with_snapshot([&] {
 		   for (int k = 0; k < range_size; k++) {
 		     os.find_(tr, b[j]);
@@ -264,8 +274,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
               << duration << " seconds" << std::endl;
 
         //std::cout << duration << " : " << trial_time << std::endl;
-	std::stringstream ss;
-	ss << "zipfian=" << zipfian_param;
         size_t num_ops = parlay::reduce(totals);
         std::cout << std::setprecision(4)
 		  << P.commandName() << ","
@@ -275,11 +283,17 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		  << "rs=" << range_size << ","
 		  << "n=" << n << ","
 		  << "p=" << p << ","
-		  << "z=" << ss.str() << ","
+		  << "z=" << zipfian_param << ","
 		  << num_ops / (duration * 1e6) << std::endl;
         if (do_check) {
 	  size_t final_cnt = os.check(tr);
 	  long updates = parlay::reduce(addeds);
+	  if (false && multifind_percent > 0) {
+	    long mfind_sum = parlay::reduce(mfind_counts);
+	    long update_sum = parlay::reduce(update_counts);
+	    long query_sum = parlay::reduce(query_counts);
+	    std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
+	  }
 	  if (range_percent > 0) {
 	    long range_sum = parlay::reduce(range_counts);
 	    long num_queries = num_ops * range_percent / 100;
@@ -378,4 +392,5 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       }
     }
   }
+  std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
 }

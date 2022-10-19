@@ -116,7 +116,16 @@ struct memory_pool {
     if (debug && (p == nullptr))
       std::cout << "retiring null value" << std::endl;
     auto x = lg.commit_value_safe(p);
-    if (x.second) pool.retire(p); // only retire if first try
+    if (x.second) // only retire if first try
+      with_empty_log([=] {pool.retire(p);}); 
+  }
+
+  void destruct(T* p) {
+    if (debug && (p == nullptr))
+      std::cout << "destructing null value" << std::endl;
+    auto x = lg.commit_value_safe(p);
+    if (x.second) // only retire if first try
+      with_empty_log([=] {pool.destruct(p);}); 
   }
 
   template <typename F, typename ... Args>

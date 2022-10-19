@@ -128,6 +128,14 @@ auto inline with_log(Log newlg, F f) {
   return r;
 }
 
+template <typename F>
+void inline with_empty_log(F f) {
+  Log holdlg = lg;
+  lg = Log(); // empty log
+  f();
+  lg = holdlg;
+}
+
 // same, but for a thunk with no return value
 template <typename F>
 void inline with_log_(Log newlg, F f) {

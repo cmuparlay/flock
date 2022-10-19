@@ -37,7 +37,7 @@ public:
 
   persistent_ptr(): v(init_ptr(nullptr)) {}
   persistent_ptr(V* ptr) : v(init_ptr(ptr)) {}
-  ~persistent_ptr() { link_pool.pool.retire(v.read());}
+  ~persistent_ptr() { link_pool.pool.destruct(v.read());}
   void init(V* ptr) {v = init_ptr(ptr);}
   
   V* read_snapshot() {
@@ -58,11 +58,23 @@ public:
   void validate() { set_stamp(v.load()); }
 
   void store(V* ptr) {
-    version_link* old_v = v.load();
-    version_link* new_v = link_pool.new_obj(tbd, old_v, (void*) ptr);
-    v = new_v;
-    set_stamp(new_v);
-    link_pool.retire(old_v);    
+    version_link* old_link = v.load();
+    version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) ptr);
+    v = new_link;
+    set_stamp(new_link);
+    link_pool.retire(old_link);    
+  }
+
+  bool cas(V* old_v, V* new_v) {
+    version_link* old_link = set_stamp(v.load());
+    if (old_v == new_v) return true;
+    if (old_v != old_link->value) return false;
+    version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) new_v);
+    bool succeed = v.single_cas(old_link, new_link);
+    if (succeed) {
+      set_stamp(new_link);
+      link_pool.retire(old_link);
+    } else set_stamp(v.load());
   }
 
   V* operator=(V* b) {store(b); return b; }

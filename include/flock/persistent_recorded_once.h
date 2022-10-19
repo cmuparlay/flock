@@ -60,10 +60,12 @@ public:
     // ensure time stamp is set
     V* head = set_stamp(v.load());
     TS ls = local_stamp;
-    if (head == nullptr) abort();
+    if (head == nullptr || head == bad_ptr) abort();
     while (head->time_stamp.load() > ls) {
-      if (head->next_version == bad_ptr) 
-	std::cout << "bad pointer: " << head->time_stamp.load() << ", " << ls << std::endl;
+      if (head->next_version == bad_ptr || head->next_version == nullptr)  {
+	std::cout << "bad pointer: " << head->time_stamp.load() << ", " << ls <<< ", " << head->next_version == nullptr << std::endl;
+	abort();
+      } 
       head = (V*) head->next_version;
     }
     return head;
