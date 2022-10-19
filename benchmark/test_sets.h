@@ -284,7 +284,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     parlay::internal::timer t;
     if (shuffle) os.shuffle(n);
 
-    for (int i = 0; i < rounds; i++) {
+    for (int i = 0; i < rounds+1; i++) {
       long len;
       auto tr = os.empty(buckets);
       if (do_check) {
@@ -392,51 +392,53 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
              }}, 1);
         double duration = t.stop();
 
-        if (finish && (duration < trial_time/4))
-          std::cout << "warning out of samples, finished in "
-              << duration << " seconds" << std::endl;
+	if (i != 0) { // don't report zeroth round -- warmup
+	  if (finish && (duration < trial_time/4))
+	    std::cout << "warning out of samples, finished in "
+		      << duration << " seconds" << std::endl;
 
-        //std::cout << duration << " : " << trial_time << std::endl;
-        size_t num_ops = parlay::reduce(totals);
-        std::cout << std::setprecision(4)
-		  << P.commandName() << ","
-		  << update_percent << "%update,"
-		  << range_percent << "%range,"
-		  << multifind_percent << "%mfind,"
-		  << "rs=" << range_size << ","
-		  << "n=" << n << ","
-		  << "p=" << p << ","
-		  << "z=" << zipfian_param << ","
-		  << num_ops / (duration * 1e6) << std::endl;
-        if (do_check) {
-	  size_t final_cnt = os.check(tr);
-	  long updates = parlay::reduce(addeds);
-	  if (false && multifind_percent > 0) {
-	    long mfind_sum = parlay::reduce(mfind_counts);
-	    long update_sum = parlay::reduce(update_counts);
-	    long query_sum = parlay::reduce(query_counts);
-	    std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
-	  }
-	  if (range_percent > 0) {
-	    long range_sum = parlay::reduce(range_counts);
-	    long num_queries = num_ops * range_percent / 100;
-	    std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
-	  }
+	  //std::cout << duration << " : " << trial_time << std::endl;
+	  size_t num_ops = parlay::reduce(totals);
+	  std::cout << std::setprecision(4)
+		    << P.commandName() << ","
+		    << update_percent << "%update,"
+		    << range_percent << "%range,"
+		    << multifind_percent << "%mfind,"
+		    << "rs=" << range_size << ","
+		    << "n=" << n << ","
+		    << "p=" << p << ","
+		    << "z=" << zipfian_param << ","
+		    << num_ops / (duration * 1e6) << std::endl;
+	  if (do_check) {
+	    size_t final_cnt = os.check(tr);
+	    long updates = parlay::reduce(addeds);
+	    if (false && multifind_percent > 0) {
+	      long mfind_sum = parlay::reduce(mfind_counts);
+	      long update_sum = parlay::reduce(update_counts);
+	      long query_sum = parlay::reduce(query_counts);
+	      std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
+	    }
+	    if (range_percent > 0) {
+	      long range_sum = parlay::reduce(range_counts);
+	      long num_queries = num_ops * range_percent / 100;
+	      std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
+	    }
 
-	  if (n + updates != final_cnt) {
-	    std::cout << "bad size: intial size = " << n 
-		      << ", added " << updates
-		      << ", final size = " << final_cnt 
-		      << std::endl;
-    } else if(verbose) {
+	    if (n + updates != final_cnt) {
+	      std::cout << "bad size: intial size = " << n 
+			<< ", added " << updates
+			<< ", final size = " << final_cnt 
+			<< std::endl;
+	    } else if(verbose) {
               std::cout << "CHECK PASSED" << std::endl;
             }
           }
-        // if (stats) {
-        //   descriptor_pool.stats();
-        //   log_array_pool.stats();
-        //   os.stats();
-        // }
+	  // if (stats) {
+	  //   descriptor_pool.stats();
+	  //   log_array_pool.stats();
+	  //   os.stats();
+	  // }
+	}
         parlay::parallel_for(0, nn, [&] (size_t i) { os.remove(tr, a[i]); });
       }
       else {

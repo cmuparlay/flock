@@ -20,9 +20,8 @@ function(add_benchmark NAME STRUCT_NAME DEFS)
   target_include_directories(${NAME} PRIVATE ${STRUCT_NAME})
 endfunction()
 
-
 foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
-  add_benchmark(${bench}_ro ${STRUCT_DIR}/${bench} Recorded_Once)
+  add_benchmark(${bench}_ro ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once")
 endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})

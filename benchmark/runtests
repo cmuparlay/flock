@@ -27,7 +27,7 @@ suffixes_ro = suffixes_all + ["_ro"]
 # updates, multifind, range (rest are queries
 mix_percents = [[5,0,0], [5,5,0], [50,0,0], [50,50,0]]
 
-rounds = int(getArg("-r", 3));
+rounds = int(getArg("-r", 2));
 
 time = float(getArg("-t", 1.0));
 
