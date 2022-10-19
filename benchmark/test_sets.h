@@ -11,12 +11,116 @@
 #include <flock/defs.h>
 #include "zipfian.h"
 #include "parse_command_line.h"
+//#include "test_persistence.h"
 
 void assert_key_exists(bool b) {
   if(!b) {
     std::cout << "key not found" << std::endl;
     abort();
   }
+}
+
+void print_array(bool* a, int N) {
+  for(int i = 0; i < N; i++)
+    std::cout << a[i];
+  std::cout << std::endl;
+}
+
+template <typename SetType>
+void test_persistence_concurrent(SetType& os) {
+  // std::cout << parlay::num_workers() << std::endl;
+// #ifdef Multi_Find
+  int N = 1000;
+  auto tr = os.empty(N);
+  auto a = parlay::random_shuffle(parlay::tabulate(N, [&] (size_t i) {return i;}));
+  std::atomic<bool> done = false;
+
+  std::thread update_thread([&] {
+      std::cout << "starting to insert" << std::endl;
+      for(int i = 0; i < N; i++) 
+        os.insert(tr, a[i], i);
+      std::cout << "starting to delete" << std::endl;
+      for(int i = N-1; i >= 0; i--)
+        os.remove(tr, a[i]);
+      std::cout << "done updating" << std::endl;
+      done = true;
+  });
+
+  std::thread query_thread([&] {
+      std::cout << "starting to query" << std::endl;
+      int counter = 0;
+      while(!done) {
+        with_snapshot([&] {
+          bool seen[N];
+          int max_seen = -1;
+          for(int i = 0; i < N; i++) seen[i] = false;
+          for(int i = 0; i < N; i++) {
+            auto val = os.find_(tr, i);
+            if(val.has_value()) {
+              seen[val.value()] = true;
+              max_seen = std::max(max_seen, (int) val.value());
+            }
+          }
+          std::cout << "max_seen: " << max_seen << std::endl;
+          // print_array(seen, N);
+          for(int i = 0; i <= max_seen; i++)
+            if(!seen[i]) {
+              std::cout << "inconsistent snapshot" << std::endl;
+              break;
+              abort();
+            }
+          if(max_seen > 0 && max_seen < N-2) 
+            counter++; // saw an intermediate state
+          return true;
+        });
+      }
+      if(counter < 3) {
+        std::cout << "not enough iterations by query thread" << std::endl;
+        abort();
+      }
+  });
+
+  update_thread.join();
+  query_thread.join();
+
+  // parlay::parallel_for(0, 3, [&] (size_t tid) {
+  //   if(tid == 0) {  // update thread
+  //     std::cout << "starting to insert" << std::endl;
+  //     for(int i = 0; i < N; i++) 
+  //       os.insert(tr, a[i], i);
+  //     std::cout << "starting to delete" << std::endl;
+  //     for(int i = N-1; i >= 0; i--)
+  //       os.remove(tr, a[i]);
+  //     std::cout << "done updating" << std::endl;
+  //     done = true;
+  //   } else {  // query threads
+  //     std::cout << "starting to query" << std::endl;
+  //     int counter = 0;
+  //     for(int j = 0; j < 6; j++) {
+  //       with_snap([&] {
+  //         bool seen[N];
+  //         int max_seen = -1;
+  //         int skip = 1;
+  //         for(int i = 0; i < N; i++) seen[i] = false;
+  //         for(int i = 0; i < N; i++) {
+  //           auto val = os.find_(tr, i);
+  //           if(val.has_value()) {
+  //             seen[val.value()] = true;
+  //             max_seen = std::max(max_seen, (int) val.value());
+  //           }
+  //         }
+  //         std::cout << max_seen << std::endl;
+  //         for(int i = 0; i <= max_seen; i++)
+  //           assert(seen[i]);
+  //         if(max_seen > 0 && max_seen < N-2) 
+  //           counter++; // saw an intermediate state
+  //         return true;
+  //       });
+  //     }
+  //     std::cout << "iterations: " << counter << std::endl;
+  //   } });
+  os.retire(tr);
+// #endif
 }
 
 template <typename SetType, typename Tree, typename Range>
@@ -95,10 +199,13 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // print memory usage statistics
   bool stats = P.getOption("-stats");
 
+  
+
   // for mixed update/query, the percent that are updates
   int update_percent = P.getOptionIntValue("-u", 20); 
 
   if (init_test) {  // trivial test inserting 4 elements and deleting one
+    std::cout << "running sanity checks" << std::endl;
     auto tr = os.empty(4);
     // os.print(tr);
     os.insert(tr, 3, 123);
@@ -114,9 +221,25 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     assert_key_exists(os.find(tr, 7).has_value());
     assert_key_exists(os.find(tr, 1).has_value());
     assert_key_exists(os.find(tr, 11).has_value());
+    assert(!os.find(tr, 10).has_value());
+    assert(!os.find(tr, 3).has_value());
+
+    // #ifdef Multi_Find
+    with_snapshot([&] {
+      assert_key_exists(os.find_(tr, 7).has_value());
+      assert_key_exists(os.find_(tr, 1).has_value());
+      assert_key_exists(os.find_(tr, 11).has_value());
+      assert(!os.find_(tr, 10).has_value());
+      assert(!os.find_(tr, 3).has_value());
+      return true;});
+    // #endif
+
     // os.print(tr);
     // std::cout << "size = " << os.check(tr) << std::endl;
     os.retire(tr);
+
+    // run persistence tests
+    test_persistence_concurrent(os);
     
   } else {  // main test
     using key_type = unsigned long;
