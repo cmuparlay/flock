@@ -117,9 +117,12 @@ public:
     TS ls = local_stamp;
     IT head = v.load();
     set_stamp(head);
+    V* head_unmarked = strip_mark_and_tag(head);
     // chase down version chain
-    while (head != 0 && strip_mark_and_tag(head)->time_stamp.load() > ls) 
-      head = strip_mark_and_tag(head)->next_version.load();
+    while (head_unmarked != 0 && head_unmarked->time_stamp.load() > ls) {
+      head = head_unmarked->next_version.load();
+      head_unmarked = strip_mark_and_tag(head);
+    }
     return get_ptr(head);
   }
 
