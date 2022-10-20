@@ -6,7 +6,7 @@ struct persistent {};
 
 struct version_link {
   std::atomic<TS> time_stamp;
-  version_link* next_version;
+  version_link* volatile next_version;
   void* value;
   version_link() : time_stamp(tbd) {}
   version_link(TS time, version_link* next, void* value) :
@@ -37,13 +37,17 @@ public:
 
   persistent_ptr(): v(init_ptr(nullptr)) {}
   persistent_ptr(V* ptr) : v(init_ptr(ptr)) {}
-  ~persistent_ptr() { link_pool.pool.destruct(v.read());}
+  ~persistent_ptr() { link_pool.destruct(v.read());
+  }
   void init(V* ptr) {v = init_ptr(ptr);}
   
   V* read_snapshot() {
     version_link* head = set_stamp(v.load());
-    while (head->time_stamp.load() > local_stamp)
+    // version_link* volatile old_head = nullptr;
+    while (head->time_stamp.load() > local_stamp) {
+      // old_head = head;
       head = head->next_version;
+    }
     return (V*) head->value;
   }
 

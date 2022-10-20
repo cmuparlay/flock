@@ -28,33 +28,34 @@ void print_array(bool* a, int N) {
 
 template <typename SetType>
 void test_persistence_concurrent(SetType& os) {
-  // std::cout << parlay::num_workers() << std::endl;
-// #ifdef Multi_Find
   int N = 1000;
   auto tr = os.empty(N);
-  auto a = parlay::random_shuffle(parlay::tabulate(N, [&] (size_t i) {return i;}));
+
+  auto a = parlay::random_shuffle(parlay::tabulate(N, [&] (size_t i) {return i+1;}));
   std::atomic<bool> done = false;
 
-  std::thread update_thread([&] {
+  int num_threads = 2;
+
+  parlay::parallel_for(0, num_threads, [&] (size_t tid) {
+    if(tid == num_threads-1) {  // update thread
       std::cout << "starting to insert" << std::endl;
       for(int i = 0; i < N; i++) 
-        os.insert(tr, a[i], i);
+        os.insert(tr, a[i], i+1);
       std::cout << "starting to delete" << std::endl;
       for(int i = N-1; i >= 0; i--)
         os.remove(tr, a[i]);
       std::cout << "done updating" << std::endl;
       done = true;
-  });
-
-  std::thread query_thread([&] {
+    } else {  // query threads
       std::cout << "starting to query" << std::endl;
       int counter = 0;
+      int counter2 = 0;
       while(!done) {
         with_snapshot([&] {
-          bool seen[N];
+          bool seen[N+1];
           int max_seen = -1;
-          for(int i = 0; i < N; i++) seen[i] = false;
-          for(int i = 0; i < N; i++) {
+          for(int i = 1; i <= N; i++) seen[i] = false;
+          for(int i = 1; i <= N; i++) {
             auto val = os.find_(tr, i);
             if(val.has_value()) {
               seen[val.value()] = true;
@@ -63,62 +64,24 @@ void test_persistence_concurrent(SetType& os) {
           }
           std::cout << "max_seen: " << max_seen << std::endl;
           // print_array(seen, N);
-          for(int i = 0; i <= max_seen; i++)
+          for(int i = 1; i <= max_seen; i++)
             if(!seen[i]) {
               std::cout << "inconsistent snapshot" << std::endl;
               break;
               abort();
             }
-          if(max_seen > 0 && max_seen < N-2) 
+          counter2++;
+          if(max_seen > 2 && max_seen < N-3) 
             counter++; // saw an intermediate state
           return true;
         });
+        // if(counter2 > 10 && counter == 0) break;
       }
       if(counter < 3) {
         std::cout << "not enough iterations by query thread" << std::endl;
-        abort();
+        // abort();
       }
-  });
-
-  update_thread.join();
-  query_thread.join();
-
-  // parlay::parallel_for(0, 3, [&] (size_t tid) {
-  //   if(tid == 0) {  // update thread
-  //     std::cout << "starting to insert" << std::endl;
-  //     for(int i = 0; i < N; i++) 
-  //       os.insert(tr, a[i], i);
-  //     std::cout << "starting to delete" << std::endl;
-  //     for(int i = N-1; i >= 0; i--)
-  //       os.remove(tr, a[i]);
-  //     std::cout << "done updating" << std::endl;
-  //     done = true;
-  //   } else {  // query threads
-  //     std::cout << "starting to query" << std::endl;
-  //     int counter = 0;
-  //     for(int j = 0; j < 6; j++) {
-  //       with_snap([&] {
-  //         bool seen[N];
-  //         int max_seen = -1;
-  //         int skip = 1;
-  //         for(int i = 0; i < N; i++) seen[i] = false;
-  //         for(int i = 0; i < N; i++) {
-  //           auto val = os.find_(tr, i);
-  //           if(val.has_value()) {
-  //             seen[val.value()] = true;
-  //             max_seen = std::max(max_seen, (int) val.value());
-  //           }
-  //         }
-  //         std::cout << max_seen << std::endl;
-  //         for(int i = 0; i <= max_seen; i++)
-  //           assert(seen[i]);
-  //         if(max_seen > 0 && max_seen < N-2) 
-  //           counter++; // saw an intermediate state
-  //         return true;
-  //       });
-  //     }
-  //     std::cout << "iterations: " << counter << std::endl;
-  //   } });
+    } }, 1);
   os.retire(tr);
 // #endif
 }
@@ -199,7 +162,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // print memory usage statistics
   bool stats = P.getOption("-stats");
 
-  
+   
 
   // for mixed update/query, the percent that are updates
   int update_percent = P.getOptionIntValue("-u", 20); 

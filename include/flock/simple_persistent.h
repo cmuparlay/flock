@@ -18,7 +18,7 @@ void print_counts() {
 struct persistent {
   size_t foo;
   std::atomic<TS> time_stamp;
-  persistent* next_version;
+  persistent* volatile next_version;
   static constexpr size_t init_ptr =(1ul << 48) - 2;
   persistent* add_tag(persistent* v, bool tag) {
     return (persistent*) ((size_t) v + tag);}
@@ -86,7 +86,7 @@ public:
   ~persistent_ptr() {
     plink* ptr = (plink*) v.read();
     if (ptr != nullptr && ptr->is_indirect())
-      link_pool.pool.retire(ptr);
+      link_pool.pool.destruct(ptr);
   }
 
   void init(V* ptr) {v = set_zero_stamp(ptr);}

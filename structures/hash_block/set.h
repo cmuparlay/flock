@@ -15,7 +15,7 @@ struct Set {
 	if (entries[i].key == k) return i;
       return -1;
     }
-    Node(K k, V v) : cnt(1) {
+    Node(K k, V v) : cnt(1) { // could this overload with the other constructor if K is a pointer?
       entries[0] = KV{k,v};
     }
     Node(node* old, K k, V v) {
