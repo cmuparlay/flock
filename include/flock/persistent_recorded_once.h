@@ -106,5 +106,25 @@ public:
     });
   }
 
+  bool cas(V* expv, V* newv) {
+    if (newv == nullptr) {
+      std::cout << "recording with nullptr not allowed" << std::endl;
+      abort();
+    }
+
+    V* oldv = v.load();
+    if(oldv != nullptr) set_stamp(oldv);
+    if(oldv != expv) return false;
+    if(oldv == newv) return true;
+    newv->next_version = expv;
+    if(v.compare_exchange_strong(oldv, newv)) {
+      set_stamp(newv);
+      return false;
+    } else {
+      set_stamp(v.load());
+      return true;
+    }
+  }
+
   V* operator=(V* b) {store(b); return b; }
 };

@@ -193,5 +193,63 @@ public:
     		 });
   }
   
+  bool cas(V* expv_, V* newv_) {
+    IT oldv_tagged = v.load();
+    V* oldv = strip_mark_and_tag(oldv_tagged);
+    set_stamp(oldv);
+    if(shortcut_indirect(oldv).first != expv_) return false;
+    if(expv_ == newv_) return true;
+
+    V* newv = newv_;
+    V* newv_marked = newv;
+
+    bool allocate_indirect_node = true;
+
+    if(newv_ != nullptr && newv->next_version == bad_ptr) {
+      IT initial_ptr = bad_ptr;
+      if(newv->next_version.compare_exchange_strong(initial_ptr,
+                   (IT) oldv_tagged))
+        allocate_indirect_node = false;
+    } 
+
+    if(allocate_indirect_node) {
+      newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
+      newv_marked = ((newv_ == nullptr)
+         ? add_null_mark(newv)
+         : add_indirect_mark(newv));
+    }
+
+    // swap in new pointer but marked as "unset" since time stamp is tbd
+    V* newv_unset = add_unset(newv_marked);
+    IT x = oldv_tagged;
+    bool succeeded = TV::cas(v, x, newv_unset);
+    
+    if (is_indirect(oldv_tagged)) {
+      if (succeeded) link_pool.retire((plink*) oldv);
+      else if (shortcut_indirect(x).first == expv_) { 
+        succeeded = TV::cas(v, x, newv_unset);
+      }
+    } 
+
+    // TODO: retry one more time in case we get intruppted by someone clearing the unset mark
+
+    if(succeeded) {
+      set_stamp(newv_unset);
+      // try to shortcut indirection out, and if not, clear unset mark
+      // for time stamp
+      if (!shortcut_indirect(newv_unset).second)
+        TV::cas(v, newv_unset, remove_unset(newv_unset));  // clear the "unset" mark // TODO: change to setting the null bit, currently this could inturrupt another VCAS
+      return true;
+    } else {
+      set_stamp(strip_mark_and_tag(v.load()));
+      if(is_indirect((IT) newv_marked)) link_pool.destruct((plink*) newv);
+      return false;
+    }
+    // // shortcut version list if appropriate, getting rid of redundant
+    // // time stamps.  
+    // if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 
+    //   newv->next_version = oldv->next_version.load();
+  }
+
   V* operator=(V* b) {store(b); return b; }
 };
