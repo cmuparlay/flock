@@ -18,3 +18,18 @@ for ds in datastructures:
     cmd = './' + ds + per + ' -i'
     os.system('echo \'' + cmd + '\'')
     os.system(cmd)
+
+for ds in datastructures_ro:
+  cmd = './' + ds + '_ro'
+  if 'list' in ds:
+    cmd += ' -n 100'
+  os.system('echo \'' + cmd + '\'')
+  os.system(cmd)
+
+for ds in datastructures:
+  for per in persistance:
+    cmd = './' + ds + per 
+    if 'list' in ds:
+      cmd += ' -n 100'
+    os.system('echo \'' + cmd + '\'')
+    os.system(cmd)

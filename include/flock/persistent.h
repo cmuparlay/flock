@@ -69,9 +69,10 @@ private:
     if (is_unset(newv)) {
       V* x = strip_mark_and_tag(newv);
       if ((x != nullptr) && x->time_stamp.load() == tbd) {
-	TS ts = global_stamp.get_write_stamp();
-	long old = tbd;
-	x->time_stamp.compare_exchange_strong(old, ts);
+      	TS ts = global_stamp.get_write_stamp();
+      	long old = tbd;
+        if(x->time_stamp.load() == tbd)
+      	  x->time_stamp.compare_exchange_strong(old, ts);
       }
     }
     return newv;
