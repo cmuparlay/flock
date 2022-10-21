@@ -1,16 +1,20 @@
 
-import system
+import os
 
 datastructures = ["arttree", "btree", "list", "list_ro", "dlist",
     "hash_block", "hash_block_lf"]
 datastructures_ro = ['btree', 'list_ro']
 
-persistance = ['', '_noshortcut', '_indirect', '_per', '_per_lock', 
+persistance = ['_noshortcut', '_indirect', '_per', '_per_lock', 
                '_read_stamp', '_write_stamp']
 
 for ds in datastructures_ro:
-  system.os(ds + '_ro')
+  cmd = './' + ds + '_ro' + ' -i'
+  os.system('echo \'' + cmd + '\'')
+  os.system(cmd)
 
 for ds in datastructures:
   for per in persistance:
-    system.os(ds + per)
+    cmd = './' + ds + per + ' -i'
+    os.system('echo \'' + cmd + '\'')
+    os.system(cmd)
