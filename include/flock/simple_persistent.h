@@ -86,7 +86,7 @@ public:
   ~persistent_ptr() {
     plink* ptr = (plink*) v.read();
     if (ptr != nullptr && ptr->is_indirect())
-      link_pool.pool.destruct(ptr);
+      link_pool.pool.destruct_no_log(ptr);
   }
 
   void init(V* ptr) {v = set_zero_stamp(ptr);}

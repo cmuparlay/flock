@@ -37,8 +37,7 @@ public:
 
   persistent_ptr(): v(init_ptr(nullptr)) {}
   persistent_ptr(V* ptr) : v(init_ptr(ptr)) {}
-  ~persistent_ptr() { link_pool.destruct(v.read());
-  }
+  ~persistent_ptr() { link_pool.destruct_no_log(v.read()); }
   void init(V* ptr) {v = init_ptr(ptr);}
   
   V* read_snapshot() {

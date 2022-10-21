@@ -108,7 +108,7 @@ public:
   ~persistent_ptr() {
     IT ptr = v.load();
     if (is_indirect(ptr))
-      link_pool.destruct((plink*) strip_mark_and_tag(ptr));
+      link_pool.destruct_no_log((plink*) strip_mark_and_tag(ptr));
   }
 
   void init(V* vv) {v = TV::init(set_zero(vv));}

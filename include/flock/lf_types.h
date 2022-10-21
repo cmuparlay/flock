@@ -128,6 +128,12 @@ struct memory_pool {
       with_empty_log([=] {pool.destruct(p);}); 
   }
 
+  void destruct_no_log(T* p) {
+    if (debug && (p == nullptr))
+      std::cout << "destructing null value" << std::endl;
+    with_empty_log([=] {pool.destruct(p);}); 
+  }
+
   template <typename F, typename ... Args>
   // f is a function that initializes a new object before it is shared
   T* new_init(F f, Args... args) {

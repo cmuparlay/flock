@@ -43,8 +43,7 @@ private:
   }
 
   static V* set_zero(V* x) {
-    assert(x != nullptr);
-    if (x->time_stamp.load() == tbd)
+    if (x != nullptr && x->time_stamp.load() == tbd)
       x->time_stamp = zero_stamp;
     return x;
   }
@@ -58,7 +57,8 @@ public:
   // reads snapshotted version (ls >= 0)
   V* read_snapshot() {
     // ensure time stamp is set
-    V* head = set_stamp(v.load());
+    V* head = v.load();
+    if(head != nullptr) set_stamp(head);
     TS ls = local_stamp;
     if (head == nullptr || head == bad_ptr) abort();
     while (head->time_stamp.load() > ls) {
@@ -73,7 +73,12 @@ public:
 
   V* load() {
     if (local_stamp != -1) return read_snapshot();
-    else return set_stamp(commit(v.load()));}
+    else {
+      V* head = commit(v.load());
+      if(head != nullptr) set_stamp(head);
+      return head;
+    }
+  }
 
   V* read() {
     if (local_stamp != -1) return read_snapshot();
@@ -82,7 +87,10 @@ public:
   V* read_cur() {
     return v.load();}
 
-  void validate() { set_stamp(v.load());}
+  void validate() { 
+    V* head = v.load();
+    if(head != nullptr) set_stamp(head);
+  }
   
   void store(V* newv) {
     V* oldv = commit(v.load());
