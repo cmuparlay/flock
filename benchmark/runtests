@@ -27,7 +27,7 @@ suffixes_ro = suffixes_all + ["_ro", "ro_rs", "ro_ws"]
 # updates, multifind, range (rest are queries), range/multifind size
 mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
-rounds = int(getArg("-r", 1));
+rounds = int(getArg("-r", 2));
 
 time = float(getArg("-t", 1.0));
 
@@ -136,7 +136,7 @@ def runtest(test,procs,n,z,mix) :
     else : str_dense = ""
     if shuffle : str_other = "-shuffle "
     else : str_other = ""
-    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_mix + str_zipfians + str_dense + str_other)
+    runstring("PARLAY_NUM_THREADS=" + str(num_threads) + " numactl -i all ./" + test + " " + str_time + str_rounds + str_n + str_mix + str_rs + str_zipfians + str_dense + str_other)
 
 def run_tests(tests,suffixes,sizes) :
     zipf = zipfians

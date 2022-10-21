@@ -482,5 +482,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       }
     }
   }
-  std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
+  if (verbose)
+    std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
 }
