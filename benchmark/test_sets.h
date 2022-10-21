@@ -157,12 +157,14 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   bool use_zipfian = (zipfian_param != 0.0);
   
   // use numbers from 1...2n if dense otherwise sparse numbers
-  bool use_sparse = !P.getOption("-dense"); 
+  bool use_sparse = !P.getOption("-dense");
+#ifdef Dense_Keys  // for range queries on hash tables
+  if (range_percent > 0)
+    use_sparse = false;
+#endif
 
   // print memory usage statistics
   bool stats = P.getOption("-stats");
-
-   
 
   // for mixed update/query, the percent that are updates
   int update_percent = P.getOptionIntValue("-u", 20); 

@@ -139,7 +139,7 @@ struct Set {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
 	    if (s->ptr.load() != x) return false;
-      node* new_node = remove_from_node(x, k, v);
+      node* new_node = remove_from_node(x, k);
       if(s->ptr.cas(x, new_node)) {
         retire_node(x);
         return true;

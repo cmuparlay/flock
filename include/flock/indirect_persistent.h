@@ -74,11 +74,14 @@ public:
     if (old_v == new_v) return true;
     if (old_v != old_link->value) return false;
     version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) new_v);
-    bool succeed = v.single_cas(old_link, new_link);
-    if (succeed) {
+    if (v.single_cas(old_link, new_link)) {
       set_stamp(new_link);
       link_pool.retire(old_link);
-    } else set_stamp(v.load());
+      return true;
+    }
+    set_stamp(v.load());
+    link_pool.retire(new_link);
+    return false;
   }
 
   V* operator=(V* b) {store(b); return b; }

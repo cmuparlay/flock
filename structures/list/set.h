@@ -1,3 +1,4 @@
+#define Range_Search 1
 #include <flock/flock.h>
 
 template <typename K, typename V>
@@ -76,13 +77,24 @@ struct Set {
 
   std::optional<V> find_(node* root, K k) {
     auto [cur, nxt] = find_location(root, k);
-    (cur->next).validate();
+    //(cur->next).validate();
     if (!nxt->is_end && nxt->key == k) return nxt->value; 
     else return {};
   }
 
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] {return find_(root, k);});
+  }
+
+  template<typename AddF>
+  void range(node* root, AddF& add, K start, K end) {
+    with_snap([=] {
+      auto [cur, nxt] = find_location(root, start);
+      while (!nxt->is_end && nxt->key <= end) {
+	add(nxt->key, nxt->value);
+	nxt = nxt->next.load();
+      }
+      return true; });
   }
 
   node* empty() {

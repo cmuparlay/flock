@@ -21,11 +21,11 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
-suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_read_stamp","_write_stamp", "_lock"]
-suffixes_ro = suffixes_all + ["_ro"]
+suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_lock"]
+suffixes_ro = suffixes_all + ["_ro", "ro_rs", "ro_ws"]
 
-# updates, multifind, range (rest are queries
-mix_percents = [[5,0,0], [5,5,0], [50,0,0], [50,50,0]]
+# updates, multifind, range (rest are queries), range/multifind size
+mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
 rounds = int(getArg("-r", 2));
 
@@ -46,12 +46,12 @@ if short :
     trees = ["btree", "hash_block", "arttree"]
     tree_sizes = [1000,10000000]
 elif all :
-    lists = ["list", "list_ro", "dlist"]
+    lists = ["list", "list_ro"]
     list_sizes = [10,100,1000]
     trees = ["btree", "hash_block", "arttree"]
     tree_sizes = [100,1000,100000,1000000,10000000,100000000]
 else :
-    lists = ["list", "dlist"]
+    lists = ["list"]
     lists_ro = ["list_ro"]
     list_sizes = [10,100,1000]
     trees = ["hash_block", "arttree"]
@@ -78,7 +78,7 @@ if (sys.argv.count("-test") > 0):
     rounds = 1
     time = .1
     zipfians = [.99]
-    mix_percents = [[50,5,5]]
+#    mix_percents = [[50,5,5]]
     tree_sizes = [100,10000000]
     list_sizes = [10,1000]
     
@@ -127,6 +127,7 @@ def runstring(op) :
 def runtest(test,procs,n,z,mix) :
     num_threads = maxcpus-1
     str_mix = "-u " + str(mix[0]) + " -mfind " + str(mix[1]) + " -range " + str(mix[2]) + " "
+    str_rs = "-rs " + str(mix[3]) + " "
     str_zipfians = "-z " + str(z) + " "
     str_rounds = "-r " + str(rounds) + " "
     str_time = "-tt " + str(time) + " "
