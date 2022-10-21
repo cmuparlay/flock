@@ -21,9 +21,9 @@ struct Set {
   memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
-    node* nxt = (root->next).read();
+    node* nxt = (root->next).load();
     while (true) {
-      node* nxt_nxt = (nxt->next).read(); // prefetch
+      node* nxt_nxt = (nxt->next).load(); // prefetch
       if (nxt->is_end || nxt->key >= k) break;
       nxt = nxt_nxt;
     }
