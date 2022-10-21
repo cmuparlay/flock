@@ -28,7 +28,8 @@ struct persistent {
   TS load_stamp() {return commit(time_stamp.load());}
   void set_stamp(TS t) {
     TS old = tbd;
-    time_stamp.compare_exchange_strong(old, t);
+    if(time_stamp.load() == tbd)
+      time_stamp.compare_exchange_strong(old, t);
   }
   persistent() : time_stamp(tbd), next_version((persistent*) init_ptr) {}
   persistent(persistent* next, bool is_indirect)

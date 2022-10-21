@@ -24,7 +24,8 @@ private:
     if (ptr->time_stamp.load() == tbd) {
       TS old_t = tbd;
       TS new_t = global_stamp.get_write_stamp();
-      ptr->time_stamp.compare_exchange_strong(old_t, new_t);
+      if (ptr->time_stamp.load() == tbd)
+        ptr->time_stamp.compare_exchange_strong(old_t, new_t);
     }
     return ptr;
   }

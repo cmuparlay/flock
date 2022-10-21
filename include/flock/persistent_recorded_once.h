@@ -37,7 +37,8 @@ private:
     if (x->time_stamp.load() == tbd) {
       TS ts = global_stamp.get_write_stamp();
       long old = tbd;
-      x->time_stamp.compare_exchange_strong(old, ts);
+      if (x->time_stamp.load() == tbd)
+        x->time_stamp.compare_exchange_strong(old, ts);
     }
     return x;
   }
