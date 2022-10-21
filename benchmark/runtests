@@ -21,17 +21,17 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
-suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_lock"]
+suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
 suffixes_ro = suffixes_all + ["_ro", "ro_rs", "ro_ws"]
 
 # updates, multifind, range (rest are queries), range/multifind size
 mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
-rounds = int(getArg("-r", 2));
+rounds = int(getArg("-r", 1));
 
 time = float(getArg("-t", 1.0));
 
-shuffle = getOption("-shuffle");
+shuffle = True #getOption("-shuffle");
 
 if (getOption("-help") or getOption("-help")) :
     print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
@@ -78,7 +78,7 @@ if (sys.argv.count("-test") > 0):
     rounds = 1
     time = .1
     zipfians = [.99]
-#    mix_percents = [[50,5,5]]
+    mix_percents = [[50,5,5]]
     tree_sizes = [100,10000000]
     list_sizes = [10,1000]
     

@@ -383,7 +383,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	      long query_sum = parlay::reduce(query_counts);
 	      std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
 	    }
-	    if (range_percent > 0) {
+	    if (verbose && range_percent > 0) {
 	      long range_sum = parlay::reduce(range_counts);
 	      long num_queries = num_ops * range_percent / 100;
 	      std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
