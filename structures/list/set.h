@@ -20,9 +20,9 @@ struct Set {
 
   auto find_location(node* root, K k) {
     node* cur = root;
-    node* nxt = (cur->next).read();
+    node* nxt = (cur->next).load();
     while (true) {
-      node* nxt_nxt = (nxt->next).read(); // prefetch
+      node* nxt_nxt = (nxt->next).load(); // prefetch
       if (nxt->is_end || nxt->key >= k) break;
       cur = nxt;
       nxt = nxt_nxt;
