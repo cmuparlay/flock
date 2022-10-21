@@ -24,6 +24,7 @@ endfunction()
 
 foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
   add_benchmark(${bench}_ro ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once")
+  add_benchmark(${bench}_simple_ro ${STRUCT_DIR}/${bench} "Persistent;Simple_Recorded_Once")
   add_benchmark(${bench}_ro_rs ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;ReadStamp")
   add_benchmark(${bench}_ro_ws ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;WriteStamp")
 endforeach()

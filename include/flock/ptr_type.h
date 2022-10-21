@@ -11,6 +11,8 @@
 // persistent objects, ptr_type includes version chains
 #ifdef Persistent
 #ifdef Recorded_Once
+#include "persistent_recorded_once.h"
+#elif Simple_Recorded_Once
 #include "simple_persistent_recorded_once.h"
 #elif FullyIndirect
 #include "indirect_persistent.h"

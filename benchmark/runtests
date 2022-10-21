@@ -22,7 +22,7 @@ all = getOption("-all")
 short = getOption("-short")
 
 suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
-suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_ro_ws"]
+suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
 
 # updates, multifind, range (rest are queries), range/multifind size
 mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
@@ -146,6 +146,8 @@ def run_tests(tests,suffixes,sizes) :
                 for suffix in suffixes:
                     for z in zipf :
                         runtest(test + suffix, maxcpus, n, z, mix)
+                with open(filename, "a") as f:
+                    f.write("...\n")
 
 try :
     processors = getProcessors()
