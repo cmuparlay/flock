@@ -58,9 +58,10 @@ public:
   V* read_snapshot() {
     // ensure time stamp is set
     V* head = v.load();
-    if(head != nullptr) set_stamp(head);
+    if(head == nullptr) return nullptr;
+    set_stamp(head);
     TS ls = local_stamp;
-    if (head == nullptr || head == bad_ptr) abort();
+    // if (head == nullptr || head == bad_ptr) abort();
     while (head->time_stamp.load() > ls) {
       if (head->next_version == bad_ptr || head->next_version == nullptr)  {
 	std::cout << "bad pointer: " << head->time_stamp.load() << ", " << ls << ", " << (head->next_version == nullptr) << std::endl;
