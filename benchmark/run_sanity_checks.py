@@ -6,7 +6,7 @@ datastructures = ["arttree", "btree", "list", "list_ro", "dlist",
 datastructures_ro = ['btree', 'list_ro']
 
 persistance = ['_noshortcut', '_indirect', '_per', '_per_lock', 
-               '_read_stamp', '_write_stamp']
+               '_per_rs', '_per_ws']
 
 for ds in datastructures_ro:
   cmd = './' + ds + '_ro' + ' -i'
