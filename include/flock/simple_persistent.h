@@ -129,23 +129,62 @@ public:
 
 #ifdef NoShortcut
     v = new_v;
+    if (old_v != nullptr && old_v->is_indirect()) 
+      link_pool.retire((plink*) old_v);
 #else
     v.cam(old_v, new_v);
-
     if (old_v != nullptr && old_v->is_indirect()) {
-      link_pool.retire((plink*) old_v);
+      // link_pool.retire((plink*) old_v);
       V* val = v.load();
       if (val != (V*) ((plink*) old_v)->value)
-	link_pool.retire((plink*) old_v);
+	      link_pool.retire((plink*) old_v);
       else v.cam(val, new_v);
     }
 #endif
-    
     set_stamp(new_v);
 #ifndef NoShortcut
     if (use_indirect) shortcut((plink*) new_v);
 #endif
   }
   
+  bool cas(N* expv, V* newv) {
+#ifndef NoShortcut
+    for(int ii = 0; ii < 2; ii++) {
+#endif
+      V* new_v = newv;
+      V* oldv = v.load();
+      if(oldv != nullptr) set_stamp(oldv);
+      if(get_ptr(oldv) != expv) return false;
+      if(oldv == newv) return true;
+      bool use_indirect = (newv == nullptr || newv->load_stamp() != tbd);
+
+      if(use_indirect)
+        new_v = (V*) link_pool.new_obj((persistent*) oldv, ptr);
+      else ptr->next_version = oldv;
+
+      bool succeeded = v.single_cas(oldv, new_v);
+
+      if(succeeded) {
+        set_stamp(new_v);
+        if(oldv != nullptr && oldv->is_indirect()) 
+          link_pool.retire(oldv);
+#ifndef NoShortcut
+          if (use_indirect) shortcut((plink*) new_v);
+#endif
+        return true;
+      }
+      if(use_indirect) link_pool.destruct(new_v);
+
+#ifndef NoShortcut
+      // only repeat if oldv was indirect
+      if(ii == 0 && (oldv == nullptr || !oldv->is_indirect())) break;
+
+    }
+#endif
+    V* curv = v.load();
+    if(curv != nullptr) set_stamp(curv);
+    return false;
+  }
+
   V* operator=(V* b) {store(b); return b; }
 };

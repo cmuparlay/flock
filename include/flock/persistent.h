@@ -197,28 +197,21 @@ public:
   bool cas(V* expv_, V* newv_) {
     IT oldv_tagged = v.load();
     V* oldv = strip_mark_and_tag(oldv_tagged);
-    set_stamp(oldv);
+    if(oldv != nullptr) set_stamp(oldv);
     if(shortcut_indirect(oldv).first != expv_) return false;
     if(expv_ == newv_) return true;
 
     V* newv = newv_;
     V* newv_marked = newv;
 
-    bool allocate_indirect_node = true;
+    bool use_indirect = (newv_ == nullptr || newv_->time_stamp.load() != tbd);
 
-    if(newv_ != nullptr && newv->next_version == bad_ptr) {
-      IT initial_ptr = bad_ptr;
-      if(newv->next_version.compare_exchange_strong(initial_ptr,
-                   (IT) oldv_tagged))
-        allocate_indirect_node = false;
-    } 
-
-    if(allocate_indirect_node) {
+    if(use_indirect) {
       newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
       newv_marked = ((newv_ == nullptr)
          ? add_null_mark(newv)
          : add_indirect_mark(newv));
-    }
+    } else newv->next_version = (IT) oldv_tagged;
 
     // swap in new pointer but marked as "unset" since time stamp is tbd
     V* newv_unset = add_unset(newv_marked);
