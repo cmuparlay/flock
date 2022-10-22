@@ -29,6 +29,10 @@ public:
     IT old_t = v.load();
     return (TV::value(old_t) == old_v &&
 	    TV::cas(v, old_t, new_v, true));}
+  bool cas(V old_v, V new_v) { // not safe inside locks
+    IT old_t = v.load();
+    return (TV::value(old_t) == old_v &&
+      TV::cas(v, old_t, new_v, true));}
   void cam(V oldv, V newv) {
     IT old_t = get_val(lg);
     if (TV::value(old_t) == oldv)

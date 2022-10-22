@@ -117,7 +117,7 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x != nullptr && x->find(k) != -1) return false;
-	    if (s->ptr.load() != x) return false;
+	    // if (s->ptr.load() != x) continue;
       node* new_node = insert_to_node(x, k, v);
       if(s->ptr.cas(x, new_node)) {
         retire_node(x);
@@ -138,7 +138,7 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
-	    if (s->ptr.load() != x) return false;
+	    // if (s->ptr.load() != x) continue;
       node* new_node = remove_from_node(x, k);
       if(s->ptr.cas(x, new_node)) {
         retire_node(x);

@@ -9,7 +9,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/run_sanity_checks.py
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
 set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist"
-		"hash_block")
+		"hash_block" "hash_block_lf")
 set(FLOCK_BENCH_RECORDED_ONCE "btree" "list_ro")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)

@@ -147,7 +147,7 @@ public:
 #endif
   }
   
-  bool cas(N* expv, V* newv) {
+  bool cas(V* expv, V* newv) {
 #ifndef NoShortcut
     for(int ii = 0; ii < 2; ii++) {
 #endif
@@ -159,21 +159,21 @@ public:
       bool use_indirect = (newv == nullptr || newv->load_stamp() != tbd);
 
       if(use_indirect)
-        new_v = (V*) link_pool.new_obj((persistent*) oldv, ptr);
-      else ptr->next_version = oldv;
+        new_v = (V*) link_pool.new_obj((persistent*) oldv, newv);
+      else newv->next_version = oldv;
 
       bool succeeded = v.single_cas(oldv, new_v);
 
       if(succeeded) {
         set_stamp(new_v);
         if(oldv != nullptr && oldv->is_indirect()) 
-          link_pool.retire(oldv);
+          link_pool.retire((plink*) oldv);
 #ifndef NoShortcut
           if (use_indirect) shortcut((plink*) new_v);
 #endif
         return true;
       }
-      if(use_indirect) link_pool.destruct(new_v);
+      if(use_indirect) link_pool.destruct((plink*) new_v);
 
 #ifndef NoShortcut
       // only repeat if oldv was indirect

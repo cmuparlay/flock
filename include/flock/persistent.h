@@ -167,7 +167,7 @@ public:
     IT x = commit(v.load());
     
     if (is_indirect(oldv_tagged)) {
-      if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv));
+      if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
       else if (TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
 	succeeded = TV::cas(v, x, newv_unset);
  	x = commit(v.load());
@@ -220,20 +220,19 @@ public:
       bool succeeded = TV::cas_with_same_tag(v, x, newv_unset); 
       
       if(succeeded) {
-        set_stamp(newv_unset);
+        set_stamp((IT) newv_unset);
         // try to shortcut indirection out, and if not, clear unset mark
         // for time stamp
         if(is_indirect(oldv_tagged))
           link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
-        if (!shortcut_indirect(newv_unset).second)
-          TV::cas_with_same_tag(v, newv_unset, remove_unset(newv_unset)); 
+        if (!shortcut_indirect((IT) newv_unset).second)
+          TV::cas_with_same_tag(v, (IT) newv_unset, remove_unset(newv_unset)); 
         return true;
       }
-      if(use_indirect) link_pool.destruct(newv);
+      if(use_indirect) link_pool.destruct((plink*) newv);
     }
 
-    set_stamp(strip_mark_and_tag(v.load()));
-    if(is_indirect((IT) newv_marked)) link_pool.destruct((plink*) newv);
+    set_stamp((IT) strip_mark_and_tag(v.load()));
     return false;
 
     // // shortcut version list if appropriate, getting rid of redundant
