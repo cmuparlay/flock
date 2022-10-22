@@ -70,9 +70,10 @@ public:
   }
 
   bool cas(V* old_v, V* new_v) {
-    version_link* old_link = set_stamp(v.load());
-    if (old_v == new_v) return true;
+    version_link* old_link = v.load();
+    if(old_link != nullptr) set_stamp(old_link);
     if (old_v != old_link->value) return false;
+    if (old_v == new_v) return true;
     version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) new_v);
     if (v.single_cas(old_link, new_link)) {
       set_stamp(new_link);
@@ -80,7 +81,7 @@ public:
       return true;
     }
     set_stamp(v.load());
-    link_pool.retire(new_link);
+    link_pool.destruct(new_link);
     return false;
   }
 
