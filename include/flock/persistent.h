@@ -146,7 +146,6 @@ public:
   
   void store(V* newv_) {
     IT oldv_tagged = commit(v.load());
-    V* oldv = strip_mark_and_tag(oldv_tagged);
     V* newv = newv_;
     V* newv_marked = newv;
 
@@ -168,7 +167,7 @@ public:
     IT x = commit(v.load());
     
     if (is_indirect(oldv_tagged)) {
-      if (succeeded) link_pool.retire((plink*) oldv);
+      if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv));
       else if (TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
 	succeeded = TV::cas(v, x, newv_unset);
  	x = commit(v.load());
@@ -185,8 +184,8 @@ public:
 
     // shortcut version list if appropriate, getting rid of redundant
     // time stamps.  
-    if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 
-      newv->next_version = oldv->next_version.load();
+    // if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 
+    //   newv->next_version = oldv->next_version.load();
 
     // free if allocated link was not used
     if (!succeeded && is_indirect((IT) newv_marked))
@@ -195,50 +194,48 @@ public:
   }
   
   bool cas(V* expv_, V* newv_) {
-    IT oldv_tagged = v.load();
-    V* oldv = strip_mark_and_tag(oldv_tagged);
-    if(oldv != nullptr) set_stamp(oldv);
-    if(shortcut_indirect(oldv).first != expv_) return false;
-    if(expv_ == newv_) return true;
+    // CAS could be interuupted once by shortcut indirect and once by clearing mark
+    for(int ii = 0; ii < 3; ii++) {
+      IT oldv_tagged = v.load();
+      set_stamp(oldv_tagged);
+      if(shortcut_indirect(oldv_tagged).first != expv_) return false;
+      if(expv_ == newv_) return true;
 
-    V* newv = newv_;
-    V* newv_marked = newv;
+      V* newv = newv_;
+      V* newv_marked = newv;
 
-    bool use_indirect = (newv_ == nullptr || newv_->time_stamp.load() != tbd);
+      bool use_indirect = (newv_ == nullptr || newv_->time_stamp.load() != tbd);
 
-    if(use_indirect) {
-      newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
-      newv_marked = ((newv_ == nullptr)
-         ? add_null_mark(newv)
-         : add_indirect_mark(newv));
-    } else newv->next_version = (IT) oldv_tagged;
+      if(use_indirect) {
+        newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
+        newv_marked = ((newv_ == nullptr)
+           ? add_null_mark(newv)
+           : add_indirect_mark(newv));
+      } else newv->next_version = (IT) oldv_tagged;
 
-    // swap in new pointer but marked as "unset" since time stamp is tbd
-    V* newv_unset = add_unset(newv_marked);
-    IT x = oldv_tagged;
-    bool succeeded = TV::cas(v, x, newv_unset);
-    
-    if (is_indirect(oldv_tagged)) {
-      if (succeeded) link_pool.retire((plink*) oldv);
-      else if (shortcut_indirect(x).first == expv_) { 
-        succeeded = TV::cas(v, x, newv_unset);
+      // swap in new pointer but marked as "unset" since time stamp is tbd
+      V* newv_unset = add_unset(newv_marked);
+      IT x = oldv_tagged;
+      // use cas_with_same_tag to avoid picking new timestamp
+      bool succeeded = TV::cas_with_same_tag(v, x, newv_unset); 
+      
+      if(succeeded) {
+        set_stamp(newv_unset);
+        // try to shortcut indirection out, and if not, clear unset mark
+        // for time stamp
+        if(is_indirect(oldv_tagged))
+          link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
+        if (!shortcut_indirect(newv_unset).second)
+          TV::cas_with_same_tag(v, newv_unset, remove_unset(newv_unset)); 
+        return true;
       }
-    } 
-
-    // TODO: retry one more time in case we get intruppted by someone clearing the unset mark
-
-    if(succeeded) {
-      set_stamp(newv_unset);
-      // try to shortcut indirection out, and if not, clear unset mark
-      // for time stamp
-      if (!shortcut_indirect(newv_unset).second)
-        TV::cas(v, newv_unset, remove_unset(newv_unset));  // clear the "unset" mark // TODO: change to setting the null bit, currently this could inturrupt another VCAS
-      return true;
-    } else {
-      set_stamp(strip_mark_and_tag(v.load()));
-      if(is_indirect((IT) newv_marked)) link_pool.destruct((plink*) newv);
-      return false;
+      if(use_indirect) link_pool.destruct(newv);
     }
+
+    set_stamp(strip_mark_and_tag(v.load()));
+    if(is_indirect((IT) newv_marked)) link_pool.destruct((plink*) newv);
+    return false;
+
     // // shortcut version list if appropriate, getting rid of redundant
     // // time stamps.  
     // if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 

@@ -177,7 +177,7 @@ public:
 
 #ifndef NoShortcut
       // only repeat if oldv was indirect
-      if(ii == 0 && (oldv == nullptr || !oldv->is_indirect())) break;
+      // if(ii == 0 && (oldv == nullptr || !oldv->is_indirect())) break;
 
     }
 #endif
