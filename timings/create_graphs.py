@@ -7,6 +7,8 @@ param_list = ['ds','per','up','range','mfind','rs','n','p','z']
 ds_list = ["arttree", "btree", "list_ro", "list", "dlist",
     "hash_block", "hash_block_lf"]
 
+num_tables = 0
+
 def splitdsname(name):
   for ds in ds_list:
     if name == ds:
@@ -78,6 +80,8 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
         row_data.append('-')
     data.append(row_data)
   output += tabulate(data, headers=headers)
+  global num_tables
+  num_tables += 1
   print(output)
   print()
   f.write(output)
@@ -118,6 +122,8 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
         row_data.append('-')
     data.append(row_data)
   output += tabulate(data, headers=headers)
+  global num_tables
+  num_tables += 1
   print(output)
   print()
   f.write(output)
@@ -166,6 +172,7 @@ for ds in parameters['ds']:
     for n in sizes:
       print_table_timestamp_inc(throughputs, parameters, ds, per, n, mix_percents, params)
 
+print('generated ' + str(num_tables) + ' tables')
 
 # rowvals = parameters['ds']
 # colvals = ['indirect', 'noshortcut', 'simple', 'per', 'ro', 'non_per']
