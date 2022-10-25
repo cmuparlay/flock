@@ -21,7 +21,7 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
-suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
+suffixes_all = ["","_indirect","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
 suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
 
 # updates, multifind, range (rest are queries), range/multifind size
@@ -36,9 +36,11 @@ shuffle = True #getOption("-shuffle");
 if (getOption("-help") or getOption("-help")) :
     print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
 
-zipfians = [.99]
+zipfians = [0, .99]
 
 suffixes_other = []
+
+num_repeats = 3
 
 if short :
     lists = ["list", "list_ro"]
@@ -145,7 +147,8 @@ def run_tests(tests,suffixes,sizes) :
             for mix in mix_percents :
                 for suffix in suffixes:
                     for z in zipf :
-                        runtest(test + suffix, maxcpus, n, z, mix)
+                        for ii in range(num_repeats):
+                            runtest(test + suffix, maxcpus, n, z, mix)
                 with open(filename, "a") as f:
                     f.write("...\n")
 
