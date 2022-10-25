@@ -43,8 +43,6 @@ zipfians = [0, .99]
 
 suffixes_other = []
 
-num_repeats = 3
-
 if short :
     lists = ["list", "list_ro"]
     list_sizes = [10,1000]
@@ -150,8 +148,7 @@ def run_tests(tests,suffixes,sizes) :
             for mix in mix_percents :
                 for suffix in suffixes:
                     for z in zipf :
-                        for ii in range(num_repeats):
-                            runtest(test + suffix, maxcpus, n, z, mix)
+                       runtest(test + suffix, maxcpus, n, z, mix)
                 with open(filename, "a") as f:
                     f.write("...\n")
 
