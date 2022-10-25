@@ -8,3 +8,5 @@ btree             51.8          70.5      72     71.3  72.5      101.1
 hash_block         6.5          10.1      10.2   10.9  -          12.3
 list               6.6          11.8      11.8   10.7  22.3       22.9
 list_ro            6.5          15        14.9   15.7  -          22.3
+
+compare with LFCA and MRLOCK

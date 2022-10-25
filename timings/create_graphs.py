@@ -3,9 +3,10 @@ import os
 import re
 from tabulate import tabulate
 
+filename = "ip-172-31-45-236_10_25_22"
+
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
-ds_list = ["arttree", "btree", "list_ro", "list", "dlist",
-    "hash_block", "hash_block_lf"]
+ds_list = ["arttree", "btree", "list_ro", "dlist", "list", "hash_block_lf", "hash_block"]
 
 num_tables = 0
 
@@ -13,6 +14,7 @@ num_tables = 0
 # choose which timestamp experiments to run
 # make sure you run the correct version of btree_ro
 # change workload to split between mfind and find.
+
 
 # rename ro -> direct
 # 3 digit percision
@@ -23,6 +25,19 @@ num_tables = 0
 # https://www.scienceopen.com/hosted-document?doi=10.14293/S2199-1006.1.SOR-.PPIV7TZ.v1
 # compare with LFCA and MRLOCK
 
+
+
+
+
+def custom_round(num):
+  if num >= 100:
+    return round(num)
+  elif num >= 10:
+    return round(num, 1)
+  elif num >= 1:
+    return round(num, 2)
+  else:
+    return round(num, 3)
 
 def splitdsname(name):
   for ds in ds_list:
@@ -59,17 +74,24 @@ def toParam(string):
 
 # mutates throughputs and parameters
 def readResultsFile(filename, throughputs, parameters):
+  throughputs_raw = {}
   for line in open(filename, "r"):
     if not line.startswith('./'):
       continue
     param = toParam(line[2:])
-    throughputs[toString(param)] = float(line.split(',')[-1])
+    key = toString(param)
+    val = float(line.split(',')[-1])
+    if key not in throughputs_raw:
+      throughputs_raw[key] = [val]
+    else:
+      throughputs_raw[key].append(val)
     for p in param_list:
       if p not in parameters:
         parameters[p] = [param[p]]
       elif param[p] not in parameters[p]:
         parameters[p].append(param[p])
-
+  for key in throughputs_raw:
+    throughputs[key] = sum(throughputs_raw[key])/len(throughputs_raw[key])
   for p in param_list:
     parameters[p].sort()
   
@@ -83,7 +105,7 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
     rowvals = parameters[row]
   if colvals == []:
     colvals = parameters[col]
-  headers = ['ds'] + colvals
+  headers = ['ds'] + ['direct' if x == 'ro' else x for x in colvals]
   data = []
   for r in rowvals:
     row_data = [r]
@@ -92,7 +114,7 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
       p[col] = c
       # print(p)
       if toString(p) in throughputs:
-        row_data.append(round(throughputs[toString(p)], 1))
+        row_data.append(custom_round(throughputs[toString(p)]))
       else:
         row_data.append('-')
     data.append(row_data)
@@ -110,7 +132,7 @@ def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['range'] = mix_percent[2]
   params['rs'] = mix_percent[3]
   rowvals = parameters['ds']
-  colvals = ['indirect', 'noshortcut', 'simple', 'per', 'ro', 'non_per']
+  colvals = ['indirect', 'simple', 'per', 'ro', 'non_per']
   print_table(throughput, parameters, 'ds', 'per', params, rowvals, colvals)
 
 def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percents, params):
@@ -134,20 +156,17 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
       p['rs'] = mix_percent[3]
       # print(p)
       if toString(p) in throughputs:
-        row_data.append(round(throughputs[toString(p)], 1))
+        row_data.append(custom_round(throughputs[toString(p)]))
       else:
         row_data.append('-')
     data.append(row_data)
-  output += tabulate(data, headers=headers)
+  output += tabulate(data, headers=headers) + '\n'
   global num_tables
   num_tables += 1
   print(output)
-  print()
   f.write(output)
   f.close()
 
-
-filename = "aware.aladdin.cs.cmu.edu_10_21_22"
 graphsfolder = 'graphs-' + filename
 if not os.path.exists(graphsfolder):
   os.makedirs(graphsfolder)
@@ -156,28 +175,27 @@ throughputs = {}
 parameters = {}
 
 readResultsFile(filename, throughputs, parameters)
-# print(parameters)
 
-list_sizes = [10,1000]
-tree_sizes = [1000,10000000]
+list_sizes = [100,1000]
+tree_sizes = [100000,10000000]
 
 small = {'list' : list_sizes[0], 'tree' : tree_sizes[0]}
 large = {'list' : list_sizes[1], 'tree' : tree_sizes[1]}
 
-mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
+mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
 params_small = {'n': small,
-          'p': 143,
+          'p': parameters['p'][0],
           'z': 0.99, }
 params_large = {'n': large,
-          'p': 143,
+          'p': parameters['p'][0],
           'z': 0.99, }
 
 for mix in mix_percents:
   print_table_mix_percent(throughputs, parameters, mix, params_small)
   print_table_mix_percent(throughputs, parameters, mix, params_large)
 
-params = {'p': 143, 'z': 0.99,}
+params = {'p': parameters['p'][0], 'z': 0.99,}
 
 for ds in parameters['ds']:
   for per in ['per', 'simple']:
@@ -189,6 +207,8 @@ for ds in parameters['ds']:
     for n in sizes:
       print_table_timestamp_inc(throughputs, parameters, ds, per, n, mix_percents, params)
 
+print(parameters)
+print()
 print('generated ' + str(num_tables) + ' tables')
 
 # rowvals = parameters['ds']
