@@ -9,6 +9,21 @@ ds_list = ["arttree", "btree", "list_ro", "list", "dlist",
 
 num_tables = 0
 
+# todo: don't run no_shortcut
+# choose which timestamp experiments to run
+# make sure you run the correct version of btree_ro
+# change workload to split between mfind and find.
+
+# rename ro -> direct
+# 3 digit percision
+
+# high overhead of persistence likely just due to timestamp increments. Measure performance with increments disabled to check this.
+
+# try to get LCFA running: https://github.com/kboyles8/lock-free-search-tree
+# https://www.scienceopen.com/hosted-document?doi=10.14293/S2199-1006.1.SOR-.PPIV7TZ.v1
+# compare with LFCA and MRLOCK
+
+
 def splitdsname(name):
   for ds in ds_list:
     if name == ds:
@@ -20,6 +35,8 @@ def toString(param):
   ds_name = param['ds']
   if param['per'] != 'non_per' and param['per']!='*':
     ds_name += '_' + param['per']
+  if param['per'] == 'ro' and param['ds'] == 'list':
+    return "invalid key"
   size = param['n']
   if type(param['n']) is dict and param['per'] != '*':
     if 'list' in param['ds']:

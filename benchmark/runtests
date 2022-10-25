@@ -21,11 +21,14 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
+# suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
+# suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
+
 suffixes_all = ["","_indirect","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
-suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
+suffixes_ro = suffixes_all + ["_ro", "_simple_ro"]
 
 # updates, multifind, range (rest are queries), range/multifind size
-mix_percents = [[5,0,0,0], [5,95,0,2], [5,95,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
+mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
 rounds = int(getArg("-r", 2));
 
@@ -45,18 +48,18 @@ num_repeats = 3
 if short :
     lists = ["list", "list_ro"]
     list_sizes = [10,1000]
-    trees = ["btree", "hash_block", "arttree"]
+    trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
     tree_sizes = [1000,10000000]
 elif all :
     lists = ["list", "list_ro"]
     list_sizes = [10,100,1000]
-    trees = ["btree", "hash_block", "arttree"]
+    trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
     tree_sizes = [100,1000,100000,1000000,10000000,100000000]
 else :
     lists = ["list"]
     lists_ro = ["list_ro"]
     list_sizes = [10,100,1000]
-    trees = ["hash_block", "arttree"]
+    trees = ["hash_block_lf", "hash_block", "arttree"]
     trees_ro = ["btree"]
     tree_sizes = [1000,100000,10000000]
 
