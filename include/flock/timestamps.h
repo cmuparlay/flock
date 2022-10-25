@@ -83,6 +83,14 @@ struct timestamp_multiple {
 };
 
 
+struct timestamp_no_inc {
+  std::atomic<TS> stamp;
+  TS get_stamp() {return stamp.load();}
+  TS get_read_stamp() {return stamp.load();}
+  TS get_write_stamp() {return stamp.load();}
+  timestamp_no_inc() : stamp(1) {}
+};
+
 // works well if mostly reads or writes
 // if stamp is odd then in write mode, and if even in read mode
 // if not in the right mode, then increment to put in the right mode
@@ -128,6 +136,8 @@ struct timestamp_read_write {
 timestamp_read global_stamp;
 #elif WriteStamp
 timestamp_write global_stamp;
+#elif NoIncStamp
+timestamp_no_inc global_stamp;
 #else
 timestamp_read_write global_stamp;
 #endif
