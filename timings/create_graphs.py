@@ -3,30 +3,24 @@ import os
 import re
 from tabulate import tabulate
 
-filename = "ip-172-31-45-236_10_25_22"
+input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
+output_folder = "uniform"
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
 ds_list = ["arttree", "btree", "list_ro", "dlist", "list", "hash_block_lf", "hash_block"]
 
 num_tables = 0
 
-# todo: don't run no_shortcut
-# choose which timestamp experiments to run
+combined_output = ""
+
 # make sure you run the correct version of btree_ro
 # change workload to split between mfind and find.
 
-
-# rename ro -> direct
-# 3 digit percision
-
-# high overhead of persistence likely just due to timestamp increments. Measure performance with increments disabled to check this.
+# measured performance of hash_block without ts increments
 
 # try to get LCFA running: https://github.com/kboyles8/lock-free-search-tree
 # https://www.scienceopen.com/hosted-document?doi=10.14293/S2199-1006.1.SOR-.PPIV7TZ.v1
 # compare with LFCA and MRLOCK
-
-
-
 
 
 def custom_round(num):
@@ -73,23 +67,24 @@ def toParam(string):
   return param
 
 # mutates throughputs and parameters
-def readResultsFile(filename, throughputs, parameters):
+def readResultsFile(throughputs, parameters):
   throughputs_raw = {}
-  for line in open(filename, "r"):
-    if not line.startswith('./'):
-      continue
-    param = toParam(line[2:])
-    key = toString(param)
-    val = float(line.split(',')[-1])
-    if key not in throughputs_raw:
-      throughputs_raw[key] = [val]
-    else:
-      throughputs_raw[key].append(val)
-    for p in param_list:
-      if p not in parameters:
-        parameters[p] = [param[p]]
-      elif param[p] not in parameters[p]:
-        parameters[p].append(param[p])
+  for filename in input_files:
+    for line in open(filename, "r"):
+      if not line.startswith('./'):
+        continue
+      param = toParam(line[2:])
+      key = toString(param)
+      val = float(line.split(',')[-1])
+      if key not in throughputs_raw:
+        throughputs_raw[key] = [val]
+      else:
+        throughputs_raw[key].append(val)
+      for p in param_list:
+        if p not in parameters:
+          parameters[p] = [param[p]]
+        elif param[p] not in parameters[p]:
+          parameters[p].append(param[p])
   for key in throughputs_raw:
     throughputs[key] = sum(throughputs_raw[key])/len(throughputs_raw[key])
   for p in param_list:
@@ -100,7 +95,7 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
   p[row] = '*'
   p[col] = '*'
   output = toString(p) + '\n========================================= \n\n'
-  f = open(graphsfolder + '/' + toString(p) + ".txt", "w")
+  f = open(output_folder + '/' + toString(p) + ".txt", "w")
   if rowvals == []:
     rowvals = parameters[row]
   if colvals == []:
@@ -119,8 +114,9 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
         row_data.append('-')
     data.append(row_data)
   output += tabulate(data, headers=headers)
-  global num_tables
+  global num_tables, combined_output
   num_tables += 1
+  combined_output += output
   print(output)
   print()
   f.write(output)
@@ -141,7 +137,7 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   p['n'] = size
   title = 'inc_policy_' + ds + '_' + per + '_size_' + str(size)
   output = title + '\n========================================= \n\n'
-  f = open(graphsfolder + '/' + title + ".txt", "w")
+  f = open(output_folder + '/' + title + ".txt", "w")
 
   colvals = ['_rs', '_ws', '']
   headers = ['workload (up-mfind-range-rs)', 'read', 'write', 'switch']
@@ -161,20 +157,20 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
         row_data.append('-')
     data.append(row_data)
   output += tabulate(data, headers=headers) + '\n'
-  global num_tables
+  global num_tables, combined_output
   num_tables += 1
+  combined_output += output
   print(output)
   f.write(output)
   f.close()
 
-graphsfolder = 'graphs-' + filename
-if not os.path.exists(graphsfolder):
-  os.makedirs(graphsfolder)
+if not os.path.exists(output_folder):
+  os.makedirs(output_folder)
 
 throughputs = {}
 parameters = {}
 
-readResultsFile(filename, throughputs, parameters)
+readResultsFile(throughputs, parameters)
 
 list_sizes = [100,1000]
 tree_sizes = [100000,10000000]
@@ -186,16 +182,16 @@ mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50
 
 params_small = {'n': small,
           'p': parameters['p'][0],
-          'z': 0.99, }
+          'z': 0, }
 params_large = {'n': large,
           'p': parameters['p'][0],
-          'z': 0.99, }
+          'z': 0, }
 
 for mix in mix_percents:
   print_table_mix_percent(throughputs, parameters, mix, params_small)
   print_table_mix_percent(throughputs, parameters, mix, params_large)
 
-params = {'p': parameters['p'][0], 'z': 0.99,}
+params = {'p': parameters['p'][0], 'z': 0,}
 
 for ds in parameters['ds']:
   for per in ['per', 'simple']:
@@ -211,6 +207,9 @@ print(parameters)
 print()
 print('generated ' + str(num_tables) + ' tables')
 
+f = open(output_folder + '/combined.txt', "w")
+f.write(combined_output)
+f.close()
 # rowvals = parameters['ds']
 # colvals = ['indirect', 'noshortcut', 'simple', 'per', 'ro', 'non_per']
 # print_table(throughputs, parameters, 'ds', 'per', params, rowvals, colvals)
