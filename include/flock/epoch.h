@@ -17,7 +17,7 @@
 // any time stamps less or equal to done_stamp indicate it is safe to
 // collect them (noone will travel through them).
   
-struct epoch_s {
+struct alignas(64) epoch_s {
   TS prev_stamp;
   
   struct alignas(64) announce_slot {
@@ -98,7 +98,7 @@ struct Link {
 using list_allocator = parlay::type_allocator<Link>;
 
 template <typename xT>
-struct mem_pool {
+struct alignas(64) mem_pool {
 private:
 
   // each thread keeps one of these

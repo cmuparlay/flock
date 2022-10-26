@@ -5,7 +5,7 @@
 
 using TS = long;
 
-struct timestamp_read {
+struct alignas(64) timestamp_read {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
 
@@ -28,7 +28,7 @@ struct timestamp_read {
   timestamp_read() : stamp(1) {}
 };
 
-struct timestamp_write {
+struct alignas(64) timestamp_write {
   std::atomic<TS> stamp;
   static constexpr int delay = 800;
 
@@ -51,7 +51,7 @@ struct timestamp_write {
   timestamp_write() : stamp(1) {}
 };
 
-struct timestamp_multiple {
+struct alignas(64) timestamp_multiple {
   static constexpr int slots = 4;
   static constexpr int gap = 16;
   static constexpr int delay = 300;
@@ -83,7 +83,7 @@ struct timestamp_multiple {
 };
 
 
-struct timestamp_no_inc {
+struct alignas(64) timestamp_no_inc {
   std::atomic<TS> stamp;
   TS get_stamp() {return stamp.load();}
   TS get_read_stamp() {return stamp.load();}
@@ -96,7 +96,7 @@ struct timestamp_no_inc {
 // if not in the right mode, then increment to put in the right mode
 thread_local float read_backoff = 50.0;
 thread_local float write_backoff = 1000.0;
-struct timestamp_read_write {
+struct alignas(64) timestamp_read_write {
   std::atomic<TS> stamp;
   // unfortunately quite sensitive to the delays
   // these were picked empirically for a particular machine (aware)

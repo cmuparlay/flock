@@ -225,7 +225,7 @@ public:
         // for time stamp
         if(is_indirect(oldv_tagged))
           link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
-        if (!shortcut_indirect((IT) newv_unset).second)
+        if (use_indirect && !shortcut_indirect((IT) newv_unset).second)
           TV::cas_with_same_tag(v, (IT) newv_unset, remove_unset(newv_unset)); 
         return true;
       }
