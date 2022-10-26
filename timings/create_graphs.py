@@ -4,7 +4,7 @@ import re
 from tabulate import tabulate
 
 input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-output_folder = "uniform"
+output_folder = "zipf"
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
 ds_list = ["arttree", "btree", "list_ro", "dlist", "list", "hash_block_lf", "hash_block"]
@@ -13,10 +13,6 @@ num_tables = 0
 
 combined_output = ""
 
-# make sure you run the correct version of btree_ro
-# change workload to split between mfind and find.
-
-# measured performance of hash_block without ts increments
 
 # try to get LCFA running: https://github.com/kboyles8/lock-free-search-tree
 # https://www.scienceopen.com/hosted-document?doi=10.14293/S2199-1006.1.SOR-.PPIV7TZ.v1
@@ -113,10 +109,10 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
       else:
         row_data.append('-')
     data.append(row_data)
-  output += tabulate(data, headers=headers)
+  output += tabulate(data, headers=headers) + '\n'
   global num_tables, combined_output
   num_tables += 1
-  combined_output += output
+  combined_output += output + '\n'
   print(output)
   print()
   f.write(output)
@@ -159,7 +155,7 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   output += tabulate(data, headers=headers) + '\n'
   global num_tables, combined_output
   num_tables += 1
-  combined_output += output
+  combined_output += output + '\n'
   print(output)
   f.write(output)
   f.close()
@@ -182,16 +178,16 @@ mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50
 
 params_small = {'n': small,
           'p': parameters['p'][0],
-          'z': 0, }
+          'z': 0.99, }
 params_large = {'n': large,
           'p': parameters['p'][0],
-          'z': 0, }
+          'z': 0.99, }
 
 for mix in mix_percents:
   print_table_mix_percent(throughputs, parameters, mix, params_small)
   print_table_mix_percent(throughputs, parameters, mix, params_large)
 
-params = {'p': parameters['p'][0], 'z': 0,}
+params = {'p': parameters['p'][0], 'z': 0.99,}
 
 for ds in parameters['ds']:
   for per in ['per', 'simple']:

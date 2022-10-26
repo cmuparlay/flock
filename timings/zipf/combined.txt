@@ -8,7 +8,9 @@ btree               228         288    290  306             307
 hash_block          827         838    920  -              1119
 hash_block_lf       911         950    816  -              1242
 list                 94.8       102    105  -               147
-list_ro              82         114    117  117             132*,5%update,0%range,0%mfind,rs=0,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              82         114    117  117             132
+
+*,5%update,0%range,0%mfind,rs=0,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -18,7 +20,9 @@ btree              109        161    164    169           176
 hash_block         488        490    790    -             889
 hash_block_lf      511        509    559    -             936
 list                 6.3       10.7   18.3  -              18.2
-list_ro              5.89      15.4   17.6  16.6           18.2*,5%update,0%range,25%mfind,rs=4,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro              5.89      15.4   17.6  16.6           18.2
+
+*,5%update,0%range,25%mfind,rs=4,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -28,7 +32,9 @@ btree               158       177    181    178             351
 hash_block          285       285    296    -              1507
 hash_block_lf       262       257    257    -              1702
 list                 41.3      42.2   41.7  -               172
-list_ro              40.4      47.5   46    47.3            157*,5%update,0%range,25%mfind,rs=4,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              40.4      47.5   46    47.3            157
+
+*,5%update,0%range,25%mfind,rs=4,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -38,7 +44,9 @@ btree               96.4     131     133    133           183
 hash_block         270       270     304    -            1100
 hash_block_lf      267       260     269    -            1151
 list                 6.2       9.91   10.7  -              18.7
-list_ro              5.95     13.3    14.2  14.2           18.6*,5%update,0%range,25%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro              5.95     13.3    14.2  14.2           18.6
+
+*,5%update,0%range,25%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -48,7 +56,9 @@ btree               223       259    265    259             411
 hash_block          518       509    528    -              2468
 hash_block_lf       486       471    471    -              2811
 list                 59.9      63     60.3  -               221
-list_ro              60.7      69.9   63.6  70.2            205*,5%update,0%range,25%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              60.7      69.9   63.6  70.2            205
+
+*,5%update,0%range,25%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -58,7 +68,9 @@ btree              109        160    165    162           195
 hash_block         421        415    469    -            1484
 hash_block_lf      418        411    425    -            1518
 list                 6.95      11     11.8  -              19.4
-list_ro              6.8       14.6   15.1  15.8           19.1*,5%update,95%range,0%mfind,rs=48,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro              6.8       14.6   15.1  15.8           19.1
+
+*,5%update,95%range,0%mfind,rs=48,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds             indirect    simple    per    direct    non_per
@@ -68,7 +80,9 @@ btree          75.7        83.6      85.2   83.7      139
 hash_block     19.7        24.6      28.3   -         39.8
 hash_block_lf  -           -         -      -         -
 list           22.8        22.9      24.3   -         102
-list_ro        22.8        25.4      25.7   25.8      93.7*,5%update,95%range,0%mfind,rs=48,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro        22.8        25.4      25.7   25.8      93.7
+
+*,5%update,95%range,0%mfind,rs=48,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds             indirect    simple    per    direct    non_per
@@ -78,7 +92,9 @@ btree          45.1        58.9      61.1   59.9      80.2
 hash_block     5.63        8.81      9.37   -         10.7
 hash_block_lf  -           -         -      -         -
 list           5.33        7.98      9.34   -         15.7
-list_ro        5.13        10.7      11.4   11.2      15.5*,5%update,0%range,5%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro        5.13        10.7      11.4   11.2      15.5
+
+*,5%update,0%range,5%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -88,7 +104,9 @@ btree               164       185    190    187             358
 hash_block          310       307    326    -              1578
 hash_block_lf       275       267    264    -              1798
 list                 40.6      43     40.4  -               174
-list_ro              41.5      46.7   44.8  45.7            159*,5%update,0%range,5%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              41.5      46.7   44.8  45.7            159
+
+*,5%update,0%range,5%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -98,7 +116,9 @@ btree               98        135    138    138           185
 hash_block         287        288    330    -            1142
 hash_block_lf      283        276    286    -            1193
 list                 6.14      10     10.8  -              18.8
-list_ro              5.95      13.5   14.5  14.6           18.4*,50%update,0%range,0%mfind,rs=0,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro              5.95      13.5   14.5  14.6           18.4
+
+*,50%update,0%range,0%mfind,rs=0,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -108,7 +128,9 @@ btree               109       132    125    144           146
 hash_block          196       209    209    -             257
 hash_block_lf       240       295    231    -             314
 list                 37.4      39.9   40.1  -              52.1
-list_ro              29.7      37     36.8  38.8           41.1*,50%update,0%range,0%mfind,rs=0,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              29.7      37     36.8  38.8           41.1
+
+*,50%update,0%range,0%mfind,rs=0,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -118,7 +140,9 @@ btree               80.5     110     105    117           120
 hash_block         182       208     220    -             270
 hash_block_lf      216       264     261    -             341
 list                 5.77      8.44   14.7  -              15.2
-list_ro              5.27     12.2    13.4  13.1           14*,50%update,0%range,50%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
+list_ro              5.27     12.2    13.4  13.1           14
+
+*,50%update,0%range,50%mfind,rs=16,n={'list': 100, 'tree': 100000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple    per  direct      non_per
@@ -128,7 +152,9 @@ btree               128       139    142    139             334
 hash_block          203       202    207    -              1310
 hash_block_lf       171       167    165    -              1356
 list                 29.6      29.8   29.7  -               142
-list_ro              30.7      32.8   32    33.1            126*,50%update,0%range,50%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
+list_ro              30.7      32.8   32    33.1            126
+
+*,50%update,0%range,50%mfind,rs=16,n={'list': 1000, 'tree': 10000000},p=63,z=0.99
 ========================================= 
 
 ds               indirect    simple     per  direct      non_per
@@ -138,7 +164,9 @@ btree               87.9     115     118     116           182
 hash_block         210       208     221     -            1105
 hash_block_lf      196       195     196     -            1211
 list                 5.9       8.91    9.51  -              18.6
-list_ro              5.55     11.6    11.6   12.4           18.1inc_policy_arttree_per_size_100000
+list_ro              5.55     11.6    11.6   12.4           18.1
+
+inc_policy_arttree_per_size_100000
 ========================================= 
 
 workload (up-mfind-range-rs)      read    write    switch
@@ -150,6 +178,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    329      260       218
 [50, 0, 0, 0]                    178       61.7     178
 [50, 50, 0, 16]                  268      212       164
+
 inc_policy_arttree_per_size_10000000
 ========================================= 
 
@@ -162,6 +191,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                   198       191       174
 [50, 0, 0, 0]                   150        60.7     149
 [50, 50, 0, 16]                 176       171       146
+
 inc_policy_arttree_simple_size_100000
 ========================================= 
 
@@ -174,6 +204,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    303      242         208
 [50, 0, 0, 0]                    179       61.2       178
 [50, 50, 0, 16]                  251      197         154
+
 inc_policy_arttree_simple_size_10000000
 ========================================= 
 
@@ -186,6 +217,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                   181       176       164
 [50, 0, 0, 0]                   138        60.1     138
 [50, 50, 0, 16]                 163       159       137
+
 inc_policy_btree_per_size_100000
 ========================================= 
 
@@ -198,6 +230,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    232      214       190
 [50, 0, 0, 0]                    126       52.6     125
 [50, 50, 0, 16]                  198      173       142
+
 inc_policy_btree_per_size_10000000
 ========================================= 
 
@@ -210,6 +243,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    142      149       138
 [50, 0, 0, 0]                    105       52.2     105
 [50, 50, 0, 16]                  130      132       118
+
 inc_policy_btree_simple_size_100000
 ========================================= 
 
@@ -222,6 +256,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    246      211       185
 [50, 0, 0, 0]                    131       52.7     132
 [50, 50, 0, 16]                  200      169       139
+
 inc_policy_btree_simple_size_10000000
 ========================================= 
 
@@ -234,6 +269,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    146      145       135
 [50, 0, 0, 0]                    111       52.9     110
 [50, 50, 0, 16]                  128      129       115
+
 inc_policy_hash_block_per_size_100000
 ========================================= 
 
@@ -246,6 +282,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                      623    418       326
 [50, 0, 0, 0]                      210     68.1     209
 [50, 50, 0, 16]                    392    292       207
+
 inc_policy_hash_block_per_size_10000000
 ========================================= 
 
@@ -258,6 +295,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                   485       399      330
 [50, 0, 0, 0]                   221        72.8    220
 [50, 50, 0, 16]                 323       283      221
+
 inc_policy_hash_block_simple_size_100000
 ========================================= 
 
@@ -270,6 +308,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    592      389       307
 [50, 0, 0, 0]                    209       65.7     209
 [50, 50, 0, 16]                  394      283       202
+
 inc_policy_hash_block_simple_size_10000000
 ========================================= 
 
@@ -282,6 +321,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                   387      338       288
 [50, 0, 0, 0]                   209       70.1     208
 [50, 50, 0, 16]                 306      271       208
+
 inc_policy_hash_block_lf_per_size_100000
 ========================================= 
 
@@ -294,6 +334,7 @@ workload (up-mfind-range-rs)    read    write    switch
 [5, 5, 0, 16]                   621     379      264
 [50, 0, 0, 0]                   232     62.5     231
 [50, 50, 0, 16]                 420     266      165
+
 inc_policy_hash_block_lf_per_size_10000000
 ========================================= 
 
@@ -306,6 +347,7 @@ workload (up-mfind-range-rs)    read    write    switch
 [5, 5, 0, 16]                   417     352      286
 [50, 0, 0, 0]                   259     70.5     261
 [50, 50, 0, 16]                 327     278      196
+
 inc_policy_hash_block_lf_simple_size_100000
 ========================================= 
 
@@ -318,6 +360,7 @@ workload (up-mfind-range-rs)    read    write    switch
 [5, 5, 0, 16]                   624     375      267
 [50, 0, 0, 0]                   297     64.0     295
 [50, 50, 0, 16]                 420     264      167
+
 inc_policy_hash_block_lf_simple_size_10000000
 ========================================= 
 
@@ -330,6 +373,7 @@ workload (up-mfind-range-rs)    read    write    switch
 [5, 5, 0, 16]                   396     341      276
 [50, 0, 0, 0]                   265     70.5     264
 [50, 50, 0, 16]                 318     273      195
+
 inc_policy_list_per_size_100
 ========================================= 
 
@@ -342,6 +386,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                     98.4     53.3      40.4
 [50, 0, 0, 0]                     40.4     13.7      40.1
 [50, 50, 0, 16]                   73.8     38.2      29.7
+
 inc_policy_list_per_size_1000
 ========================================= 
 
@@ -354,6 +399,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    11.7     11.2      10.8
 [50, 0, 0, 0]                    14.7      6.93     14.7
 [50, 50, 0, 16]                  10.8     10.1       9.51
+
 inc_policy_list_simple_size_100
 ========================================= 
 
@@ -366,6 +412,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                     99       54.7      43
 [50, 0, 0, 0]                     40.1     13.6      39.9
 [50, 50, 0, 16]                   75.4     39.1      29.8
+
 inc_policy_list_simple_size_1000
 ========================================= 
 
@@ -378,6 +425,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    10.7     10.1      10
 [50, 0, 0, 0]                     8.54     6.25      8.44
 [50, 50, 0, 16]                   9.94     9.24      8.91
+
 inc_policy_list_ro_per_size_100
 ========================================= 
 
@@ -390,6 +438,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    113       61.1      44.8
 [50, 0, 0, 0]                     37.1     13.6      36.8
 [50, 50, 0, 16]                   77       40.6      32
+
 inc_policy_list_ro_per_size_1000
 ========================================= 
 
@@ -402,6 +451,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                     15.9    15.1       14.5
 [50, 0, 0, 0]                     13.6     8.41      13.4
 [50, 50, 0, 16]                   13.6    12.6       11.6
+
 inc_policy_list_ro_simple_size_100
 ========================================= 
 
@@ -414,6 +464,7 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    114       61.6      46.7
 [50, 0, 0, 0]                     37.1     13.5      37
 [50, 50, 0, 16]                   81.5     41.4      32.8
+
 inc_policy_list_ro_simple_size_1000
 ========================================= 
 
@@ -426,3 +477,4 @@ workload (up-mfind-range-rs)      read    write    switch
 [5, 5, 0, 16]                    14.8     14.2       13.5
 [50, 0, 0, 0]                    12.2      8.12      12.2
 [50, 50, 0, 16]                  13.5     12.4       11.6
+
