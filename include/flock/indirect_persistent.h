@@ -6,7 +6,7 @@ struct persistent {};
 
 struct version_link {
   std::atomic<TS> time_stamp;
-  version_link* volatile next_version;
+  version_link* next_version;
   void* value;
   version_link() : time_stamp(tbd) {}
   version_link(TS time, version_link* next, void* value) :

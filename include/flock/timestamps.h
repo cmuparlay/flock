@@ -5,32 +5,56 @@
 
 using TS = long;
 
+thread_local int read_delay = 1;
+thread_local int write_delay = 1;
+
 struct alignas(64) timestamp_read {
   std::atomic<TS> stamp;
-  static constexpr int delay = 800;
+  alignas(128) static int delay;
 
   TS get_stamp() {return stamp.load();}
       
   TS get_read_stamp() {
     TS ts = stamp.load();
 
-    // delay to reduce contention
-    for(volatile int i = 0; i < delay; i++);
+    if(delay == -1) {
+          // delay to reduce contention
+      for(volatile int i = 1; i < read_delay; i++) {}
+      // std::atomic_thread_fence(std::memory_order_seq_cst);
 
-    // only update timestamp if has not changed
-    if (stamp.load() == ts)
-      stamp.compare_exchange_strong(ts,ts+1);
-
+      // only update timestamp if has not changed
+      if (stamp.load() == ts) {
+        if(stamp.fetch_add(1) == ts) {
+          if(read_delay >= 2) read_delay /= 2;
+        }
+        else {
+          if(read_delay < 256) read_delay *= 2;
+        }
+      }
+    } else {
+      for(volatile int i = 1; i < delay; i++) {}
+      if (stamp.load() == ts)
+        stamp.fetch_add(1);
+    }
     return ts;
   }
 
   TS get_write_stamp() {return stamp.load();}
-  timestamp_read() : stamp(1) {}
+  timestamp_read() : stamp(1) {
+    auto cstr = std::getenv("READ_DELAY");
+    if(cstr != nullptr)
+      delay = atoi(cstr);
+    else
+      delay = -1;
+    // std::cout << "READ_DELAY: " << delay << std::endl;
+  }
 };
+
+alignas(128) int timestamp_read::delay = 800;
 
 struct alignas(64) timestamp_write {
   std::atomic<TS> stamp;
-  static constexpr int delay = 800;
+  alignas(128) static int delay;
 
   TS get_stamp() {return stamp.load();}
 
@@ -39,17 +63,38 @@ struct alignas(64) timestamp_write {
   TS get_write_stamp() {
     TS ts = stamp.load();
 
-    // delay to reduce contention
-    for(volatile int i = 0; i < delay; i++);
+    if(delay == -1) {
+      // delay to reduce contention
+      for(volatile int i = 1; i < write_delay; i++) {}
+      // std::atomic_thread_fence(std::memory_order_seq_cst);
 
-    // only update timestamp if has not changed
-    if (stamp.load() == ts)
-      stamp.compare_exchange_strong(ts,ts+1);
-
+      // only update timestamp if has not changed
+      if (stamp.load() == ts) {
+        if(stamp.fetch_add(1) == ts) {
+          if(write_delay >= 2) write_delay /= 2;
+        }
+        else {
+          if(write_delay < 256) write_delay *= 2;
+        }
+      }
+    } else {
+      for(volatile int i = 1; i < delay; i++) {}
+      if (stamp.load() == ts)
+        stamp.fetch_add(1);
+    }
     return ts+1;
   }
-  timestamp_write() : stamp(1) {}
+  timestamp_write() : stamp(1) {
+    auto cstr = std::getenv("WRITE_DELAY");
+    if(cstr != nullptr)
+      delay = atoi(cstr);
+    else
+      delay = -1;
+    // std::cout << "WRITE_DELAY: " << delay << std::endl;
+  }
 };
+
+alignas(128) int timestamp_write::delay = 200;
 
 struct alignas(64) timestamp_multiple {
   static constexpr int slots = 4;
@@ -94,10 +139,14 @@ struct alignas(64) timestamp_no_inc {
 // works well if mostly reads or writes
 // if stamp is odd then in write mode, and if even in read mode
 // if not in the right mode, then increment to put in the right mode
-thread_local float read_backoff = 50.0;
-thread_local float write_backoff = 1000.0;
+// thread_local float read_backoff = 50.0;
+// thread_local float write_backoff = 1000.0;
+
+thread_local int adaptive_backoff = 1;
+
 struct alignas(64) timestamp_read_write {
   std::atomic<TS> stamp;
+  alignas(128) static int delay;
   // unfortunately quite sensitive to the delays
   // these were picked empirically for a particular machine (aware)
   //static constexpr int write_delay = 1500;
@@ -108,29 +157,89 @@ struct alignas(64) timestamp_read_write {
   inline TS get_write_stamp() {
     TS s = stamp.load();
     if (s % 2 == 1) return s;
-    for(volatile int j = 0; j < round(write_backoff) ; j++);
+    if(delay == -1) {
+      for(volatile int j = 1; j < adaptive_backoff ; j++) {}
+    }
+    else {
+      for(volatile int i = 1; i < delay; i++) {}
+    }
     if (s != stamp.load()) return s;
-    if (stamp.compare_exchange_strong(s,s+1)) {
-      if (write_backoff > 1200.0) write_backoff *= .98;
-    } else if (write_backoff < 1800.0) write_backoff *= 1.02;
+    TS tmp = s;
+    if (stamp.compare_exchange_strong(tmp, s+1)) {
+      if (adaptive_backoff >= 2) adaptive_backoff /= 2;
+    } else if (adaptive_backoff < 256) adaptive_backoff *= 2;
     return s+1; // return new stamp
   }
 
   TS get_read_stamp() {
     TS s = stamp.load();
     if (s % 2 == 0) return s;
-    for(volatile int j = 0; j < round(read_backoff) ; j++);
+    if(delay == -1) {
+      for(volatile int j = 1; j < adaptive_backoff ; j++) {}
+    }
+    else {
+      for(volatile int j = 1; j < delay ; j++) {}
+    }
     if (s != stamp.load()) return s;
-    if (stamp.compare_exchange_strong(s,s+1)) {
-      if (read_backoff > 10.0) read_backoff *= .98;
-    } else if (read_backoff < 400.0) read_backoff *= 1.02;
+    TS tmp = s;
+    if (stamp.compare_exchange_strong(tmp, s+1)) {
+      if (adaptive_backoff >= 2) adaptive_backoff /= 2;
+    } else if (adaptive_backoff < 256) adaptive_backoff *= 2;
     return s; // return old stamp
   }
 
   TS current() { return stamp.load();}
   
-  timestamp_read_write() : stamp(1) {}
+  timestamp_read_write() : stamp(1) {
+    auto cstr = std::getenv("WRITE_DELAY");
+    // delay = 0;
+    if(cstr != nullptr)
+      delay = atoi(cstr);
+    else
+      delay = -1;
+    // std::cout << "INC_DELAY: " << delay << std::endl;
+  }
 };
+
+alignas(128) int timestamp_read_write::delay = 200;
+
+// struct alignas(64) timestamp_read_write {
+//   std::atomic<TS> stamp;
+//   // unfortunately quite sensitive to the delays
+//   // these were picked empirically for a particular machine (aware)
+//   //static constexpr int write_delay = 1500;
+//   //static constexpr int read_delay = 150;
+
+//   TS get_stamp() {return stamp.load();}
+
+//   inline TS get_write_stamp() {
+//     TS s = stamp.load();
+//     if (s % 2 == 1) return s;
+//     for(volatile int j = 300; j < round(write_backoff) ; j++);
+//     if (s != stamp.load()) return s;
+//     TS tmp = s;
+//     if (stamp.compare_exchange_strong(tmp, s+1)) {
+//       if (write_backoff >= 100) write_backoff -= 200;
+//     } else if (write_backoff < 600) write_backoff += 100;
+//     return s+1; // return new stamp
+//   }
+
+//   TS get_read_stamp() {
+//     TS s = stamp.load();
+//     if (s % 2 == 0) return s;
+//     for(volatile int j = 300; j < round(write_backoff) ; j++);
+//     if (s != stamp.load()) return s;
+//     TS tmp = s;
+//     if (stamp.compare_exchange_strong(tmp, s+1)) {
+//       if (write_backoff >= 100) write_backoff -= 200;
+//     } else if (write_backoff < 600) write_backoff += 100;
+//     return s; // return old stamp
+//   }
+
+//   TS current() { return stamp.load();}
+  
+//   timestamp_read_write() : stamp(1) {}
+// };
 
 #ifdef ReadStamp
 timestamp_read global_stamp;

@@ -1,5 +1,7 @@
 #include <parlay/primitives.h>
 #include <flock/flock.h>
+#define Range_Search 1
+#define Dense_Keys 1
 
 template <typename K, typename V>
 struct Set {
@@ -152,6 +154,16 @@ struct Set {
   bool remove(Table& table, K k) {
     slot* s = table.get_slot(k);
     return with_epoch([&] {return remove_at(s, k);});
+  }
+
+  template<typename AddF>
+  void range(Table& table, AddF& add, K start, K end) {
+    with_snap([&] {
+      for (K k = start; k <= end; k++) {
+	auto x = find_(table, k);
+	if (x.has_value()) add(k, x.value());
+      }
+      return true;});
   }
 
   Table empty(size_t n) {return Table(n);}

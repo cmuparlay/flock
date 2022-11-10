@@ -1,6 +1,6 @@
 #pragma once
 using IT = size_t;
-#define NoShortcut 1
+// #define NoShortcut 1
 
 #ifdef NoHelp
 template <typename F>
@@ -18,7 +18,7 @@ void print_counts() {
 struct persistent {
   size_t foo;
   std::atomic<TS> time_stamp;
-  persistent* volatile next_version;
+  persistent* next_version;
   static constexpr size_t init_ptr =(1ul << 48) - 2;
   persistent* add_tag(persistent* v, bool tag) {
     return (persistent*) ((size_t) v + tag);}

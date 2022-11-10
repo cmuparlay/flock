@@ -24,15 +24,16 @@ short = getOption("-short")
 # suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
 # suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
 
-suffixes_all = ["","_indirect","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
-suffixes_ro = suffixes_all + ["_ro", "_simple_ro"]
+suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
+# suffixes_all = ["","_indirect","_simple","_per","_per_rs","_per_ws", "_per_lock"]
+suffixes_ro = suffixes_all + ["_ro", "_simple_ro", "_ro_rs", "_ro_ws"]
 
 # updates, multifind, range (rest are queries), range/multifind size
 mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
-rounds = int(getArg("-r", 2));
+rounds = int(getArg("-r", 3));
 
-time = float(getArg("-t", 1.0));
+time = float(getArg("-t", 3.0));
 
 shuffle = True #getOption("-shuffle");
 

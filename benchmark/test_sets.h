@@ -11,7 +11,6 @@
 #include <flock/defs.h>
 #include "zipfian.h"
 #include "parse_command_line.h"
-//#include "test_persistence.h"
 
 void assert_key_exists(bool b) {
   if(!b) {
@@ -268,9 +267,14 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	  auto y = x.head(x.size());
 	  insert_balanced(os, tr, y);
 	} else {
-          parlay::parallel_for(0, n, [&] (size_t i) {
+          parlay::parallel_for(0, nn, [&] (size_t i) {
                 os.insert(tr, a[i], 123); });
+          parlay::parallel_for(n, nn, [&] (size_t i) {
+                os.remove(tr, a[i]); });
+          // parlay::parallel_for(0, n, [&] (size_t i) {
+                // os.insert(tr, a[i], 123); });
 	}
+  long start_timestamp = global_stamp.get_stamp();
   
         if (do_check) {
           //size_t expected = parlay::remove_duplicates(a.head(n)).size();
@@ -303,6 +307,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	     long mfind_count = 0;
 	     long update_count = 0;
 	     long query_count = 0;
+       volatile long keysum = 0;
              while (true) {
                // every once in a while check if time is over
                if (cnt >= 100) { 
@@ -324,7 +329,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	       
 	       if (op_types[j] == Find) {
 		 query_count++;
-		 os.find(tr, b[j]);
+		 auto val = os.find(tr, b[j]);
+     if(val.has_value()) keysum += val.value();
 	       }
 	       else if (op_types[j] == Insert) {
 		 update_count++;
@@ -343,7 +349,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 mfind_count++;
                  with_snapshot([&] {
 		   for (int k = 0; k < range_size; k++) {
-		     os.find_(tr, b[j]);
+		     auto val = os.find_(tr, b[j]);
+         if(val.has_value()) keysum += val.value();
 		     if (++j >= (i+1)*mp) j -= mp;
 		     cnt++;
 		     total++;
@@ -374,6 +381,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		    << "p=" << p << ","
 		    << "z=" << zipfian_param << ","
 		    << num_ops / (duration * 1e6) << std::endl;
+    // std::cout << "timestamp increments (per microsecond): " << (global_stamp.get_stamp()-start_timestamp)*1.0/(duration * 1e6) << std::endl;
+    // std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
 	  if (do_check) {
 	    size_t final_cnt = os.check(tr);
 	    long updates = parlay::reduce(addeds);

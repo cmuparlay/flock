@@ -23,7 +23,7 @@ T commit(T v) {return lg.commit_value(v).first;}
 #define bad_ptr ((void*) ((1ul << 48) -1))
 struct persistent {
   std::atomic<TS> time_stamp;
-  void* volatile next_version;
+  void* next_version;
   persistent() : time_stamp(tbd), next_version(bad_ptr) {}
 };
 
