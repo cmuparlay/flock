@@ -3,8 +3,10 @@ import os
 import re
 from tabulate import tabulate
 
-input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-output_folder = "zipf"
+# input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
+input_files = ["ip-172-31-41-51_11_07_22", "ip-172-31-41-51_11_07_22"]
+output_folder = "uniform-nov8"
+zipf = 0
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
 ds_list = ["arttree", "btree", "list_ro", "dlist", "list", "hash_block_lf", "hash_block"]
@@ -124,7 +126,7 @@ def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['range'] = mix_percent[2]
   params['rs'] = mix_percent[3]
   rowvals = parameters['ds']
-  colvals = ['indirect', 'simple', 'per', 'ro', 'non_per']
+  colvals = ['indirect', 'noshortcut', 'simple', 'per', 'ro', 'non_per']
   print_table(throughput, parameters, 'ds', 'per', params, rowvals, colvals)
 
 def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percents, params):
@@ -160,6 +162,14 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   f.write(output)
   f.close()
 
+def print_scalability_graphs(throughput, parameters, ds, per, size, mix_percents, params):
+  
+  return
+
+def print_size_graphs(throughput, parameters, ds, per, size, mix_percents, params):
+
+  return
+
 if not os.path.exists(output_folder):
   os.makedirs(output_folder)
 
@@ -174,20 +184,21 @@ tree_sizes = [100000,10000000]
 small = {'list' : list_sizes[0], 'tree' : tree_sizes[0]}
 large = {'list' : list_sizes[1], 'tree' : tree_sizes[1]}
 
+
 mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
 
 params_small = {'n': small,
           'p': parameters['p'][0],
-          'z': 0.99, }
+          'z': zipf, }
 params_large = {'n': large,
           'p': parameters['p'][0],
-          'z': 0.99, }
+          'z': zipf, }
 
 for mix in mix_percents:
   print_table_mix_percent(throughputs, parameters, mix, params_small)
   print_table_mix_percent(throughputs, parameters, mix, params_large)
 
-params = {'p': parameters['p'][0], 'z': 0.99,}
+params = {'p': parameters['p'][0], 'z': zipf,}
 
 for ds in parameters['ds']:
   for per in ['per', 'simple']:
