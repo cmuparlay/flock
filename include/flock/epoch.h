@@ -68,9 +68,8 @@ struct alignas(64) epoch_s {
     // check if everyone is done with earlier epochs
     for (int j=0; j<2; j++) //do twice
       for (int i=0; i < workers; i++)
-	if ((announcements[i].last != -1l) &&
-	    announcements[i].last < current_e) 
-	  all_there = false;
+      	if ((announcements[i].last != -1l) && announcements[i].last < current_e) 
+      	  all_there = false;
     // if so then increment current epoch
     if (all_there) {
       // timestamps are for multiversioning (snapshots)
