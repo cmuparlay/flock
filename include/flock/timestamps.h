@@ -241,7 +241,7 @@ alignas(128) int timestamp_read_write::delay = 200;
 //   timestamp_read_write() : stamp(1) {}
 // };
 
-#ifdef ReadStamp
+#if defined(ReadStamp) | defined(LazyStamp)
 timestamp_read global_stamp;
 #elif WriteStamp
 timestamp_write global_stamp;
@@ -260,6 +260,7 @@ thread_local TS local_stamp{-1};
 // from the previous increment (which is now safe to collect).
 TS done_stamp = global_stamp.get_stamp();
 
+#ifndef LazyStamp
 template <typename F>
 auto with_snapshot(F f) {
   return with_epoch([&] {
@@ -269,4 +270,28 @@ auto with_snapshot(F f) {
     return r;
   });
 }
+#else
+thread_local bool bad_stamp;
+parlay::sequence<long> num_retries(parlay::num_workers()*16, 0);
+void print_retries() {
+  std::cout << " retries = " << parlay::reduce(num_retries)
+	    << ", " << global_stamp.get_read_stamp() <<std::endl;
+}
 
+template <typename F>
+auto with_snapshot(F f) {
+  return with_epoch([&] {
+    local_stamp = global_stamp.get_stamp();
+    bad_stamp = false;
+    auto r = f();
+    if (bad_stamp) {
+      num_retries[parlay::worker_id()*16]++;
+      local_stamp = global_stamp.get_read_stamp();
+      r = f();
+    }
+    local_stamp = -1;
+    return r;
+  });
+}
+  
+#endif

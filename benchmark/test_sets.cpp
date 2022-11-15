@@ -12,4 +12,7 @@ int main(int argc, char* argv[]) {
 #if defined(Persistent) && ! defined(Recorded_Once)
   //  print_counts();
 #endif
+#if defined(LazyStamp)
+  print_retries();
+#endif
 }

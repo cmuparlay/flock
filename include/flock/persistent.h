@@ -119,6 +119,9 @@ public:
     IT head = v.load();
     set_stamp(head);
     V* head_unmarked = strip_mark_and_tag(head);
+#ifdef LazyStamp
+    if (head_unmarked->time_stamp.load() == ls) bad_stamp = true;
+#endif
     // chase down version chain
     while (head_unmarked != 0 && head_unmarked->time_stamp.load() > ls) {
       head = head_unmarked->next_version.load();
