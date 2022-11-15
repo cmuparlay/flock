@@ -96,6 +96,11 @@ public:
     TS ls = local_stamp;
     V* head = v.load();
     set_stamp(head);
+#ifdef LazyStamp
+    if (head != nullptr &&
+	head->time_stamp.load() == ls)
+      bad_stamp = true;
+#endif
     while (head != nullptr && head->read_stamp() > ls)
       head = (V*) head->get_next();
     return ((head != nullptr) && head->is_indirect()) ? (V*) ((plink*) head)->value : head;

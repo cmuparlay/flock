@@ -21,12 +21,9 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
-# suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
-# suffixes_ro = suffixes_all + ["_ro", "_ro_rs", "_simple_ro", "_ro_ws"]
+suffixes_all = ["","_indirect_ls","_noshortcut_ls","_simple_ls","_per_ls","_per_rs","_per_ws","_per_ns", "_per_ss", "_per_lock_ls"]
 
-suffixes_all = ["","_indirect","_noshortcut","_simple","_per","_per_rs","_per_ws", "_simple_rs", "_simple_ws", "_per_lock"]
-# suffixes_all = ["","_indirect","_simple","_per","_per_rs","_per_ws", "_per_lock"]
-suffixes_ro = suffixes_all + ["_ro", "_simple_ro", "_ro_rs", "_ro_ws"]
+suffixes_ro = suffixes_all + ["_ro_ls", "_ro_rs", "_ro_ws", "_ro_ns", "_ro_ss"]
 
 # updates, multifind, range (rest are queries), range/multifind size
 mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
@@ -41,6 +38,7 @@ if (getOption("-help") or getOption("-help")) :
     print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
 
 zipfians = [0, .99]
+# zipfians = [.99]
 
 suffixes_other = []
 
@@ -51,16 +49,16 @@ if short :
     tree_sizes = [1000,10000000]
 elif all :
     lists = ["list", "list_ro"]
-    list_sizes = [10,100,1000]
+    list_sizes = [100,1000]
     trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
     tree_sizes = [100,1000,100000,1000000,10000000,100000000]
 else :
     lists = ["list"]
     lists_ro = ["list_ro"]
-    list_sizes = [10,100,1000]
+    list_sizes = [100,1000]
     trees = ["hash_block_lf", "hash_block", "arttree"]
     trees_ro = ["btree"]
-    tree_sizes = [1000,100000,10000000]
+    tree_sizes = [100000,10000000]
 
 
 today = date.today().strftime("%m_%d_%y")
@@ -157,10 +155,10 @@ try :
     processors = getProcessors()
     os.system("make -j")
     runstring("git rev-parse --short HEAD")
-    run_tests(lists,suffixes_all,list_sizes)
-    run_tests(lists_ro,suffixes_ro,list_sizes)
     run_tests(trees,suffixes_all,tree_sizes)
     run_tests(trees_ro,suffixes_ro,tree_sizes)
+    run_tests(lists,suffixes_all,list_sizes)
+    run_tests(lists_ro,suffixes_ro,list_sizes)
             
 except NameError,v :
   x, = v

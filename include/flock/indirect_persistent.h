@@ -43,9 +43,11 @@ public:
   
   V* read_snapshot() {
     version_link* head = set_stamp(v.load());
-    // version_link* volatile old_head = nullptr;
+#ifdef LazyStamp
+    if (head->time_stamp.load() == local_stamp)
+      bad_stamp = true;
+#endif
     while (head->time_stamp.load() > local_stamp) {
-      // old_head = head;
       head = head->next_version;
     }
     return (V*) head->value;

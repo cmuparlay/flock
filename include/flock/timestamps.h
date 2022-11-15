@@ -275,7 +275,7 @@ thread_local bool bad_stamp;
 parlay::sequence<long> num_retries(parlay::num_workers()*16, 0);
 void print_retries() {
   std::cout << " retries = " << parlay::reduce(num_retries)
-	    << ", " << global_stamp.get_read_stamp() <<std::endl;
+	    << ", final stamp = " << global_stamp.get_read_stamp() <<std::endl;
 }
 
 template <typename F>

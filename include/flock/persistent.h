@@ -120,13 +120,22 @@ public:
     set_stamp(head);
     V* head_unmarked = strip_mark_and_tag(head);
 #ifdef LazyStamp
-    if (head_unmarked->time_stamp.load() == ls) bad_stamp = true;
-#endif
+    if (head_unmarked != 0) {
+      TS head_time =  head_unmarked->time_stamp.load();
+      if (head_time == ls) bad_stamp = true;
+      else if (head_time > ls)
+	do {
+	  head = head_unmarked->next_version.load();
+	  head_unmarked = strip_mark_and_tag(head);
+	} while (head_unmarked != 0 && head_unmarked->time_stamp.load() > ls);
+    }
+#else
     // chase down version chain
     while (head_unmarked != 0 && head_unmarked->time_stamp.load() > ls) {
       head = head_unmarked->next_version.load();
       head_unmarked = strip_mark_and_tag(head);
     }
+#endif
     return get_ptr(head);
   }
 

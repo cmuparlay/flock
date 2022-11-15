@@ -62,7 +62,9 @@ public:
     if(head == nullptr) return nullptr;
     set_stamp(head);
     TS ls = local_stamp;
-    // if (head == nullptr || head == bad_ptr) abort();
+#ifdef LazyStamp
+    if (head->time_stamp.load() == ls) bad_stamp = true;
+#endif
     while (head->time_stamp.load() > ls) {
       if (head->next_version == bad_ptr || head->next_version == nullptr)  {
 	std::cout << "bad pointer: " << head->time_stamp.load() << ", " << ls << ", " << (head->next_version == nullptr) << std::endl;
