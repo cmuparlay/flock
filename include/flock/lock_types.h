@@ -1,54 +1,19 @@
 #pragma once
 #include <atomic>
 #include "epoch.h"
-// Public interface for supported data types
-//  mutable_val<T> :
-//    mutable_val(v) : constructor
-//    mutable_val() : default constructor
-//    load() : return value
-//    store(v) : store value
-//    cam(old_v, new_v) : cas but does not return value
-//    ** the following two are the same as load and store if uses
-//       with regular locks
-//    read() : return value, but not idempotent
-//    init(v) : like store(v) but only used before anyone other thread
-//              has a handle to this mutable
-//    ** the following only needed for snapshotting and only
-//       if trying to optimized code.
-//    read_() : read that does not check for valid timestamp
-//    validate() : ensures it has a timestamp
-//
-//  ** The following is if a value is only changed once from its
-//     initial value
-//  write_once<T> :
-//    write_once(v) : constructor
-//    write_once() : default constructor
-//    load() : return value
-//    store(v) : store value
-//    init(v) : like store(v) but only used before anyone other thread
-//              has a handle to this mutable
-//
-//  memory_pool<T> :
-//    memory_pool() : constructor
-//    new_obj(constructor args) -> *T : new object of type T
-//    retire(*T) -> void : returns memory to pool
-//    ** the following only needed for lock_free locks
-//    new_init(f, constructor args) : applies f to constructed object
-//    ** Statistics and others (can be noops)
-//    stats()
-//    shuffle()
-//    reserve()
-//    clear()
+#include "no_tagged.h"
+
+namespace flck {
 
 template <typename V>
-struct mutable_val {
+struct atomic {
 private:
   std::atomic<V> v;
 public:
   static_assert(sizeof(V) <= 4 || std::is_pointer<V>::value,
     "Type for mutable must be a pointer or at most 4 bytes");
-  mutable_val(V v) : v(v) {}
-  mutable_val() : v(0) {}
+  atomic(V v) : v(v) {}
+  atomic() : v(0) {}
   void init(V vv) {v = vv;}
   V load() {return v.load();}
   V read() {return v.load();}
@@ -66,7 +31,25 @@ public:
 };
 
 template <typename V>
-using write_once = mutable_val<V>;
+using write_once = atomic<V>;
 
 template <typename T>
-using memory_pool = mem_pool<T>;
+using memory_pool = internal::mem_pool<T>;
+
+  // to make consistent with lock free implementation
+  namespace internal {
+    template <typename T>
+    using tagged = no_tagged<T>;
+  }
+
+  template <typename F>
+  bool skip_if_done(F f) {f(); return true;}
+
+  template <typename F>
+  bool skip_if_done_no_log(F f) {f(); return true;}
+
+  template<typename V>
+  V commit(V v) {return v;}
+
+} // namespace flck
+

@@ -8,11 +8,13 @@
 
 #include <parlay/parallel.h> // needed for worker_id
 
-#include "defs.h"
 #include <atomic>
 #include<chrono>
 #include<thread>
 
+namespace flck {
+  namespace internal {
+    
 // used for reentrant locks
 static thread_local size_t current_id = parlay::worker_id();
 
@@ -89,6 +91,10 @@ public:
       std::cout << "self lock using with_lock not supported" << std::endl;
       abort();
     }
+    const int init_delay = 100;
+    const int max_delay = 2000;
+    int delay = init_delay;
+
     while (true) {
       lock_entry newl = current.take_lock();
       if (!current.is_locked() &&
@@ -96,10 +102,12 @@ public:
 	RT result = f();
 	lck = newl.release_lock();
 	return result;
-      } 
-      if (wait_before_retrying_lock)
-	std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+      }
+      for (volatile int i=0; i < delay; i++);
+      delay = std::min(2*delay, max_delay);
     }
   }
 
 };
+  } // namespace  internal
+} //namespace flck

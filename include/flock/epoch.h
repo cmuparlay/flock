@@ -16,9 +16,12 @@
 // timestamps are distinct from epochs and are for multiversioning (snapshots)
 // any time stamps less or equal to done_stamp indicate it is safe to
 // collect them (noone will travel through them).
-  
+
+namespace flck {
+namespace internal {
+
 struct alignas(64) epoch_s {
-  TS prev_stamp;
+  vl::TS prev_stamp;
   
   struct alignas(64) announce_slot {
     std::atomic<long> last;
@@ -31,7 +34,7 @@ struct alignas(64) epoch_s {
     int workers = parlay::num_workers();
     announcements = std::vector<announce_slot>(workers);
     current_epoch = 0;
-    prev_stamp = global_stamp.get_stamp();
+    prev_stamp = vl::global_stamp.get_stamp();
   }
 
   long get_current() {
@@ -74,9 +77,9 @@ struct alignas(64) epoch_s {
     if (all_there) {
       // timestamps are for multiversioning (snapshots)
       // we set done_stamp to the stamp from the previous epoch update
-      TS current_stamp = global_stamp.get_stamp();
+      vl::TS current_stamp = vl::global_stamp.get_stamp();
       if (current_epoch.compare_exchange_strong(current_e, current_e+1)) {
-	done_stamp = prev_stamp;
+	vl::done_stamp = prev_stamp;
 	prev_stamp = current_stamp;
       }
     }
@@ -205,11 +208,13 @@ public:
     Allocator::finish();
   }
 };
+} // end namespace internal
 
 template <typename Thunk>
 typename std::result_of<Thunk()>::type with_epoch(Thunk f) {
-  epoch.announce();
+  internal::epoch.announce();
   typename std::result_of<Thunk()>::type v = f();
-  epoch.unannounce();
+  internal::epoch.unannounce();
   return v;
 }
+} // end namespace flck

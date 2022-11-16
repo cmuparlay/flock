@@ -1,8 +1,8 @@
 #pragma once
+#include "flock.h"
 
-void print_counts() {}
-
-struct persistent {};
+namespace vl {
+struct versioned {};
 
 struct version_link {
   std::atomic<TS> time_stamp;
@@ -13,12 +13,12 @@ struct version_link {
     time_stamp(time), next_version(next), value(value) {}  
 };
 
-memory_pool<version_link> link_pool;
+flck::memory_pool<version_link> link_pool;
 
 template <typename V>
-struct persistent_ptr {
+struct versioned_ptr {
 private:
-  mutable_val<version_link*> v;
+  flck::atomic<version_link*> v;
 
   static version_link* set_stamp(version_link* ptr) {
     if (ptr->time_stamp.load() == tbd) {
@@ -36,9 +36,9 @@ private:
 
 public:
 
-  persistent_ptr(): v(init_ptr(nullptr)) {}
-  persistent_ptr(V* ptr) : v(init_ptr(ptr)) {}
-  ~persistent_ptr() { link_pool.destruct_no_log(v.read()); }
+  versioned_ptr(): v(init_ptr(nullptr)) {}
+  versioned_ptr(V* ptr) : v(init_ptr(ptr)) {}
+  ~versioned_ptr() { link_pool.destruct_no_log(v.read()); }
   void init(V* ptr) {v = init_ptr(ptr);}
   
   V* read_snapshot() {
@@ -89,3 +89,5 @@ public:
 
   V* operator=(V* b) {store(b); return b; }
 };
+
+} // namespace vl

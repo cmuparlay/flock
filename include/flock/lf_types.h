@@ -1,15 +1,18 @@
 #include <atomic>
-#include "tagged_pool.h"
 #include "tagged.h"
 #include "lf_log.h"
 
+#pragma once
+
+namespace flck {
+
 template <typename V>
-struct mutable_val {
+struct atomic {
 private:
   using IT = size_t;
-  using TV = tagged<V>;
+  using TV = internal::tagged<V>;
 
-  IT get_val(Log &p) {
+  IT get_val(internal::Log &p) {
     return p.commit_value(v.load()).first; }
 
 public:
@@ -18,13 +21,13 @@ public:
     "Type for mutable must be a pointer or at most 4 bytes");
 
   // not much to it.  heavy lifting done in TV
-  mutable_val(V vv) : v(TV::init(vv)) {}
-  mutable_val() : v(TV::init(0)) {}
+  atomic(V vv) : v(TV::init(vv)) {}
+  atomic() : v(TV::init(0)) {}
   void init(V vv) {v = TV::init(vv);}
-  V load() {return TV::value(get_val(lg));}
+  V load() {return TV::value(get_val(internal::lg));}
   V read() {return TV::value(v.load());}
   V read_snapshot() {return TV::value(v.load());}
-  void store(V vv) {TV::cas(v, get_val(lg), vv);}
+  void store(V vv) {TV::cas(v, get_val(internal::lg), vv);}
   bool single_cas(V old_v, V new_v) {
     IT old_t = v.load();
     return (TV::value(old_t) == old_v &&
@@ -34,7 +37,7 @@ public:
     return (TV::value(old_t) == old_v &&
       TV::cas(v, old_t, new_v, true));}
   void cam(V oldv, V newv) {
-    IT old_t = get_val(lg);
+    IT old_t = get_val(internal::lg);
     if (TV::value(old_t) == oldv)
       TV::cas(v, old_t, newv);}
   V operator=(V b) {store(b); return b; }
@@ -46,7 +49,7 @@ public:
 };
 
 template <typename V>
-struct mutable_double {
+struct atomic_double {
 private:
   struct alignas(16) TV {size_t count; V val; };
   TV v;
@@ -60,13 +63,13 @@ public:
   static_assert(sizeof(V) <= 8,
     "Type for mutable_double must be at most 8 bytes");
 
-  mutable_double(V vv) : v({1, vv}) {}
-  mutable_double() : v({1, 0}) {}
-  V load() {return lg.commit_value_safe(v.val).first;}
+  atomic_double(V vv) : v({1, vv}) {}
+  atomic_double() : v({1, 0}) {}
+  V load() {return internal::lg.commit_value_safe(v.val).first;}
   V read() {return v.val;}
   void init(V vv) {v.val = vv;}
   void store(V newv) {
-    size_t cnt = lg.commit_value(v.count).first;
+    size_t cnt = internal::lg.commit_value(v.count).first;
 #ifdef NoSkip  // used to test performance without optimization
     cam({cnt, v.val}, {cnt+1, newv});
 #else
@@ -90,7 +93,7 @@ struct write_once {
   std::atomic<V> v;
   write_once(V initial) : v(initial) {}
   write_once() {}
-  V load() {return lg.commit_value_safe(v.load()).first;}
+  V load() {return internal::lg.commit_value_safe(v.load()).first;}
   V read() {return v.load();}
   void init(V vv) { v = vv; }
   void store(V vv) { v = vv; }
@@ -103,9 +106,11 @@ struct write_once {
 // allocation and retire in a lock.
 // *****************************
 
-struct lock;
-
-template <typename T, typename Pool=mem_pool<T>>
+ namespace internal {
+   struct lock;
+ }
+ 
+template <typename T, typename Pool=internal::mem_pool<T>>
 struct memory_pool {
   Pool pool;
 
@@ -117,35 +122,33 @@ struct memory_pool {
   void acquire(T* p) { pool.acquire(p);}
   
   void retire(T* p) {
-    if (debug && (p == nullptr))
-      std::cout << "retiring null value" << std::endl;
-    auto x = lg.commit_value_safe(p);
+    assert(p != nullptr);
+    auto x = internal::lg.commit_value_safe(p);
     if (x.second) // only retire if first try
-      with_empty_log([=] {pool.retire(p);}); 
+      internal::with_empty_log([=] {pool.retire(p);}); 
   }
 
   void destruct(T* p) {
-    if (debug && (p == nullptr))
-      std::cout << "destructing null value" << std::endl;
-    auto x = lg.commit_value_safe(p);
+    assert(p != nullptr);
+    auto x = internal::lg.commit_value_safe(p);
     if (x.second) // only retire if first try
-      with_empty_log([=] {pool.destruct(p);}); 
+      internal::with_empty_log([=] {pool.destruct(p);}); 
   }
 
   void destruct_no_log(T* p) {
-    if (debug && (p == nullptr))
-      std::cout << "destructing null value" << std::endl;
-    with_empty_log([=] {pool.destruct(p);}); 
+    assert(p != nullptr);
+    internal::with_empty_log([=] {pool.destruct(p);}); 
   }
 
   template <typename F, typename ... Args>
   // f is a function that initializes a new object before it is shared
   T* new_init(F f, Args... args) {
-    T* newv = with_log(Log(), [&] { //run f without logging (i.e. an empty log)
+    //run f without logging (i.e. an empty log)
+    T* newv = internal::with_log(internal::Log(), [&] { 
 	T* x = pool.new_obj(args...);
 	f(x);
 	return x;});
-    auto r = lg.commit_value(newv);
+    auto r = internal::lg.commit_value(newv);
     if (!r.second) { pool.destruct(newv); } // destruct if already initialized
     return r.first;
   }
@@ -157,7 +160,7 @@ struct memory_pool {
   }
 
 protected:
-  friend class lock;
+  friend class internal::lock;
 
   // The following protected routines are only used internally
   // in the lock code (not accessible to the user)
@@ -169,10 +172,10 @@ protected:
   // The returned pointer can be one of done_true or done_false
   // if the object is already retired using retire_acquired.
   template <typename ... Args>
-  std::pair<T*,log_entry*> new_obj_acquired(Args... args) {
+  std::pair<T*,internal::log_entry*> new_obj_acquired(Args... args) {
     auto [ptr,fl] = new_obj_fl(args...);
-    if (lg.is_empty()) return std::pair(ptr, nullptr);
-    log_entry* l = lg.current_entry();
+    if (internal::lg.is_empty()) return std::pair(ptr, nullptr);
+    internal::log_entry* l = internal::lg.current_entry();
     if (!fl && !is_done(ptr)) {
       pool.acquire(ptr);
       return std::make_pair((T*) l->load(), nullptr);
@@ -187,8 +190,8 @@ protected:
   // It is important that only one of the helping thunks is passed an le that
   // is not null, otherwise could be retired multiple times
   template<typename TT>
-  void retire_acquired_result(T* p, log_entry* le, std::optional<TT> result) {
-    if (lg.is_empty()) pool.retire(p);
+  void retire_acquired_result(T* p, internal::log_entry* le, std::optional<TT> result) {
+    if (internal::lg.is_empty()) pool.retire(p);
     else if (le != nullptr) {
       *le = tag_result(result);
       pool.retire(p);
@@ -213,8 +216,9 @@ private:
   std::pair<T*,bool> new_obj_fl(Args... args) {
     // TODO: helpers might do lots of allocates and frees,
     // can potentially optimize by checking if a log value has already been committed.
-    T* newv = with_log(Log(), [&] {return pool.new_obj(args...);});
-    auto r = lg.commit_value(newv);
+    T* newv = internal::with_log(internal::Log(),
+				 [&] {return pool.new_obj(args...);});
+    auto r = internal::lg.commit_value(newv);
     // if already allocated return back to pool
     if (!r.second) { pool.destruct(newv); }
     return r;
@@ -250,4 +254,16 @@ private:
   }
   
 };
+
+template<typename V>
+V commit(V v) {return internal::lg.commit_value(v).first;}
+
+template <typename F>
+bool skip_if_done(F f) { return internal::skip_if_done(f); }
+
+template <typename F>
+bool skip_if_done_no_log(F f) { return internal::skip_if_done_no_log(f); }
+
+
+} // namespace flck
 

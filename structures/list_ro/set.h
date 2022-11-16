@@ -8,20 +8,20 @@
 // change in case user needs the max possible key, and to make generic
 // acros key types.
 
-#include <flock/flock.h>
+#include <flock/verlib.h>
 
 #define Range_Search 1
 
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(32) node : ll_head {
-    ptr_type<node> next;
+  struct alignas(32) node : vl::versioned {
+    vl::versioned_ptr<node> next;
     K key;
     V value;
     bool is_end;
-    write_once<bool> removed;
-    lock_type lck;
+    flck::write_once<bool> removed;
+    flck::lock lck;
     node(K key, V value, node* next, bool is_end)
       : key(key), value(value), next(next), is_end(is_end), removed(false) {}
     node() : is_end(false), next(), removed(false) {} // for head and tail
@@ -30,7 +30,7 @@ struct Set {
       is_end(n->is_end), removed(false) {}
   };
 
-  memory_pool<node> node_pool;
+  vl::memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
     node* cur = root;
@@ -48,7 +48,7 @@ struct Set {
   static constexpr int max_delay=2000;
 
   bool insert(node* root, K k, V v) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       while (true) {
 	int delay = init_delay;
 	auto [cur, nxt] = find_location(root, k);
@@ -66,7 +66,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
@@ -99,12 +99,12 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] { return find_(root, k);});
+    return vl::with_epoch([&] { return find_(root, k);});
   }
 
   template<typename AddF>
   void range(node* root, AddF& add, K start, K end) {
-    with_snap([=] {
+    vl::with_snapshot([=] {
       auto [cur, nxt] = find_location(root, start);
       while (!nxt->is_end && nxt->key <= end) {
 	add(nxt->key, nxt->value);

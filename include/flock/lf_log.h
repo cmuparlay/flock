@@ -2,6 +2,9 @@
 #include <atomic>
 #include "epoch.h"
 
+namespace flck {
+namespace internal {
+
 // default log length.  Will grow if needed.
 constexpr int Log_Len = 8;
 using log_entry = std::atomic<void*>;
@@ -88,10 +91,9 @@ struct Log {
   template<typename V>
   std::pair<V,bool> commit_value(V newv) {
     if (is_empty()) return std::make_pair(newv, true);
+    assert(newv != nullptr); // check not committing 0
     log_entry* l = next_entry();
     void* oldv = l->load();
-    if (debug && (void*) newv == nullptr)
-      std::cout << "committing null value to log" << std::endl;
     if (oldv == nullptr && l->compare_exchange_strong(oldv, (void*) newv))
       return std::make_pair(newv, true);
     else return std::make_pair((V) (size_t) oldv, false);
@@ -188,4 +190,6 @@ static V read_only(Thunk f) {
   V r = with_log(Log(), [&] {return f();});
   return lg.commit_value_safe(r).first;
 }
-  
+
+} // namespace internal
+} // namespace flck

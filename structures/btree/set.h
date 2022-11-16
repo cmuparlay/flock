@@ -1,5 +1,5 @@
 #define Range_Search 1
-#include <flock/flock.h>
+#include <flock/verlib.h>
 #include <parlay/primitives.h>
 
 // A top-down implementation of abtrees
@@ -30,7 +30,7 @@ struct Set {
   struct leaf;
   enum Status : char { isOver, isUnder, OK};
 
-  struct header : ll_head {
+  struct header : vl::versioned {
     bool is_leaf;
     Status status;
     char size;
@@ -45,10 +45,10 @@ struct Set {
   // being removed.
   // A node needs to be copied to add, remove, or rebalance children.
   struct alignas(64) node : header {
-    write_once<bool> removed;
+    flck::write_once<bool> removed;
     K keys[node_block_size-1];
-    ptr_type<node> children[node_block_size];
-    lock_type lck;
+    vl::versioned_ptr<node> children[node_block_size];
+    flck::lock lck;
     
     int find(K k, uint i=0) {
       while (i < header::size-1 && keys[i] <= k) i++;
@@ -79,7 +79,7 @@ struct Set {
 
   };
 
-  memory_pool<node> node_pool;
+  vl::memory_pool<node> node_pool;
 
   // helper function to copy into a new node
   template <typename Key, typename Child>
@@ -232,7 +232,7 @@ struct Set {
 	size} {};
   };
 
-  memory_pool<leaf> leaf_pool;
+  vl::memory_pool<leaf> leaf_pool;
 
   leaf* copy_leaf(leaf* l) {
     int size = l->size;
@@ -509,7 +509,7 @@ struct Set {
   // tries again.
   // returns false and does no update if already in tree
   bool insert(node* root, K k, V v) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
@@ -532,7 +532,7 @@ struct Set {
   // changed.  If the try_lock fails it tries again.  Returns false if
   // not found.
   bool remove(node* root, K k) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       int delay = init_delay;
       while (true) {
         auto [p, cidx, l] = find_and_fix(root, k);
@@ -572,7 +572,7 @@ struct Set {
 
   template<typename AddF>
   void range(node* root, AddF& add, K start, K end) {
-    with_snap([=] {
+    vl::with_snapshot([=] {
       range_internal(root, add, start, end);
       return true;
     });
@@ -581,7 +581,7 @@ struct Set {
   // a wait-free version that does not split on way down
   std::optional<V> find_(node* root, K k) {
     node* c = root;
-    ptr_type<node>* x;
+    vl::versioned_ptr<node>* x;
     while (!c->is_leaf) {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
@@ -593,7 +593,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] {return find_(root, k);});
+    return vl::with_epoch([&] {return find_(root, k);});
   }
 
   // An empty tree is an empty leaf along with a root pointing tho the
@@ -659,7 +659,7 @@ struct Set {
     return rtup(std::get<0>(r[0]),std::get<1>(r[r.size()-1]), total);
   }
 
-  long check(node* root) {
+  long check(node* root, bool verbose=false) {
     auto [minv, maxv, cnt] = check_recursive(root->children[0].load(), true);
     if (verbose) std::cout << "average height = "
 			   << ((double) total_height(root) / cnt)

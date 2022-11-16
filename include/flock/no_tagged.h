@@ -2,6 +2,8 @@
 #include <parlay/parallel.h>
 #include <atomic>
 
+namespace flck {
+  namespace internal {
 // A dummy wrapper if no tagging is needed
 template <typename V>
 struct no_tagged {
@@ -17,3 +19,5 @@ struct no_tagged {
     return cas(loc, oldv, v);
   }
 };
+  } // end namespace internal
+} // end namespace flck

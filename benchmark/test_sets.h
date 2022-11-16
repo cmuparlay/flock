@@ -8,7 +8,6 @@
 #include <parlay/io.h>
 #include <parlay/internal/get_time.h>
 #include <parlay/internal/group_by.h>
-#include <flock/defs.h>
 #include "zipfian.h"
 #include "parse_command_line.h"
 
@@ -50,7 +49,7 @@ void test_persistence_concurrent(SetType& os) {
       int counter = 0;
       int counter2 = 0;
       while(!done) {
-        with_snapshot([&] {
+	vl::with_snapshot([&] {
           bool seen[N+1];
           int max_seen = -1;
           for(int i = 1; i <= N; i++) seen[i] = false;
@@ -131,13 +130,10 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   bool shuffle = P.getOption("-shuffle");
 
   // verbose
-  verbose = P.getOption("-v");
+  bool verbose = P.getOption("-v");
 
   // clear the memory pool between rounds
   bool clear = P.getOption("-clear");
-
-  // only relevant to strict locks (not try locks)
-  wait_before_retrying_lock = P.getOption("-wait");
 
   // number of samples 
   long m = P.getOptionIntValue("-m", fixed_time ? (long) (trial_time * 5000000 * std::min(p, 100)) : n);
@@ -146,7 +142,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   bool do_check = ! P.getOption("-no_check");
 
   // use try locks 
-  try_only = !P.getOption("-strict_lock");
+  // try_only = !P.getOption("-strict_lock");
 
   // run a trivial test
   bool init_test = P.getOption("-i"); // run trivial test
@@ -189,7 +185,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     assert(!os.find(tr, 3).has_value());
 
     // #ifdef Multi_Find
-    with_snapshot([&] {
+    vl::with_snapshot([&] {
       assert_key_exists(os.find_(tr, 7).has_value());
       assert_key_exists(os.find_(tr, 1).has_value());
       assert_key_exists(os.find_(tr, 11).has_value());
@@ -274,7 +270,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           // parlay::parallel_for(0, n, [&] (size_t i) {
                 // os.insert(tr, a[i], 123); });
 	}
-  long start_timestamp = global_stamp.get_stamp();
+	//long start_timestamp = global_stamp.get_stamp();
   
         if (do_check) {
           //size_t expected = parlay::remove_duplicates(a.head(n)).size();
@@ -347,10 +343,10 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 #endif
 	       } else { // multifind
 		 mfind_count++;
-                 with_snapshot([&] {
+		 vl::with_snapshot([&] {
 		   for (int k = 0; k < range_size; k++) {
 		     auto val = os.find_(tr, b[j]);
-         if(val.has_value()) keysum += val.value();
+		     if(val.has_value()) keysum += val.value();
 		     if (++j >= (i+1)*mp) j -= mp;
 		     cnt++;
 		     total++;
@@ -491,6 +487,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       }
     }
   }
-  if (verbose)
-    std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
+  //if (verbose)
+  //  std::cout << "final timestamp: " << vl::global_stamp.get_stamp() << std::endl;
 }

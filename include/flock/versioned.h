@@ -1,45 +1,29 @@
 #pragma once
-using IT = size_t;
+#include "flock.h"
+#include "timestamps.h"
 
-#ifdef NoHelp
-#include "no_tagged.h"
-template <typename T>
-using tagged = no_tagged<T>;
-template <typename F>
-bool skip_if_done(F f) {f(); return true;}
-IT commit(IT v) {return v;}
-
-#else // Helping
-#include "lf_log.h"
-IT commit(IT v) {return lg.commit_value(v).first;}
-#endif
-
-parlay::sequence<long> i_counts(parlay::num_workers()*16, 0);
-void print_counts() {
-  std::cout << " indirect = " << parlay::reduce(i_counts) << std::endl;
-}
-
+namespace vl {
 #define bad_ptr ((1ul << 48) -1)
 
 using IT = size_t;
-struct persistent {
+struct versioned {
   std::atomic<TS> time_stamp;
   std::atomic<IT> next_version;
-  persistent() : time_stamp(tbd), next_version(bad_ptr) {}
-  persistent(IT next) : time_stamp(tbd), next_version(next) {}
+  versioned() : time_stamp(tbd), next_version(bad_ptr) {}
+  versioned(IT next) : time_stamp(tbd), next_version(next) {}
 };
 
-struct plink : persistent {
+struct plink : versioned {
   IT value;
-  plink(IT next, IT value) : persistent(next), value(value) {}  
+  plink(IT next, IT value) : versioned(next), value(value) {}  
 };
 
-mem_pool<plink> link_pool;
+ flck::internal::mem_pool<plink> link_pool;
 
 template <typename V>
-struct persistent_ptr {
+struct versioned_ptr {
 private:
-  using TV = tagged<V*>;
+  using TV = flck::internal::tagged<V*>;
   std::atomic<IT> v;
 
   // uses lowest three bits as mark:
@@ -104,9 +88,9 @@ private:
 
 public:
 
-  persistent_ptr(V* v) : v(TV::init(set_zero(v))) {}
-  persistent_ptr(): v(TV::init(0)) {}
-  ~persistent_ptr() {
+  versioned_ptr(V* v) : v(TV::init(set_zero(v))) {}
+  versioned_ptr(): v(TV::init(0)) {}
+  ~versioned_ptr() {
     IT ptr = v.load();
     if (is_indirect(ptr))
       link_pool.destruct_no_log((plink*) strip_mark_and_tag(ptr));
@@ -141,7 +125,7 @@ public:
 
   V* load() {  // can be used anywhere
     if (local_stamp != -1) return read_snapshot();
-    else return shortcut_indirect(set_stamp(commit(v.load()))).first;}
+    else return shortcut_indirect(set_stamp(flck::commit(v.load()))).first;}
 
   V* read() {  // only safe on journey
     //if (local_stamp != -1) read_snapshot();
@@ -157,12 +141,12 @@ public:
   }
   
   void store(V* newv_) {
-    IT oldv_tagged = commit(v.load());
+    IT oldv_tagged = flck::commit(v.load());
     V* newv = newv_;
     V* newv_marked = newv;
 
-    skip_if_done([&] {
-    if (newv_ == nullptr || commit(newv_->time_stamp.load() != tbd)) {
+    flck::skip_if_done([&] {
+    if (newv_ == nullptr || flck::commit(newv_->time_stamp.load() != tbd)) {
       newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
       newv_marked = ((newv_ == nullptr)
 		     ? add_null_mark(newv)
@@ -176,13 +160,13 @@ public:
     // swap in new pointer but marked as "unset" since time stamp is tbd
     V* newv_unset = add_unset(newv_marked);
     bool succeeded = TV::cas(v, oldv_tagged, newv_unset);
-    IT x = commit(v.load());
+    IT x = flck::commit(v.load());
     
     if (is_indirect(oldv_tagged)) {
       if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
       else if (TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
 	succeeded = TV::cas(v, x, newv_unset);
- 	x = commit(v.load());
+ 	x = flck::commit(v.load());
       }
     } 
 
@@ -255,3 +239,4 @@ public:
 
   V* operator=(V* b) {store(b); return b; }
 };
+} // namespace verlib

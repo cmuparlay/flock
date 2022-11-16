@@ -13,6 +13,6 @@ int main(int argc, char* argv[]) {
   //  print_counts();
 #endif
 #if defined(LazyStamp)
-  print_retries();
+  vl::print_retries();
 #endif
 }

@@ -1,52 +1,48 @@
 #pragma once
-using IT = size_t;
-// #define NoShortcut 1
 
-#ifdef NoHelp
-template <typename F>
-bool skip_if_done(F f) {f(); return true;}
-IT commit(TS v) {return v;}
-#else // Helping
-TS commit(TS v) {return lg.commit_value(v).first;}
-#endif
+#include "flock.h"
+
+namespace vl {
+  
+using IT = size_t;
 
 parlay::sequence<long> i_counts(parlay::num_workers()*16, 0);
 void print_counts() {
   std::cout << " indirect = " << parlay::reduce(i_counts) << std::endl;
 }
 
-struct persistent {
+struct versioned {
   size_t foo;
   std::atomic<TS> time_stamp;
-  persistent* next_version;
+  versioned* next_version;
   static constexpr size_t init_ptr =(1ul << 48) - 2;
-  persistent* add_tag(persistent* v, bool tag) {
-    return (persistent*) ((size_t) v + tag);}
+  versioned* add_tag(versioned* v, bool tag) {
+    return (versioned*) ((size_t) v + tag);}
   bool is_indirect() {return (IT) next_version & 1;}
-  persistent* get_next() {return (persistent*) ((IT) next_version & ~1ul);}
+  versioned* get_next() {return (versioned*) ((IT) next_version & ~1ul);}
   TS read_stamp() {return time_stamp.load();}
-  TS load_stamp() {return commit(time_stamp.load());}
+  TS load_stamp() {return flck::commit(time_stamp.load());}
   void set_stamp(TS t) {
     TS old = tbd;
     if(time_stamp.load() == tbd)
       time_stamp.compare_exchange_strong(old, t);
   }
-  persistent() : time_stamp(tbd), next_version((persistent*) init_ptr) {}
-  persistent(persistent* next, bool is_indirect)
+  versioned() : time_stamp(tbd), next_version((versioned*) init_ptr) {}
+  versioned(versioned* next, bool is_indirect)
     : time_stamp(tbd), next_version(add_tag(next,is_indirect)) {}
 };
 
-struct plink : persistent {
+struct plink : versioned {
   void* value;
-  plink(persistent* next, void* value) : persistent{next, true}, value(value) {}  
+  plink(versioned* next, void* value) : versioned{next, true}, value(value) {}  
 };
 
-memory_pool<plink> link_pool;
+ flck::memory_pool<plink> link_pool;
 
 template <typename V>
-struct persistent_ptr {
+struct versioned_ptr {
 private:
-  mutable_val<V*> v;
+  flck::atomic<V*> v;
 
   static V* set_stamp(V* ptr) {
     if (ptr != nullptr && ptr->read_stamp() == tbd)
@@ -81,10 +77,10 @@ private:
 
 public:
 
-  persistent_ptr(): v(0) {}
-  persistent_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
+  versioned_ptr(): v(0) {}
+  versioned_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
 
-  ~persistent_ptr() {
+  ~versioned_ptr() {
     plink* ptr = (plink*) v.read();
     if (ptr != nullptr && ptr->is_indirect())
       link_pool.pool.destruct_no_log(ptr);
@@ -129,7 +125,7 @@ public:
     bool use_indirect = (ptr == nullptr || ptr->load_stamp() != tbd);
 
     if (use_indirect)
-      new_v = (V*) link_pool.new_obj((persistent*) old_v, ptr);
+      new_v = (V*) link_pool.new_obj((versioned*) old_v, ptr);
     else ptr->next_version = old_v;
 
 #ifdef NoShortcut
@@ -164,7 +160,7 @@ public:
       bool use_indirect = (newv == nullptr || newv->load_stamp() != tbd);
 
       if(use_indirect)
-        new_v = (V*) link_pool.new_obj((persistent*) oldv, newv);
+        new_v = (V*) link_pool.new_obj((versioned*) oldv, newv);
       else newv->next_version = oldv;
 
       bool succeeded = v.single_cas(oldv, new_v);
@@ -193,3 +189,4 @@ public:
 
   V* operator=(V* b) {store(b); return b; }
 };
+} // namespace vl

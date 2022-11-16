@@ -7,15 +7,22 @@
 //   is_locked() -> bool
 //   is_self_locked() -> bool
 
-#include "defs.h"
 #include <atomic>
 #include <functional>
+#include <assert.h>
 #include "lf_log.h"
 #include "tagged.h"
 #include "lf_types.h"
+#include "acquired_pool.h"
+
+namespace flck {
+namespace internal {
 
 // used for reentrant locks
 static thread_local size_t current_id = parlay::worker_id();
+
+// a flag to indicate that currently helping
+static thread_local bool helping = false;
 
 // user facing lock
 using lock_entry_ = size_t;
@@ -46,21 +53,12 @@ struct descriptor {
   }
 
   ~descriptor() { // just for debugging
-    int i = 0;
-    if (debug) {
-      if (freed) {
-	std::cout << "yikes: double freeing" << std::endl;
-	abort();
-      }
-      freed = true;
-    }
+    assert(!freed);
+    freed = true;
   }
 
   void operator () () {
-    if (debug && freed) {
-      std::cout << "yikes: calling freed function" << std::endl; 
-      abort();
-    }
+    assert(!freed);
     // run f using log based on lg_array
     with_log_(Log(&lg_array,0), f);
     done = true;
@@ -77,7 +75,7 @@ memory_pool<descriptor> descriptor_pool;
 // If noone is helping (acquire flag is false), then reclaim
 // immediately, otherwise send to epoch-based collector.
 // When helping the acquired flag needs to be set.
-memory_pool<descriptor,tagged_pool<descriptor>> descriptor_pool;
+memory_pool<descriptor,acquired_pool<descriptor>> descriptor_pool;
 #endif
 
 struct lock {
@@ -257,3 +255,6 @@ public:
     return result.has_value() && result.value();
   }
 };
+
+} // namespace internal
+} // namespace flck

@@ -19,6 +19,9 @@
 // The CAS is ensured to be ABA free.
 // *****************************
 
+namespace flck {
+  namespace internal {
+    
 // The announcement array with one announcement per thread
 struct write_annoucements {
   std::atomic<size_t>* announcements;
@@ -137,3 +140,5 @@ public:
   }
 
 };
+  } // namespace internal
+} // namespace flck

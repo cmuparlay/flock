@@ -1,4 +1,4 @@
-#include <flock/flock.h>
+#include <flock/verlib.h>
 #include <parlay/primitives.h>
 #define Range_Search 1
 
@@ -14,10 +14,10 @@ struct Set {
     return (key >> (8*(sizeof(K)-1-pos))) & 255;
   }
 
-  struct header : ll_head {
+  struct header : vl::versioned {
     K key;
     node_type nt;
-    write_once<bool> removed;
+    flck::write_once<bool> removed;
     // every node has a byte position in the key
     // e.g. the root has byte_num = 0
     short int byte_num; 
@@ -27,11 +27,11 @@ struct Set {
   };
 
   // generic node
-  struct node : header, lock_type {};
-  using node_ptr = ptr_type<node>;
+  struct node : header, flck::lock {};
+  using node_ptr = vl::versioned_ptr<node>;
 
   // 256 entries, one for each value of a byte, null if empty
-  struct full_node : header, lock_type {
+  struct full_node : header, flck::lock {
     node_ptr children[256];
 
     bool is_full() {return false;}
@@ -56,9 +56,9 @@ struct Set {
   // deleted its entry in the 64-pointer array is made null and
   // can be refilled.  Once all 64 slots are used a new node
   // has to be allocated.
-  struct indirect_node : header, lock_type {
-    mutable_val<int> num_used; // could be aba_free since only increases
-    write_once<char> idx[256];  // -1 means empty
+  struct indirect_node : header, flck::lock {
+    flck::atomic<int> num_used; // could be aba_free since only increases
+    flck::write_once<char> idx[256];  // -1 means empty
     node_ptr ptr[64];
 
     bool is_full() {return num_used.load() == 64;}
@@ -92,7 +92,7 @@ struct Set {
   // are immutable, but the pointers can be changed.  i.e. Adding a
   // new child requires copying, but updating a child can be done in
   // place.
-  struct alignas(64) sparse_node : header, lock_type {
+  struct alignas(64) sparse_node : header, flck::lock {
     int num_used; 
     unsigned char keys[16];
     node_ptr ptr[16];
@@ -131,10 +131,10 @@ struct Set {
     leaf(K key, V value) : header(key, Leaf, sizeof(K)), value(value) {};
   };
 
-  memory_pool<full_node> full_pool;
-  memory_pool<indirect_node> indirect_pool;
-  memory_pool<sparse_node> sparse_pool;
-  memory_pool<leaf> leaf_pool;
+  vl::memory_pool<full_node> full_pool;
+  vl::memory_pool<indirect_node> indirect_pool;
+  vl::memory_pool<sparse_node> sparse_pool;
+  vl::memory_pool<leaf> leaf_pool;
 
   // dispatch based on node type
   // A returned nullptr means no child matching the key
@@ -267,7 +267,7 @@ struct Set {
   }
 
   bool insert(node* root, K k, V v) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       while (true) {		 
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
@@ -301,7 +301,7 @@ struct Set {
 
   // currently a "lazy" remove that only removes the leaf
   bool remove(node* root, K k) {
-    return with_epoch([=] {
+    return vl::with_epoch([=] {
       while (true) {
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	// if not found return
@@ -327,7 +327,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] {return find_(root, k);});
+    return vl::with_epoch([&] {return find_(root, k);});
   }
 
   template<typename AddF>
@@ -381,7 +381,7 @@ struct Set {
       std::cout << "Error: range query with start > end" << std::endl;
       abort();
     }
-    with_snap([=] {
+    vl::with_snapshot([=] {
       range_internal(root, add,
 		     std::optional<K>(start), std::optional<K>(end), 0);
       return true;

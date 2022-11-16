@@ -2,7 +2,12 @@
 #include <limits>
 #include <atomic>
 // code for timestamps for snapshots
+namespace flck {
+  template <typename Thunk>
+  typename std::result_of<Thunk()>::type with_epoch(Thunk f);
+}
 
+namespace vl {
 using TS = long;
 
 thread_local int read_delay = 1;
@@ -263,7 +268,7 @@ TS done_stamp = global_stamp.get_stamp();
 #ifndef LazyStamp
 template <typename F>
 auto with_snapshot(F f) {
-  return with_epoch([&] {
+  return flck::with_epoch([&] {
     local_stamp = global_stamp.get_read_stamp();
     auto r = f();
     local_stamp = -1;
@@ -295,3 +300,4 @@ auto with_snapshot(F f) {
 }
   
 #endif
+} // namespace verlib
