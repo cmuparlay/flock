@@ -15,21 +15,26 @@ thread_local int write_delay = 1;
 
 struct alignas(64) timestamp_read {
   std::atomic<TS> stamp;
-  alignas(128) static int delay;
+  alignas(128) int delay;
 
   TS get_stamp() {return stamp.load();}
-      
+
   TS get_read_stamp() {
     TS ts = stamp.load();
+    inc_read_stamp(ts);
+    return ts;
+  }
 
+  void inc_read_stamp(TS ts) {
     if(delay == -1) {
-          // delay to reduce contention
+      // delay to reduce contention
       for(volatile int i = 1; i < read_delay; i++) {}
       // std::atomic_thread_fence(std::memory_order_seq_cst);
 
       // only update timestamp if has not changed
       if (stamp.load() == ts) {
         if(stamp.fetch_add(1) == ts) {
+	  //if (stamp.compare_exchange_strong(ts,ts+1)) {
           if(read_delay >= 2) read_delay /= 2;
         }
         else {
@@ -41,21 +46,19 @@ struct alignas(64) timestamp_read {
       if (stamp.load() == ts)
         stamp.fetch_add(1);
     }
-    return ts;
   }
 
   TS get_write_stamp() {return stamp.load();}
-  timestamp_read() : stamp(1) {
+  timestamp_read(int d = -1) : stamp(1) {
     auto cstr = std::getenv("READ_DELAY");
-    if(cstr != nullptr)
+    if(cstr != nullptr) {
       delay = atoi(cstr);
-    else
-      delay = -1;
-    // std::cout << "READ_DELAY: " << delay << std::endl;
+      std::cout << "READ_DELAY: " << delay << std::endl;
+    } else delay = d;
   }
 };
 
-alignas(128) int timestamp_read::delay = 800;
+  //alignas(128) int timestamp_read::delay = 800;
 
 struct alignas(64) timestamp_write {
   std::atomic<TS> stamp;
@@ -246,8 +249,10 @@ alignas(128) int timestamp_read_write::delay = 200;
 //   timestamp_read_write() : stamp(1) {}
 // };
 
-#if defined(ReadStamp) | defined(LazyStamp)
+#ifdef ReadStamp
 timestamp_read global_stamp;
+#elif LazyStamp
+timestamp_read global_stamp{100};
 #elif WriteStamp
 timestamp_write global_stamp;
 #elif NoIncStamp
@@ -291,7 +296,7 @@ auto with_snapshot(F f) {
     auto r = f();
     if (bad_stamp) {
       num_retries[parlay::worker_id()*16]++;
-      local_stamp = global_stamp.get_read_stamp();
+      global_stamp.inc_read_stamp(local_stamp);
       r = f();
     }
     local_stamp = -1;
