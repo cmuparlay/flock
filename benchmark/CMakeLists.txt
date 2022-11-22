@@ -23,12 +23,7 @@ function(add_benchmark NAME STRUCT_NAME DEFS)
 endfunction()
 
 foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
-  add_benchmark(${bench}_ro_ss ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once")
-  add_benchmark(${bench}_simple_ro_ls ${STRUCT_DIR}/${bench} "Persistent;Simple_Recorded_Once;LazyStamp")
-  add_benchmark(${bench}_ro_rs ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;ReadStamp")
-  add_benchmark(${bench}_ro_ns ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;NoIncStamp")
-  add_benchmark(${bench}_ro_ws ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;WriteStamp")
-    add_benchmark(${bench}_ro_ls ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;LazyStamp")
+  add_benchmark(${bench}_ro_ls ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;LazyStamp")
 endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})
