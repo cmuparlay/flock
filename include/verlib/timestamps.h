@@ -1,7 +1,7 @@
 #pragma once
 #include <limits>
 #include <atomic>
-#include "epoch.h"
+#include "flock/epoch.h"
 
 // code for timestamps for snapshots
 // namespace flck {

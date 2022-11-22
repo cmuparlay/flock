@@ -8,7 +8,7 @@
 // once" as described in the paper.
 #pragma once
 
-#include "flock.h"
+#include "flock/flock.h"
 
 #ifdef Persistent
 
