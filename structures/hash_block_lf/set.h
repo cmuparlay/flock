@@ -38,7 +38,7 @@ struct Set {
   };
   using node = Node<0>;
 
-  struct slot : flck::lock {
+  struct slot {
     vl::versioned_ptr<node> ptr;
     slot() : ptr(nullptr) {}
   };
@@ -157,13 +157,11 @@ struct Set {
   }
 
   template<typename AddF>
-  void range(Table& table, AddF& add, K start, K end) {
-    vl::with_snapshot([&] {
+  void range_(Table& table, AddF& add, K start, K end) {
       for (K k = start; k <= end; k++) {
 	auto x = find_(table, k);
 	if (x.has_value()) add(k, x.value());
       }
-      return true;});
   }
 
   Table empty(size_t n) {return Table(n);}

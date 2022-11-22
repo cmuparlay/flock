@@ -95,14 +95,12 @@ struct Set {
   }
 
   template<typename AddF>
-  void range(node* root, AddF& add, K start, K end) {
-    vl::with_snapshot([=] {
+  void range_(node* root, AddF& add, K start, K end) {
       auto nxt = find_location(root, start);
       while (!nxt->is_end && nxt->key <= end) {
 	add(nxt->key, nxt->value);
 	nxt = nxt->next.load();
       }
-      return true; });
   }
   
   node* empty() {

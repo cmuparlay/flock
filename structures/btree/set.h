@@ -571,11 +571,8 @@ struct Set {
   }
 
   template<typename AddF>
-  void range(node* root, AddF& add, K start, K end) {
-    vl::with_snapshot([=] {
+  void range_(node* root, AddF& add, K start, K end) {
       range_internal(root, add, start, end);
-      return true;
-    });
   }
     
   // a wait-free version that does not split on way down

@@ -336,22 +336,26 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		 if (os.remove(tr, b[j])) added--;}
 	       else if (op_types[j] == Range) {
 #ifdef Range_Search
-		 auto addf = [&] (K x, V y) { range_count++;};
 		 key_type end = ((b[j] > max_key - range_gap)
 				 ? max_key : b[j] + range_gap);
-		 os.range(tr, addf, b[j], end);
+		 range_count += vl::with_snapshot([&] {
+				    long cnt=0;
+				    auto addf = [&] (K x, V y) { cnt++;};
+				    os.range_(tr, addf, b[j], end);
+				    return cnt;});
 #endif
 	       } else { // multifind
 		 mfind_count++;
-		 vl::with_snapshot([&] {
+		 keysum += vl::with_snapshot([&] {
+	           long tmp_sum = 0;
 		   for (int k = 0; k < range_size; k++) {
 		     auto val = os.find_(tr, b[j]);
-		     if(val.has_value()) keysum += val.value();
+		     if(val.has_value()) tmp_sum += val.value();
 #ifdef LazyStamp
-		     if (vl::bad_stamp) return true;
+		     if (vl::bad_stamp) return 0l;
 #endif
 		   }
-		   return true;});
+		   return tmp_sum;});
 		 j += range_size;
 		 if (j >= (i+1)*mp) j -= mp;
 		 cnt += range_size;

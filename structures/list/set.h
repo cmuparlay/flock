@@ -87,25 +87,23 @@ struct Set {
   }
 
   template<typename AddF>
-    void range(node* root, AddF& add, K start, K end) {
-    vl::with_snapshot([=] {
-      node* nxt = (root->next).load();
-      while (true) {
-	node* nxt_nxt = (nxt->next).load(); // prefetch
-	if (nxt->is_end || nxt->key >= start) break;
-	nxt = nxt_nxt;
+  void range_(node* root, AddF& add, K start, K end) {
+    node* nxt = (root->next).load();
+    while (true) {
+      node* nxt_nxt = (nxt->next).load(); // prefetch
+      if (nxt->is_end || nxt->key >= start) break;
+      nxt = nxt_nxt;
 #ifdef LazyStamp
-	if (vl::bad_stamp) return true;
+      if (vl::bad_stamp) return;
 #endif
-      }
-      while (!nxt->is_end && nxt->key <= end) {
-	add(nxt->key, nxt->value);
-	nxt = nxt->next.load();
+    }
+    while (!nxt->is_end && nxt->key <= end) {
+      add(nxt->key, nxt->value);
+      nxt = nxt->next.load();
 #ifdef LazyStamp
-	if (vl::bad_stamp) return true;
+      if (vl::bad_stamp) return;
 #endif
-      }
-      return true; });
+    }
   }
 
   node* empty() {

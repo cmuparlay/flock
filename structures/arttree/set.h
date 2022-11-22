@@ -376,16 +376,9 @@ struct Set {
   }		       
 
   template<typename AddF>
-  void range(node* root, AddF& add, K start, K end) {
-    if (start > end) {
-      std::cout << "Error: range query with start > end" << std::endl;
-      abort();
-    }
-    vl::with_snapshot([=] {
-      range_internal(root, add,
-		     std::optional<K>(start), std::optional<K>(end), 0);
-      return true;
-    });
+  void range_(node* root, AddF& add, K start, K end) {
+    range_internal(root, add,
+		   std::optional<K>(start), std::optional<K>(end), 0);
   }
 
   node* empty() {
