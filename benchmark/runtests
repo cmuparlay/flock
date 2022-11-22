@@ -80,7 +80,7 @@ if (sys.argv.count("-test") > 0):
     rounds = 1
     time = .1
     zipfians = [.99]
-    mix_percents = [[50,5,5]]
+    mix_percents = [[50,5,5,1]]
     tree_sizes = [100,10000000]
     list_sizes = [10,1000]
     

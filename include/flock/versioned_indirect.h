@@ -1,5 +1,6 @@
 #pragma once
 #include "flock.h"
+#include "timestamps.h"
 
 namespace vl {
 struct versioned {};
@@ -43,13 +44,12 @@ public:
   
   V* read_snapshot() {
     version_link* head = set_stamp(v.load());
+    while (head->time_stamp.load() > local_stamp)
+      head = head->next_version;
 #ifdef LazyStamp
     if (head->time_stamp.load() == local_stamp)
       bad_stamp = true;
 #endif
-    while (head->time_stamp.load() > local_stamp) {
-      head = head->next_version;
-    }
     return (V*) head->value;
   }
 

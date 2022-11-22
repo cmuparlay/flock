@@ -57,12 +57,12 @@ public:
     if(head == nullptr) return nullptr;
     set_stamp(head);
     TS ls = local_stamp;
-#ifdef LazyStamp
-    if (head->time_stamp.load() == ls) bad_stamp = true;
-#endif
     while (head->time_stamp.load() > ls) {
       head = (V*) head->next_version;
     }
+#ifdef LazyStamp
+    if (head->time_stamp.load() == ls) bad_stamp = true;
+#endif
     return head;
   }
 

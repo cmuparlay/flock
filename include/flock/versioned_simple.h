@@ -1,6 +1,7 @@
 #pragma once
 
 #include "flock.h"
+#include "timestamps.h"
 
 namespace vl {
   
@@ -92,14 +93,15 @@ public:
     TS ls = local_stamp;
     V* head = v.load();
     set_stamp(head);
-#ifdef LazyStamp
-    if (head != nullptr &&
-	head->time_stamp.load() == ls)
-      bad_stamp = true;
-#endif
     while (head != nullptr && head->read_stamp() > ls)
       head = (V*) head->get_next();
-    return ((head != nullptr) && head->is_indirect()) ? (V*) ((plink*) head)->value : head;
+#ifdef LazyStamp
+    if (head != nullptr && head->read_stamp() == ls)
+      bad_stamp = true;
+#endif
+    return (((head != nullptr) && head->is_indirect()) ?
+	    (V*) ((plink*) head)->value :
+	    head);
   }
 
   V* load() {  // can be used anywhere
@@ -108,10 +110,6 @@ public:
   }
   
   V* read() {  // only safe on journey
-    return get_ptr(v.read());
-  }
-
-  V* read_cur() {  // only safe on journey, outside of snapshot
     return get_ptr(v.read());
   }
 

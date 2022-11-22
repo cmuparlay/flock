@@ -1,14 +1,16 @@
 #pragma once
 #include <limits>
 #include <atomic>
+#include "epoch.h"
+
 // code for timestamps for snapshots
-namespace flck {
-  template <typename Thunk>
-  typename std::result_of<Thunk()>::type with_epoch(Thunk f);
-}
+// namespace flck {
+//   template <typename Thunk>
+//   typename std::result_of<Thunk()>::type with_epoch(Thunk f);
+// }
 
 namespace vl {
-using TS = long;
+  using TS = long;
 
 thread_local int read_delay = 1;
 thread_local int write_delay = 1;
@@ -269,6 +271,20 @@ thread_local TS local_stamp{-1};
 // Whenever an epoch is incremented this is set to the stamp
 // from the previous increment (which is now safe to collect).
 TS done_stamp = global_stamp.get_stamp();
+TS prev_stamp = global_stamp.get_stamp();
+TS current_stamp;
+  
+  bool add_epoch_hooks() {
+    flck::internal::epoch.before_epoch_hooks.push_back([&] {
+       // is this correct?  should it increment the stamp?
+       current_stamp = global_stamp.get_stamp();});
+    flck::internal::epoch.after_epoch_hooks.push_back([&] {
+	done_stamp = prev_stamp;
+	prev_stamp = current_stamp;});
+    return true;
+  }
+
+  bool junk = add_epoch_hooks();
 
 #ifndef LazyStamp
 template <typename F>
@@ -303,6 +319,11 @@ auto with_snapshot(F f) {
     return r;
   });
 }
-  
+
 #endif
 } // namespace verlib
+
+
+
+
+  

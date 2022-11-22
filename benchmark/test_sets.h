@@ -303,7 +303,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	     long mfind_count = 0;
 	     long update_count = 0;
 	     long query_count = 0;
-       volatile long keysum = 0;
+	     volatile long keysum = 0;
              while (true) {
                // every once in a while check if time is over
                if (cnt >= 100) { 
@@ -326,7 +326,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	       if (op_types[j] == Find) {
 		 query_count++;
 		 auto val = os.find(tr, b[j]);
-     if(val.has_value()) keysum += val.value();
+		 if(val.has_value()) keysum += val.value();
 	       }
 	       else if (op_types[j] == Insert) {
 		 update_count++;
@@ -347,11 +347,15 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		   for (int k = 0; k < range_size; k++) {
 		     auto val = os.find_(tr, b[j]);
 		     if(val.has_value()) keysum += val.value();
-		     if (++j >= (i+1)*mp) j -= mp;
-		     cnt++;
-		     total++;
+#ifdef LazyStamp
+		     if (vl::bad_stamp) return true;
+#endif
 		   }
 		   return true;});
+		 j += range_size;
+		 if (j >= (i+1)*mp) j -= mp;
+		 cnt += range_size;
+		 total += range_size;
 		 continue;
 	       }
 	       if (++j >= (i+1)*mp) j -= mp;

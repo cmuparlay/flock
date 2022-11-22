@@ -44,12 +44,12 @@ public:
 
   V* read_snapshot() {
     V* head = set_stamp(v.load());
+    while (head->time_stamp.load() > local_stamp)
+      head = (V*) head->next_version;
 #ifdef LazyStamp
     if (head->time_stamp.load() == local_stamp) bad_stamp = true;
     else 
 #endif
-    while (head->time_stamp.load() > local_stamp)
-      head = (V*) head->next_version;
     return head;
   }
 

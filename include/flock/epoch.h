@@ -5,7 +5,7 @@
 #include <parlay/random.h>
 #include <parlay/primitives.h>
 #include <unordered_set>
-#include "timestamps.h"
+//#include "timestamps.h"
 
 #pragma once
 
@@ -21,7 +21,21 @@ namespace flck {
 namespace internal {
 
 struct alignas(64) epoch_s {
-  vl::TS prev_stamp;
+  // vl::TS prev_stamp;
+  // vl::TS current_stamp;
+
+  // void add_hooks() {
+  //   prev_stamp = vl::global_stamp.get_stamp();
+  //   before_epoch_hooks.push_back([&] {
+  //      current_stamp = vl::global_stamp.get_read_stamp();});
+  //   after_epoch_hooks.push_back([&] {
+  // 	vl::done_stamp = prev_stamp;
+  // 	prev_stamp = current_stamp;});
+  // }
+	
+  // functions to run when epoch is incremented
+  std::vector<std::function<void()>> before_epoch_hooks;
+  std::vector<std::function<void()>> after_epoch_hooks;
   
   struct alignas(64) announce_slot {
     std::atomic<long> last;
@@ -34,7 +48,7 @@ struct alignas(64) epoch_s {
     int workers = parlay::num_workers();
     announcements = std::vector<announce_slot>(workers);
     current_epoch = 0;
-    prev_stamp = vl::global_stamp.get_stamp();
+    //add_hooks();
   }
 
   long get_current() {
@@ -77,15 +91,18 @@ struct alignas(64) epoch_s {
     if (all_there) {
       // timestamps are for multiversioning (snapshots)
       // we set done_stamp to the stamp from the previous epoch update
-      vl::TS current_stamp = vl::global_stamp.get_stamp();
+      //vl::TS current_stamp = vl::global_stamp.get_stamp();
+      for (auto h : before_epoch_hooks) h();
       if (current_epoch.compare_exchange_strong(current_e, current_e+1)) {
-	vl::done_stamp = prev_stamp;
-	prev_stamp = current_stamp;
+	for (auto h : after_epoch_hooks) h();
+	//vl::done_stamp = prev_stamp;
+	//prev_stamp = current_stamp;
       }
     }
   }
 };
 
+  int aaaaa;
 epoch_s epoch;
 
 // ***************************

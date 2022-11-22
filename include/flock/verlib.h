@@ -29,10 +29,13 @@
 
 namespace vl {
 
-struct versioned {};
+  struct versioned {};
 
-template <typename T>
-using versioned_ptr = flck::atomic<T*>;
+  template <typename T>
+  using versioned_ptr = flck::atomic<T*>;
+
+  template <typename F>
+  auto with_snapshot(F f) { return f();}
 }
 
 #endif
