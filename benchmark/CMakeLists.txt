@@ -18,7 +18,7 @@ set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
 function(add_benchmark NAME STRUCT_NAME DEFS)
   add_executable(${NAME} ${SOURCES})
   target_compile_definitions(${NAME} PRIVATE ${DEFS})
-  target_link_libraries(${NAME} PRIVATE flock)
+  target_link_libraries(${NAME} PRIVATE verlib)
   target_include_directories(${NAME} PRIVATE ${STRUCT_NAME})
 endfunction()
 
