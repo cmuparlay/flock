@@ -47,8 +47,8 @@ public:
     while (head->time_stamp.load() > local_stamp)
       head = head->next_version;
 #ifdef LazyStamp
-    if (head->time_stamp.load() == local_stamp)
-      bad_stamp = true;
+    if (head->time_stamp.load() == local_stamp && speculative)
+      aborted = true;
 #endif
     return (V*) head->value;
   }

@@ -93,8 +93,8 @@ public:
     while (head != nullptr && head->read_stamp() > ls)
       head = (V*) head->get_next();
 #ifdef LazyStamp
-    if (head != nullptr && head->read_stamp() == ls)
-      bad_stamp = true;
+    if (head != nullptr && head->read_stamp() == ls && speculative)
+      aborted = true;
 #endif
     return (((head != nullptr) && head->is_indirect()) ?
 	    (V*) ((plink*) head)->value :

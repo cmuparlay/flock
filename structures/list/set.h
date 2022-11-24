@@ -94,14 +94,14 @@ struct Set {
       if (nxt->is_end || nxt->key >= start) break;
       nxt = nxt_nxt;
 #ifdef LazyStamp
-      if (vl::bad_stamp) return;
+      if (vl::aborted) return;
 #endif
     }
     while (!nxt->is_end && nxt->key <= end) {
       add(nxt->key, nxt->value);
       nxt = nxt->next.load();
 #ifdef LazyStamp
-      if (vl::bad_stamp) return;
+      if (vl::aborted) return;
 #endif
     }
   }

@@ -61,7 +61,8 @@ public:
       head = (V*) head->next_version;
     }
 #ifdef LazyStamp
-    if (head->time_stamp.load() == ls) bad_stamp = true;
+    if (head->time_stamp.load() == ls && speculative)
+      aborted = true;
 #endif
     return head;
   }

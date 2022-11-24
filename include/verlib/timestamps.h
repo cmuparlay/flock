@@ -297,7 +297,8 @@ auto with_snapshot(F f) {
   });
 }
 #else
-thread_local bool bad_stamp;
+thread_local bool aborted = false;
+thread_local bool speculative = false;
 parlay::sequence<long> num_retries(parlay::num_workers()*16, 0);
 void print_retries() {
   std::cout << " retries = " << parlay::reduce(num_retries)
@@ -308,9 +309,12 @@ template <typename F>
 auto with_snapshot(F f) {
   return with_epoch([&] {
     local_stamp = global_stamp.get_stamp();
-    bad_stamp = false;
+    aborted = false;
+    speculative = true;
     auto r = f();
-    if (bad_stamp) {
+    speculative = false;
+    if (aborted) {
+      aborted = false;
       num_retries[parlay::worker_id()*16]++;
       global_stamp.inc_read_stamp(local_stamp);
       r = f();

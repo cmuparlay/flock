@@ -114,8 +114,8 @@ public:
       head_unmarked = strip_mark_and_tag(head);
     }
 #ifdef LazyStamp
-    if (head_unmarked != 0 && head_unmarked->time_stamp.load() == ls)
-      bad_stamp = true;
+    if (head_unmarked != 0 && head_unmarked->time_stamp.load() == ls && speculative)
+      aborted = aborted;
 #endif
     return get_ptr(head);
   }

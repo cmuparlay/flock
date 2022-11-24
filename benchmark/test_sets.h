@@ -352,7 +352,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		     auto val = os.find_(tr, b[j]);
 		     if(val.has_value()) tmp_sum += val.value();
 #ifdef LazyStamp
-		     if (vl::bad_stamp) return 0l;
+		     if (vl::aborted) return 0l;
 #endif
 		   }
 		   return tmp_sum;});
