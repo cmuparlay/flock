@@ -8,8 +8,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/run_sanity_checks.py
           DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
-set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist"
-		"hash_block" "hash_block_lf")
+set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist" "hash_block")
+set(FLOCK_BENCH_NO_LOCKS "hash_block_lf")
 set(FLOCK_BENCH_RECORDED_ONCE "btree" "list_ro")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
@@ -23,7 +23,7 @@ function(add_benchmark NAME STRUCT_NAME DEFS)
 endfunction()
 
 foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
-  add_benchmark(${bench}_ro_ls ${STRUCT_DIR}/${bench} "Persistent;Recorded_Once;LazyStamp")
+  add_benchmark(${bench}_ro_ls ${STRUCT_DIR}/${bench} "Versioned;Recorded_Once;LazyStamp")
 endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})
@@ -32,15 +32,29 @@ endforeach()
 
 foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench} ${STRUCT_DIR}/${bench} "")
-  add_benchmark(${bench}_indirect_ls ${STRUCT_DIR}/${bench} "Persistent;FullyIndirect;LazyStamp")
-  add_benchmark(${bench}_noshortcut_ls ${STRUCT_DIR}/${bench} "Persistent;Simple;NoShortcut;LazyStamp")
-  add_benchmark(${bench}_simple_ls ${STRUCT_DIR}/${bench} "Persistent;Simple;LazyStamp")
-  add_benchmark(${bench}_per_ss ${STRUCT_DIR}/${bench} "Persistent")
-  add_benchmark(${bench}_per_rs ${STRUCT_DIR}/${bench} "Persistent;ReadStamp")
-  add_benchmark(${bench}_per_ns ${STRUCT_DIR}/${bench} "Persistent;NoIncStamp")
-  add_benchmark(${bench}_per_ws ${STRUCT_DIR}/${bench} "Persistent;WriteStamp")
-  add_benchmark(${bench}_per_ls ${STRUCT_DIR}/${bench} "Persistent;LazyStamp")
-  add_benchmark(${bench}_per_lock_ls ${STRUCT_DIR}/${bench} "Persistent;NoHelp;LazyStamp")
+  add_benchmark(${bench}_indirect_ls ${STRUCT_DIR}/${bench} "Versioned;FullyIndirect;LazyStamp")
+  add_benchmark(${bench}_noshortcut_ls ${STRUCT_DIR}/${bench} "Versioned;Simple;NoShortcut;LazyStamp")
+  add_benchmark(${bench}_simple_ls ${STRUCT_DIR}/${bench} "Versioned;Simple;LazyStamp")
+  add_benchmark(${bench}_ver_ss ${STRUCT_DIR}/${bench} "Versioned")
+  add_benchmark(${bench}_ver_rs ${STRUCT_DIR}/${bench} "Versioned;ReadStamp")
+  add_benchmark(${bench}_ver_ns ${STRUCT_DIR}/${bench} "Versioned;NoIncStamp")
+  add_benchmark(${bench}_ver_ws ${STRUCT_DIR}/${bench} "Versioned;WriteStamp")
+  add_benchmark(${bench}_ver_ls ${STRUCT_DIR}/${bench} "Versioned;LazyStamp")
+  add_benchmark(${bench}_ver_lock_ls ${STRUCT_DIR}/${bench} "Versioned;NoHelp;LazyStamp")
+endforeach()
+
+# None of these need helping
+foreach(bench ${FLOCK_BENCH_NO_LOCKS})
+  add_benchmark(${bench} ${STRUCT_DIR}/${bench} "")
+  add_benchmark(${bench}_indirect_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;FullyIndirect;LazyStamp")
+  add_benchmark(${bench}_noshortcut_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;Simple;NoShortcut;LazyStamp")
+  add_benchmark(${bench}_simple_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;Simple;LazyStamp")
+  add_benchmark(${bench}_ver_ss ${STRUCT_DIR}/${bench} "NoHelp;Versioned")
+  add_benchmark(${bench}_ver_rs ${STRUCT_DIR}/${bench} "NoHelp;Versioned;ReadStamp")
+  add_benchmark(${bench}_ver_ns ${STRUCT_DIR}/${bench} "NoHelp;Versioned;NoIncStamp")
+  add_benchmark(${bench}_ver_ws ${STRUCT_DIR}/${bench} "NoHelp;Versioned;WriteStamp")
+  add_benchmark(${bench}_ver_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;LazyStamp")
+  add_benchmark(${bench}_ver_lock_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;LazyStamp")
 endforeach()
 
 

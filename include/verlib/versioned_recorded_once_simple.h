@@ -1,6 +1,6 @@
 // A version for data structures that only record once.
 // Effectively this means that an object that is pointed to
-// by a persistent_ptr can only be stored to a persistent pointer
+// by a versioned_ptr can only be stored to a versioned pointer
 // once.
 
 // Based on paper:
@@ -8,18 +8,19 @@
 // Constant-time snapshots with applications to concurrent data structures
 // PPoPP 2021
 #pragma once
+#include "flock/flock.h"
 #include "timestamps.h"
 
-struct persistent {
+struct versioned {
   std::atomic<TS> time_stamp;
-  persistent* next_version;
-  persistent() : time_stamp(tbd) {}
+  versioned* next_version;
+  versioned() : time_stamp(tbd) {}
 };
 
 template <typename V>
-struct persistent_ptr {
+struct versioned_ptr {
 private:
-  mutable_val<V*> v;
+  flck::atomic<V*> v;
 
   static V* set_stamp(V* ptr) {
     if (ptr->time_stamp.load() == tbd) {
@@ -38,8 +39,8 @@ private:
 
 public:
 
-  persistent_ptr(V* v) : v(init_ptr(v)) {}
-  persistent_ptr(): v(nullptr) {}
+  versioned_ptr(V* v) : v(init_ptr(v)) {}
+  versioned_ptr(): v(nullptr) {}
   void init(V* vv) { v = init_ptr(vv);}
 
   V* read_snapshot() {
@@ -47,8 +48,8 @@ public:
     while (head->time_stamp.load() > local_stamp)
       head = (V*) head->next_version;
 #ifdef LazyStamp
-    if (head->time_stamp.load() == local_stamp) bad_stamp = true;
-    else 
+    if (head->time_stamp.load() == local_stamp)
+      bad_stamp = true;
 #endif
     return head;
   }
@@ -63,7 +64,7 @@ public:
   
   void store(V* new_v) {
     V* old_v = v.load();
-    new_v->next_version = (persistent*) old_v;
+    new_v->next_version = (versioned*) old_v;
     v = new_v;
     set_stamp(new_v);
   }
@@ -74,7 +75,7 @@ public:
     if (old_v != exp_v) return false;
     if (old_v == new_v) return true;
     new_v->next_version = exp_v;
-    if (v.single_cas(old_v, new_v)) {
+    if (v.cas_ni(old_v, new_v)) {
       set_stamp(new_v);
       return true;
     } else {

@@ -1,5 +1,5 @@
-// This selects between using persistent objects or regular objects
-// Persistent objects are implemented as described in:
+// This selects between using versioned objects or regular objects
+// Versioned objects are implemented as described in:
 //   Wei, Ben-David, Blelloch, Fatourou, Rupert and Sun,
 //   Constant-Time Snapshots with Applications to Concurrent Data Structures
 //   PPoPP 2021
@@ -10,13 +10,13 @@
 
 #include "flock/flock.h"
 
-#ifdef Persistent
+#ifdef Versioned
 
-// persistent objects, ptr_type includes version chains
+// versioned objects, ptr_type includes version chains
 #ifdef Recorded_Once
 #include "versioned_recorded_once.h"
 #elif Simple_Recorded_Once_
-#include "simple_persistent_recorded_once.h"
+#include "versioned_recorded_once_simple.h"
 #elif FullyIndirect
 #include "versioned_indirect.h"
 #elif Simple
@@ -25,7 +25,7 @@
 #include "versioned.h"
 #endif
 
-# else // Not Persistent
+# else // Not Versioned
 
 namespace vl {
 

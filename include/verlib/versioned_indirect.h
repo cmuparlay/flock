@@ -39,7 +39,7 @@ public:
 
   versioned_ptr(): v(init_ptr(nullptr)) {}
   versioned_ptr(V* ptr) : v(init_ptr(ptr)) {}
-  ~versioned_ptr() { link_pool.destruct_no_log(v.read()); }
+  ~versioned_ptr() { link_pool.destruct(v.load()); }
   void init(V* ptr) {v = init_ptr(ptr);}
   
   V* read_snapshot() {
@@ -77,7 +77,7 @@ public:
     if (old_v != old_link->value) return false;
     if (old_v == new_v) return true;
     version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) new_v);
-    if (v.single_cas(old_link, new_link)) {
+    if (v.cas_ni(old_link, new_link)) {
       set_stamp(new_link);
       link_pool.retire(old_link);
       return true;

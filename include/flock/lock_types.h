@@ -20,7 +20,9 @@ public:
   V read_snapshot() {return v.load();}
   V read_cur() {return v.load();}
   void store(V vv) { v = vv;}
-  bool single_cas(V old_v, V new_v) {
+  bool cas(V old_v, V new_v) {
+    return v.compare_exchange_strong(old_v,new_v);}
+  bool cas_ni(V old_v, V new_v) {
     return v.compare_exchange_strong(old_v,new_v);}
   void cam(V oldv, V newv) {
     v.compare_exchange_strong(oldv,newv);}
@@ -50,6 +52,9 @@ using memory_pool = internal::mem_pool<T>;
 
   template<typename V>
   V commit(V v) {return v;}
+
+  template <typename F>
+  void non_idempotent(F f) { f();}
 
 } // namespace flck
 

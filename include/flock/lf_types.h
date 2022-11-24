@@ -28,11 +28,11 @@ public:
   V read() {return TV::value(v.load());}
   V read_snapshot() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(internal::lg), vv);}
-  bool single_cas(V old_v, V new_v) {
-    IT old_t = v.load();
-    return (TV::value(old_t) == old_v &&
-	    TV::cas(v, old_t, new_v, true));}
   bool cas(V old_v, V new_v) { // not safe inside locks
+    assert(internal::log.is_empty());
+    return cas_ni(old_v, new_v);
+  }
+  bool cas_ni(V old_v, V new_v) { 
     IT old_t = v.load();
     return (TV::value(old_t) == old_v &&
       TV::cas(v, old_t, new_v, true));}
@@ -125,19 +125,24 @@ struct memory_pool {
     assert(p != nullptr);
     auto x = internal::lg.commit_value_safe(p);
     if (x.second) // only retire if first try
-      internal::with_empty_log([=] {pool.retire(p);}); 
+      internal::with_empty_log([&] {pool.retire(p);}); 
   }
 
+  void retire_ni(T* p) {
+    assert(p != nullptr);
+    internal::with_empty_log([&] {pool.retire(p);});
+  }
+	      
   void destruct(T* p) {
     assert(p != nullptr);
     auto x = internal::lg.commit_value_safe(p);
     if (x.second) // only retire if first try
-      internal::with_empty_log([=] {pool.destruct(p);}); 
+      internal::with_empty_log([&] {pool.destruct(p);}); 
   }
 
-  void destruct_no_log(T* p) {
+  void destruct_ni(T* p) {
     assert(p != nullptr);
-    internal::with_empty_log([=] {pool.destruct(p);}); 
+    internal::with_empty_log([&] {pool.destruct(p);}); 
   }
 
   template <typename F, typename ... Args>
@@ -149,7 +154,8 @@ struct memory_pool {
 	f(x);
 	return x;});
     auto r = internal::lg.commit_value(newv);
-    if (!r.second) { pool.destruct(newv); } // destruct if already initialized
+    if (!r.second)  // destruct if already initialized
+      internal::with_empty_log([&] {pool.destruct(newv);});
     return r.first;
   }
 
@@ -194,7 +200,7 @@ protected:
     if (internal::lg.is_empty()) pool.retire(p);
     else if (le != nullptr) {
       *le = tag_result(result);
-      pool.retire(p);
+      internal::with_empty_log([&] { pool.retire(p);});
     }
   }
 
@@ -220,7 +226,8 @@ private:
 				 [&] {return pool.new_obj(args...);});
     auto r = internal::lg.commit_value(newv);
     // if already allocated return back to pool
-    if (!r.second) { pool.destruct(newv); }
+    if (!r.second) {
+      internal::with_empty_log([&] {pool.destruct(newv);}); }
     return r;
   }
 
@@ -264,6 +271,8 @@ bool skip_if_done(F f) { return internal::skip_if_done(f); }
 template <typename F>
 bool skip_if_done_no_log(F f) { return internal::skip_if_done_no_log(f); }
 
+template <typename F>
+void non_idempotent(F f) { internal::with_empty_log(f); }
 
 } // namespace flck
 

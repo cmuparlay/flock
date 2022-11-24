@@ -58,13 +58,10 @@ private:
   }
 
   void shortcut(plink* ptr) {
-      if (ptr->read_stamp() <= done_stamp)
-        if (v.single_cas((V*) ptr, (V*) ptr->value))
-#ifdef NoHelp
-      	  link_pool.retire(ptr);
-#else
-      link_pool.pool.retire(ptr);
-#endif
+    if (ptr->read_stamp() <= done_stamp)
+      flck::non_idempotent([&] {
+	  if (v.cas((V*) ptr, (V*) ptr->value))
+	    link_pool.retire(ptr);});      
   }
 
   V* get_ptr(V* ptr) {
@@ -82,9 +79,9 @@ public:
   versioned_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
 
   ~versioned_ptr() {
-    plink* ptr = (plink*) v.read();
+    plink* ptr = (plink*) v.load();
     if (ptr != nullptr && ptr->is_indirect())
-      link_pool.pool.destruct_no_log(ptr);
+      link_pool.destruct(ptr);
   }
 
   void init(V* ptr) {v = set_zero_stamp(ptr);}
@@ -161,7 +158,7 @@ public:
         new_v = (V*) link_pool.new_obj((versioned*) oldv, newv);
       else newv->next_version = oldv;
 
-      bool succeeded = v.single_cas(oldv, new_v);
+      bool succeeded = v.cas_ni(oldv, new_v);
 
       if(succeeded) {
         set_stamp(new_v);

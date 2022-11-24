@@ -172,12 +172,6 @@ public:
      Allocator::free(p);
   }
 
-  // destructs and frees the object immediately
-  void destruct_no_log(T* p) {
-     p->~T();
-     Allocator::free(p);
-  }
-
   template <typename ... Args>
   T* new_obj(Args... args) {
     T* newv = Allocator::alloc();
