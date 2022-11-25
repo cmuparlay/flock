@@ -105,10 +105,6 @@ public:
     V* head_unmarked = strip_mark_and_tag(head);
 
     // chase down version chain
-#ifdef LazyStamp
-    if (head_unmarked == 0 || head_unmarked->time_stamp.load() < ls)
-      return get_ptr(head);
-#endif
     while (head_unmarked != 0 && head_unmarked->time_stamp.load() > ls) {
       head = head_unmarked->next_version.load();
       head_unmarked = strip_mark_and_tag(head);

@@ -41,6 +41,7 @@ foreach(bench ${FLOCK_BENCH})
   add_benchmark(${bench}_ver_ws ${STRUCT_DIR}/${bench} "Versioned;WriteStamp")
   add_benchmark(${bench}_ver_ls ${STRUCT_DIR}/${bench} "Versioned;LazyStamp")
   add_benchmark(${bench}_ver_lock_ls ${STRUCT_DIR}/${bench} "Versioned;NoHelp;LazyStamp")
+  add_benchmark(${bench}_simple_lock_ls ${STRUCT_DIR}/${bench} "Versioned;Simple;NoHelp;LazyStamp")
 endforeach()
 
 # None of these need helping
@@ -54,7 +55,8 @@ foreach(bench ${FLOCK_BENCH_NO_LOCKS})
   add_benchmark(${bench}_ver_ns ${STRUCT_DIR}/${bench} "NoHelp;Versioned;NoIncStamp")
   add_benchmark(${bench}_ver_ws ${STRUCT_DIR}/${bench} "NoHelp;Versioned;WriteStamp")
   add_benchmark(${bench}_ver_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;LazyStamp")
-  add_benchmark(${bench}_ver_lock_ls ${STRUCT_DIR}/${bench} "NoHelp;Versioned;LazyStamp")
+  add_benchmark(${bench}_ver_lock_ls ${STRUCT_DIR}/${bench} "Versioned;LazyStamp")
+  add_benchmark(${bench}_simple_lock_ls ${STRUCT_DIR}/${bench} "Versioned;Simple;LazyStamp")
 endforeach()
 
 
