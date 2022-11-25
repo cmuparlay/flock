@@ -222,10 +222,15 @@ public:
 } // end namespace internal
 
 template <typename Thunk>
-typename std::result_of<Thunk()>::type with_epoch(Thunk f) {
+auto with_epoch(Thunk f) {
   internal::epoch.announce();
-  typename std::result_of<Thunk()>::type v = f();
-  internal::epoch.unannounce();
-  return v;
+  if constexpr (std::is_void_v<std::invoke_result_t<Thunk>>) {
+    f();
+    internal::epoch.unannounce();
+  } else {
+    auto v = f();
+    internal::epoch.unannounce();
+    return v;
+  }
 }
 } // end namespace flck

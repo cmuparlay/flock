@@ -60,7 +60,7 @@ struct descriptor {
   void operator () () {
     assert(!freed);
     // run f using log based on lg_array
-    with_log_(Log(&lg_array,0), f);
+    with_log(Log(&lg_array,0), f);
     done = true;
     //std::atomic_thread_fence(std::memory_order_seq_cst);
   }

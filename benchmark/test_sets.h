@@ -71,7 +71,6 @@ void test_persistence_concurrent(SetType& os) {
           counter2++;
           if(max_seen > 2 && max_seen < N-3) 
             counter++; // saw an intermediate state
-          return true;
         });
         // if(counter2 > 10 && counter == 0) break;
       }
@@ -191,7 +190,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       assert_key_exists(os.find_(tr, 11).has_value());
       assert(!os.find_(tr, 10).has_value());
       assert(!os.find_(tr, 3).has_value());
-      return true;});
+      });
     // #endif
 
     // os.print(tr);

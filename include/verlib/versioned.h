@@ -115,7 +115,7 @@ public:
     }
 #ifdef LazyStamp
     if (head_unmarked != 0 && head_unmarked->time_stamp.load() == ls && speculative)
-      aborted = aborted;
+      aborted = true;
 #endif
     return get_ptr(head);
   }

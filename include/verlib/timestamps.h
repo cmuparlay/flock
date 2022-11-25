@@ -291,9 +291,14 @@ template <typename F>
 auto with_snapshot(F f) {
   return flck::with_epoch([&] {
     local_stamp = global_stamp.get_read_stamp();
-    auto r = f();
-    local_stamp = -1;
-    return r;
+    if constexpr (std::is_void_v<std::invoke_result_t<F>>) {
+      f();
+      local_stamp = -1;
+    } else {
+      auto r = f();
+      local_stamp = -1;
+      return r;
+    }
   });
 }
 #else
@@ -311,16 +316,28 @@ auto with_snapshot(F f) {
     local_stamp = global_stamp.get_stamp();
     aborted = false;
     speculative = true;
-    auto r = f();
-    speculative = false;
-    if (aborted) {
-      aborted = false;
-      num_retries[parlay::worker_id()*16]++;
-      global_stamp.inc_read_stamp(local_stamp);
-      r = f();
+    if constexpr (std::is_void_v<std::invoke_result_t<F>>) {
+      f();
+      speculative = false;
+      if (aborted) {
+	aborted = false;
+	num_retries[parlay::worker_id()*16]++;
+	global_stamp.inc_read_stamp(local_stamp);
+	f();
+      }
+      local_stamp = -1;
+    } else {
+      auto r = f();
+      speculative = false;
+      if (aborted) {
+	aborted = false;
+	num_retries[parlay::worker_id()*16]++;
+	global_stamp.inc_read_stamp(local_stamp);
+	r = f();
+      }
+      local_stamp = -1;
+      return r;
     }
-    local_stamp = -1;
-    return r;
   });
 }
 
