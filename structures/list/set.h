@@ -15,6 +15,11 @@ struct Set {
       : key(key), value(value), next(next), is_end(false), removed(false) {};
     node(node* next, bool is_end) // for head and tail
       : next(next), is_end(is_end), removed(false) {};
+#ifdef Recorded_Once
+    node(node* n) // copy from pointer
+      : key(n->key), value(n->value), next(n->next.load()),
+      is_end(n->is_end), removed(false) {}
+#endif
   };
 
   vl::memory_pool<node> node_pool;
@@ -52,6 +57,33 @@ struct Set {
       }});
   }
 
+#ifdef Recorded_Once
+  bool remove(node* root, K k) {
+    return vl::with_epoch([=] {
+      int delay = init_delay;
+      while (true) {
+	auto [cur, nxt] = find_location(root, k);
+	if (nxt->is_end || k != nxt->key) return false; // not found
+	// triply nested lock to grab cur, nxt, and nxt->next
+        if (cur->lck.try_lock([=] {
+          if (cur->removed.load() || (cur->next).load() != nxt) return false;
+	  return nxt->lck.try_lock([=] {
+	    node* nxtnxt = (nxt->next).load();
+	    return nxtnxt->lck.try_lock([=] {
+	      nxt->removed = true;
+	      nxtnxt->removed = true;
+	      cur->next = node_pool.new_obj(nxtnxt); // copy nxt->next
+	      node_pool.retire(nxt);
+	      node_pool.retire(nxtnxt); 
+	      return true;
+	    });});}))
+	  return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
+      }
+    });
+  }
+#else
   bool remove(node* root, K k) {
     return vl::with_epoch([=] {
       int delay = init_delay;
@@ -59,21 +91,32 @@ struct Set {
 	auto [cur, nxt] = find_location(root, k);
 	if (nxt->is_end || k != nxt->key) return false; // not found
         if (cur->lck.try_lock([=] {
-          if (cur->removed.load() || (cur->next).load() != nxt)
-	    return false;
+          if (cur->removed.load() || (cur->next).load() != nxt) return false;
 	  return nxt->lck.try_lock([=] {
 	    node* nxtnxt = (nxt->next).load();
+#ifdef Recorded_Once
+	    // if recoreded once then need to copy nxtnxt and point to it
+	    return nxtnxt->lck.try_lock([=] {
+	      nxt->removed = true;
+	      nxtnxt->removed = true;
+	      cur->next = node_pool.new_obj(nxtnxt); // copy nxt->next
+	      node_pool.retire(nxt);
+	      node_pool.retire(nxtnxt); 
+	      return true;});
+#else
 	    nxt->removed = true;
 	    cur->next = nxtnxt; // shortcut
-	    node_pool.retire(nxt); 
+	    node_pool.retire(nxt);
 	    return true;
-	  });}))
+#endif
+	    });}))
 	  return true;
 	for (volatile int i=0; i < delay; i++);
 	delay = std::min(2*delay, max_delay);
       }
     });
   }
+#endif
 
   std::optional<V> find_(node* root, K k) {
     auto [cur, nxt] = find_location(root, k);

@@ -272,7 +272,7 @@ thread_local TS local_stamp{-1};
 // from the previous increment (which is now safe to collect).
 TS done_stamp = global_stamp.get_stamp();
 TS prev_stamp = global_stamp.get_stamp();
-TS current_stamp;
+thread_local TS current_stamp;
   
   bool add_epoch_hooks() {
     flck::internal::epoch.before_epoch_hooks.push_back([&] {

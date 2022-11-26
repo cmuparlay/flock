@@ -8,9 +8,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/run_sanity_checks.py
           DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
-set(FLOCK_BENCH "arttree" "btree" "list" "list_ro" "dlist" "hash_block")
+set(FLOCK_BENCH "arttree" "btree" "list" "dlist" "hash_block")
 set(FLOCK_BENCH_NO_LOCKS "hash_block_lf")
-set(FLOCK_BENCH_RECORDED_ONCE "btree" "list_ro")
+set(FLOCK_BENCH_RECORDED_ONCE "btree" "list")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
 set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
@@ -23,7 +23,7 @@ function(add_benchmark NAME STRUCT_NAME DEFS)
 endfunction()
 
 foreach(bench ${FLOCK_BENCH_RECORDED_ONCE})
-  add_benchmark(${bench}_ro_ls ${STRUCT_DIR}/${bench} "Versioned;Recorded_Once;LazyStamp")
+  add_benchmark(${bench}_ver_ro_ls ${STRUCT_DIR}/${bench} "Versioned;Recorded_Once;LazyStamp")
 endforeach()
 
 foreach(bench ${OTHER_LIST_BENCH})

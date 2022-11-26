@@ -23,7 +23,7 @@ short = getOption("-short")
 
 suffixes_all = ["","_indirect_ls","_noshortcut_ls","_simple_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_ss", "_ver_lock_ls", "_simple_lock_ls"]
 
-suffixes_ro = suffixes_all + ["_ro_ls"] # , "_ro_rs", "_ro_ws", "_ro_ns", "_ro_ss"]
+suffixes_ro = suffixes_all + ["per_ro_ls"] # , "_ro_rs", "_ro_ws", "_ro_ns", "_ro_ss"]
 
 # updates, multifind, range (rest are queries), range/multifind size
 # mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
@@ -44,18 +44,18 @@ zipfians = [0, .99]
 suffixes_other = []
 
 if short :
-    lists = ["list", "list_ro"]
+    lists = ["list"]
     list_sizes = [10,1000]
     trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
     tree_sizes = [1000,10000000]
 elif all :
-    lists = ["list", "list_ro"]
+    lists = ["list"]
     list_sizes = [100,1000]
     trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
     tree_sizes = [100,1000,100000,1000000,10000000,100000000]
 else :
-    lists = ["list"]
-    lists_ro = ["list_ro"]
+    lists = []
+    lists_ro = ["list"]
     list_sizes = [100,1000]
     trees = ["hash_block_lf", "hash_block", "arttree"]
     trees_ro = ["btree"]

@@ -21,17 +21,6 @@ namespace flck {
 namespace internal {
 
 struct alignas(64) epoch_s {
-  // vl::TS prev_stamp;
-  // vl::TS current_stamp;
-
-  // void add_hooks() {
-  //   prev_stamp = vl::global_stamp.get_stamp();
-  //   before_epoch_hooks.push_back([&] {
-  //      current_stamp = vl::global_stamp.get_read_stamp();});
-  //   after_epoch_hooks.push_back([&] {
-  // 	vl::done_stamp = prev_stamp;
-  // 	prev_stamp = current_stamp;});
-  // }
 	
   // functions to run when epoch is incremented
   std::vector<std::function<void()>> before_epoch_hooks;
@@ -48,7 +37,6 @@ struct alignas(64) epoch_s {
     int workers = parlay::num_workers();
     announcements = std::vector<announce_slot>(workers);
     current_epoch = 0;
-    //add_hooks();
   }
 
   long get_current() {
@@ -89,20 +77,14 @@ struct alignas(64) epoch_s {
       	  all_there = false;
     // if so then increment current epoch
     if (all_there) {
-      // timestamps are for multiversioning (snapshots)
-      // we set done_stamp to the stamp from the previous epoch update
-      //vl::TS current_stamp = vl::global_stamp.get_stamp();
       for (auto h : before_epoch_hooks) h();
       if (current_epoch.compare_exchange_strong(current_e, current_e+1)) {
 	for (auto h : after_epoch_hooks) h();
-	//vl::done_stamp = prev_stamp;
-	//prev_stamp = current_stamp;
       }
     }
   }
 };
 
-  int aaaaa;
 epoch_s epoch;
 
 // ***************************
@@ -116,9 +98,14 @@ struct Link {
 
 using list_allocator = parlay::type_allocator<Link>;
 
+  using namespace std::chrono;
+
 template <typename xT>
 struct alignas(64) mem_pool {
 private:
+
+  static constexpr double milliseconds_between_epoch_updates = 20.0;
+  using sys_time = time_point<std::chrono::system_clock>;
 
   // each thread keeps one of these
   struct alignas(256) old_current {
@@ -126,7 +113,8 @@ private:
     Link* current; // linked list of retired items from current epoch
     long epoch; // epoch on last retire, updated on a retire
     long count; // number of retires so far, reset on updating the epoch
-    old_current() : old(nullptr), current(nullptr), epoch(0), count(0) {}
+    sys_time time; // time of last epoch update
+    old_current() : old(nullptr), current(nullptr), epoch(0) {}
   };
 
   std::vector<old_current> pools;
@@ -148,7 +136,12 @@ public:
 
   mem_pool() {
     workers = parlay::num_workers();
+    //update_threshold = 10*workers;
     pools = std::vector<old_current>(workers);
+    for (int i = 0; i < workers; i++) {
+      //pools[i].count = parlay::hash64(i) % update_threshold;
+      pools[i].time = system_clock::now();
+    }
   }
 
   mem_pool(const mem_pool&) = delete;
@@ -197,8 +190,12 @@ public:
       pid.epoch = epoch.get_current();
     }
     // a heuristic
-    if (++pid.count == 10 * workers) {
-      pid.count = 0;
+    auto now = system_clock::now();
+    if (duration_cast<milliseconds>(now - pid.time).count() >
+	milliseconds_between_epoch_updates) {
+      //if (++pid.count == 10 * workers) {
+      //pid.count = 0;
+      pid.time = now;
       epoch.update_epoch();
     }
     Link* lnk = list_allocator::alloc();
@@ -219,6 +216,7 @@ public:
     Allocator::finish();
   }
 };
+
 } // end namespace internal
 
 template <typename Thunk>
