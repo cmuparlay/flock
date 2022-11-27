@@ -38,7 +38,11 @@ struct Set {
   };
   using node = Node<0>;
 
+#ifdef UseCAS
+  struct slot {
+#else
   struct slot : flck::lock {
+#endif
     vl::versioned_ptr<node> ptr;
     slot() : ptr(nullptr) {}
   };
@@ -119,14 +123,22 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x != nullptr && x->find(k) != -1) return false;
+#ifdef UseCAS
+      node* new_node = insert_to_node(x, k, v);
+      if(s->ptr.cas(x, new_node)) {
+        retire_node(x);
+        return true;
+      } else retire_node(new_node); // TODO: could be destruct
+#else  // use try_lock
       if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = insert_to_node(x, k, v);
 	    retire_node(x);
 	    return true;}))
 	return true;
-      	for (volatile int i=0; i < delay; i++);
-	delay = std::min(2*delay, max_delay);
+#endif
+      for (volatile int i=0; i < delay; i++);
+      delay = std::min(2*delay, max_delay);
     }
   }
 
@@ -140,12 +152,20 @@ struct Set {
     while (true) {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
+#ifdef UseCAS
+      node* new_node = remove_from_node(x, k);
+      if(s->ptr.cas(x, new_node)) {
+        retire_node(x);
+        return true;
+      } else retire_node(new_node); // TODO: could be destruct
+#else
       if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = remove_from_node(x, k);
 	    retire_node(x);
 	    return true;}))
 	return true;
+#endif      
       for (volatile int i=0; i < delay; i++);
       delay = std::min(2*delay, max_delay);
     }
@@ -160,6 +180,9 @@ struct Set {
   void range_(Table& table, AddF& add, K start, K end) {
       for (K k = start; k <= end; k++) {
 	auto x = find_(table, k);
+#ifdef LazyStamp
+	if (vl::aborted) return;
+#endif
 	if (x.has_value()) add(k, x.value());
       }
   }
