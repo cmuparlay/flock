@@ -4,12 +4,12 @@ import re
 from tabulate import tabulate
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-input_files = ["ip-172-31-41-51_11_07_22", "ip-172-31-41-51_11_07_22"]
-output_folder = "uniform-nov8"
-zipf = 0
+input_files = ["ip-172-31-40-46_11_27_22_64cores"]
+output_folder = "nov28"
+zipfs = [0, 0.99]
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
-ds_list = ["arttree", "btree", "list_ro", "dlist", "list", "hash_block_lf", "hash_block"]
+ds_list = ["arttree", "btree", "dlist", "list", "hash_block_lf", "hash_block"]
 
 num_tables = 0
 
@@ -126,7 +126,7 @@ def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['range'] = mix_percent[2]
   params['rs'] = mix_percent[3]
   rowvals = parameters['ds']
-  colvals = ['indirect', 'noshortcut', 'simple', 'per', 'ro', 'non_per']
+  colvals = ['indirect_ls', 'noshortcut_ls', 'simple_ls', 'ver_ls', 'ver_ro_ls', 'non_per']
   print_table(throughput, parameters, 'ds', 'per', params, rowvals, colvals)
 
 def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percents, params):
@@ -137,8 +137,8 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   output = title + '\n========================================= \n\n'
   f = open(output_folder + '/' + title + ".txt", "w")
 
-  colvals = ['_rs', '_ws', '']
-  headers = ['workload (up-mfind-range-rs)', 'read', 'write', 'switch']
+  colvals = ['_ss', '_rs', '_ws', '_ls', '_ns']
+  headers = ['workload (up-mfind-range-rs)', 'switch', 'read', 'write', 'lazy', 'no_inc']
   data = []
   for mix_percent in mix_percents:
     row_data = [mix_percent]
@@ -185,33 +185,36 @@ small = {'list' : list_sizes[0], 'tree' : tree_sizes[0]}
 large = {'list' : list_sizes[1], 'tree' : tree_sizes[1]}
 
 
-mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
+# mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,25,0,16]]
+mix_percents = [[5,0,0,0], [50,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48]]
 
-params_small = {'n': small,
-          'p': parameters['p'][0],
-          'z': zipf, }
-params_large = {'n': large,
-          'p': parameters['p'][0],
-          'z': zipf, }
+for zipf in zipfs:
+  params_small = {'n': small,
+            'p': parameters['p'][0],
+            'z': zipf, }
+  params_large = {'n': large,
+            'p': parameters['p'][0],
+            'z': zipf, }
 
-for mix in mix_percents:
-  print_table_mix_percent(throughputs, parameters, mix, params_small)
-  print_table_mix_percent(throughputs, parameters, mix, params_large)
+  for mix in mix_percents:
+    print_table_mix_percent(throughputs, parameters, mix, params_small)
+    print_table_mix_percent(throughputs, parameters, mix, params_large)
 
-params = {'p': parameters['p'][0], 'z': zipf,}
+  params = {'p': parameters['p'][0], 'z': zipf,}
 
-for ds in parameters['ds']:
-  for per in ['per', 'simple']:
-    sizes = []
-    if 'list' in ds:
-      sizes = list_sizes
-    else:
-      sizes = tree_sizes
-    for n in sizes:
-      print_table_timestamp_inc(throughputs, parameters, ds, per, n, mix_percents, params)
+  for ds in parameters['ds']:
+    for per in ['ver']:
+      sizes = []
+      if 'list' in ds:
+        sizes = list_sizes
+      else:
+        sizes = tree_sizes
+      for n in sizes:
+        print_table_timestamp_inc(throughputs, parameters, ds, per, n, mix_percents, params)
 
 print(parameters)
 print()
+
 print('generated ' + str(num_tables) + ' tables')
 
 f = open(output_folder + '/combined.txt', "w")
