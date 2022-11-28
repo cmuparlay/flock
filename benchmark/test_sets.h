@@ -49,9 +49,10 @@ void test_persistence_concurrent(SetType& os) {
       int counter = 0;
       int counter2 = 0;
       while(!done) {
-	vl::with_snapshot([&] {
-          bool seen[N+1];
-          int max_seen = -1;
+        bool seen[N+1];
+        int max_seen;
+	      vl::with_snapshot([&] {
+          max_seen = -1;
           for(int i = 1; i <= N; i++) seen[i] = false;
           for(int i = 1; i <= N; i++) {
             auto val = os.find_(tr, i);
@@ -60,18 +61,18 @@ void test_persistence_concurrent(SetType& os) {
               max_seen = std::max(max_seen, (int) val.value());
             }
           }
-          std::cout << "max_seen: " << max_seen << std::endl;
-          // print_array(seen, N);
-          for(int i = 1; i <= max_seen; i++)
-            if(!seen[i]) {
-              std::cout << "inconsistent snapshot" << std::endl;
-              break;
-              abort();
-            }
-          counter2++;
-          if(max_seen > 2 && max_seen < N-3) 
-            counter++; // saw an intermediate state
         });
+        std::cout << "max_seen: " << max_seen << std::endl;
+        // print_array(seen, N);
+        for(int i = 1; i <= max_seen; i++)
+          if(!seen[i]) {
+            std::cout << "inconsistent snapshot" << std::endl;
+            break;
+            abort();
+          }
+        counter2++;
+        if(max_seen > 2 && max_seen < N-3) 
+          counter++; // saw an intermediate state
         // if(counter2 > 10 && counter == 0) break;
       }
       if(counter < 3) {
