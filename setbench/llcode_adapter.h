@@ -5,6 +5,7 @@
 #include "random_fnv1a.h"
 #include "adapter.h"
 
+#include <verlib/verlib.h>
 #include <parlay/primitives.h>
 #include <optional>
 
@@ -32,6 +33,13 @@ public:
   }
 
   std::optional<V> find(adapter_t* ds, const K key) {
+    init_thread(ds);
+    V val = ds->find(_tid, key);
+    if(val == (V) ds->getNoValue()) return {};
+    else return val;
+  } 
+
+  std::optional<V> find_(adapter_t* ds, const K key) {
     init_thread(ds);
     V val = ds->find(_tid, key);
     if(val == (V) ds->getNoValue()) return {};
