@@ -209,7 +209,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     parlay::sequence<key_type> a;
     if (use_sparse) {
       auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
-			 return (key_type) parlay::hash64(i);}); 
+			 return (key_type) ((parlay::hash64(i) << 1) >> 1);}); // generate 63-bit keys
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});

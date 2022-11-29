@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
 input_files = ["ip-172-31-40-46_11_27_22_64cores"]
-output_folder = "nov28"
+output_folder = "nov28_64core"
 zipfs = [0, 0.99]
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
@@ -137,18 +137,21 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   output = title + '\n========================================= \n\n'
   f = open(output_folder + '/' + title + ".txt", "w")
 
-  colvals = ['_ss', '_rs', '_ws', '_ls', '_ns']
-  headers = ['workload (up-mfind-range-rs)', 'switch', 'read', 'write', 'lazy', 'no_inc']
+  colvals = ['_ss', '_rs', '_ws', '_ls', '_ns', 'non_per']
+  headers = ['workload (up-mfind-range-rs)', 'switch', 'read', 'write', 'lazy', 'no_inc', 'non_per']
   data = []
   for mix_percent in mix_percents:
     row_data = [mix_percent]
     for c in colvals:
       p['per'] = per + c
+      if c == 'non_per': 
+        p['per'] = c
       p['up'] = mix_percent[0]
       p['mfind'] = mix_percent[1]
       p['range'] = mix_percent[2]
       p['rs'] = mix_percent[3]
       # print(p)
+      # print(toString(p))
       if toString(p) in throughputs:
         row_data.append(custom_round(throughputs[toString(p)]))
       else:

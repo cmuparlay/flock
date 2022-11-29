@@ -46,7 +46,7 @@ endforeach()
 
 # None of these need helping
 foreach(bench ${FLOCK_BENCH_USE_CAS})
-  add_benchmark(${bench}_lf ${STRUCT_DIR}/${bench} "")
+  add_benchmark(${bench}_lf ${STRUCT_DIR}/${bench} "NoHelp;UseCAS")
   add_benchmark(${bench}_lf_indirect_ls ${STRUCT_DIR}/${bench} "NoHelp;UseCAS;Versioned;FullyIndirect;LazyStamp")
   add_benchmark(${bench}_lf_noshortcut_ls ${STRUCT_DIR}/${bench} "NoHelp;UseCAS;Versioned;Simple;NoShortcut;LazyStamp")
   add_benchmark(${bench}_lf_simple_ls ${STRUCT_DIR}/${bench} "NoHelp;UseCAS;Versioned;Simple;LazyStamp")
