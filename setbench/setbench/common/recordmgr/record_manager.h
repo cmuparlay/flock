@@ -42,6 +42,7 @@ public:
     RecordManagerSet(const int numProcesses, RecoveryMgr<void *> * const _recoveryMgr) {}
     template <typename T>
     record_manager_single_type<T, Reclaim, Alloc, Pool> * get(T * const recordType) {
+        // std::cerr << typeid(T).name() << std::endl;
         throw std::logic_error("invalid type passed to RecordManagerSet::get()");
         return NULL;
     }
@@ -74,14 +75,16 @@ public:
         check_duplicates<First, Rest...>(); // check if first is in {rest...}
     }
     ~RecordManagerSet() {
-        std::cout<<"recordmanager set destructor started for object type "<<typeid(First).name()<<std::endl;
+        // std::cout<<"recordmanager set destructor started for object type "<<typeid(First).name()<<std::endl;
         delete mgr;
-        std::cout<<"recordmanager set destructor finished for object type "<<typeid(First).name()<<std::endl;
+        // std::cout<<"recordmanager set destructor finished for object type "<<typeid(First).name()<<std::endl;
         // note: should automatically call the parent class' destructor afterwards
     }
     // note: the compiled code for get() should be a single read and return statement
     template<typename T>
     inline record_manager_single_type<T, Reclaim, Alloc, Pool> * get(T * const recordType) {
+        // std::cerr << "FIRST: " << typeid(First).name() <<  std::endl;
+        // std::cerr << "T: " << typeid(T).name() <<  std::endl;
         if (typeid(First) == typeid(T)) {
             //cout<<"MATCH: typeid(First)="<<typeid(First).name()<<" typeid(T)="<<typeid(T).name()<<std::endl;
             return (record_manager_single_type<T, Reclaim, Alloc, Pool> *) mgr;

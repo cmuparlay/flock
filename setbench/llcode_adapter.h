@@ -29,12 +29,14 @@ public:
   }
 
   adapter_t* empty(size_t n) {
-    return new adapter_t(parlay::num_workers(), KEY_NEG_INFTY, KEY_POS_INFTY, KEY_NEG_INFTY, nullptr);
+    return new adapter_t(parlay::num_workers(), KEY_NEG_INFTY, KEY_POS_INFTY, 0, nullptr);
   }
 
   std::optional<V> find(adapter_t* ds, const K key) {
     init_thread(ds);
     V val = ds->find(_tid, key);
+    // std::cerr << "llcode_adapter: " << val << std::endl;
+    // std::cerr << "noval: " << ds->getNoValue() << std::endl;
     if(val == (V) ds->getNoValue()) return {};
     else return val;
   } 

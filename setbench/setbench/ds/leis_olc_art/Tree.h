@@ -10,6 +10,9 @@
 #include "N.cpp"
 #include "Key.h"
 
+#include <parlay/random.h>
+#include <parlay/primitives.h>
+
 namespace ART_OLC {
 
     template <class RecordManager>
@@ -25,6 +28,31 @@ namespace ART_OLC {
         TID checkKey(const TID tid, const Key &k) const;
 
         LoadKeyFunction loadKey;
+
+        void retire(const TID threadID, N* node) {
+            switch (node->getType()) {
+                case NTypes::N4: {
+                    auto n = (N4*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N16: {
+                    auto n = (N16*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N48: {
+                    auto n = (N48*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N256: {
+                    auto n = (N256*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+            }
+        }
 
     public:
         enum class CheckPrefixResult : uint8_t {
@@ -83,10 +111,27 @@ namespace ART_OLC {
 
         N* alloc(const int threadID, NTypes type);
 
+        static void shuffle(size_t n);
+
         N* const getRoot() {
             return root;
         }
     };
+
+    template<typename _T>
+    static void shuffleHelper(size_t n) {
+      auto ptrs = parlay::tabulate(n, [&] (size_t i) {return parlay::type_allocator<_T>::alloc();});
+      ptrs = parlay::random_shuffle(ptrs);
+      parlay::parallel_for(0, n, [&] (size_t i) {parlay::type_allocator<_T>::free(ptrs[i]);});
+    }
+
+    template <class RecordManager>
+    void Tree<RecordManager>::shuffle(size_t n) {
+        shuffleHelper<N256>(n/100);
+        shuffleHelper<N48>(n/10);
+        shuffleHelper<N16>(n/5);
+        shuffleHelper<N4>(n);
+    }
 
     template <class RecordManager>
     Tree<RecordManager>::Tree(const int numThreads, LoadKeyFunction loadKey) : recmgr(new RecordManager(numThreads)), loadKey(loadKey) {
@@ -398,7 +443,8 @@ namespace ART_OLC {
 
                                 parentNode->writeUnlock();
                                 node->writeUnlockObsolete();
-                                recmgr->retire(threadID, node);
+                                retire(threadID, node);
+                                // recmgr->retire(threadID, node);
                             } else {
                                 secondNodeN->writeLockOrRestart(needRestart);
                                 if (needRestart) {
@@ -415,7 +461,8 @@ namespace ART_OLC {
                                 secondNodeN->writeUnlock();
 
                                 node->writeUnlockObsolete();
-                                recmgr->retire(threadID, node);
+                                retire(threadID, node);
+                                // recmgr->retire(threadID, node);
                             }
                         } else {
                             N::removeAndUnlock(threadID, recmgr, node, v, k[level], parentNode, parentVersion, parentKey, needRestart);
