@@ -4,8 +4,8 @@ import re
 from tabulate import tabulate
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-input_files = ["ip-172-31-40-46_11_27_22_64cores"]
-output_folder = "nov28_64core"
+input_files = ["ip-172-31-40-46_11_26_22"]
+output_folder = "nov28"
 zipfs = [0, 0.99]
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
@@ -126,7 +126,7 @@ def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['range'] = mix_percent[2]
   params['rs'] = mix_percent[3]
   rowvals = parameters['ds']
-  colvals = ['indirect_ls', 'noshortcut_ls', 'simple_ls', 'ver_ls', 'ver_ro_ls', 'non_per']
+  colvals = ['indirect_ls', 'noshortcut_ls', 'simple_ls', 'ver_ls', 'ver_lock_ls', 'ver_ro_ls', 'non_per']
   print_table(throughput, parameters, 'ds', 'per', params, rowvals, colvals)
 
 def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percents, params):
