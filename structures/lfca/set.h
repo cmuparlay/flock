@@ -21,28 +21,24 @@ public:
   }
 
   std::optional<V> find(adapter_t* ds, const K key) {
-    init_thread(ds);
     V val = ds->find(_tid, key);
     if(val == (V) ds->getNoValue()) return {};
     else return val;
   } 
 
   std::optional<V> find_(adapter_t* ds, const K key) {
-    init_thread(ds);
     V val = ds->find(_tid, key);
     if(val == (V) ds->getNoValue()) return {};
     else return val;
   } 
 
   V insert(adapter_t* ds, K key, const V val) {
-    init_thread(ds);
     assert(key != 0);
     V r = ds->insertIfAbsent(_tid, key, val); 
     return (r == (V) ds->getNoValue());
   }
 
   V remove(adapter_t* ds, const K key) {
-    init_thread(ds);
     V r = ds->erase(_tid, key);
     return (r != (V) ds->getNoValue());
   }
