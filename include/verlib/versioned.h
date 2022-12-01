@@ -33,11 +33,8 @@ private:
   // the highest 16 bits are used by the ABA "tag"
   static V* add_null_mark(V* ptr) {return (V*) (3ul | (IT) ptr);};
   static V* add_indirect_mark(V* ptr) {return (V*) (2ul | (IT) ptr);};
-  static V* add_unset(V* ptr) {return (V*) (4ul | (IT) ptr);};
-  static V* remove_unset(V* ptr) {return (V*) (~4ul & (IT) ptr);};
   static bool is_empty(IT ptr) {return ptr & 1;}
   static bool is_indirect(IT ptr) {return (ptr >> 1) & 1;}
-  static bool is_unset(IT ptr) {return (ptr >> 2) & 1;}
   static bool is_null(IT ptr) {return TV::value(ptr) == nullptr || is_empty(ptr);}
   static V* strip_mark_and_tag(IT ptr) {return TV::value(ptr & ~7ul);}
   static V* get_ptr(IT ptr) {
@@ -47,10 +44,10 @@ private:
   
 
   // sets the timestamp in a version link if time stamp is TBD
-  // The test for is_unset is an optimization avoiding reading the timestamp
-  // if timestamp has been set and the "unset" mark removed from the pointer.
+  // The test for is_null is an optimization avoiding reading the timestamp
+  // for indirectly stored nullptrs
   static IT set_stamp(IT newv) {
-    if (is_unset(newv)) {
+    if (!is_null(newv)) {
       V* x = strip_mark_and_tag(newv);
       if ((x != nullptr) && x->time_stamp.load() == tbd) {
       	TS ts = global_stamp.get_write_stamp();
@@ -70,18 +67,17 @@ private:
 
   // For an indirect pointer if its stamp is older than done_stamp
   // then it will no longer be accessed and can be spliced out.
-  // The splice needs to be done under a lock since it can race with updates
   std::pair<V*,bool> shortcut_indirect(IT ptr) {
     auto ptr_notag = (plink*) strip_mark_and_tag(ptr);
     if (is_indirect(ptr)) {
       //i_counts[16*parlay::worker_id()]++;
       TS stamp = ptr_notag->time_stamp.load();
-      V* newv = is_empty(ptr) ? nullptr : (V*) ptr_notag->value;
+      V* newv = (V*) ptr_notag->value;
       if (stamp <= done_stamp) {
-      	// there can't be an ABA unless indirect node is reclaimed
+        // there can't be an ABA unless indirect node is reclaimed
         if (TV::cas_with_same_tag(v, ptr, newv, true)) 
-      	  link_pool.retire(ptr_notag);
-	return std::pair{newv, true};
+          link_pool.retire(ptr_notag);
+        return std::pair{newv, true};
       } else return std::pair{newv, false};
     } else return std::pair{(V*) ptr_notag, false};
   }
@@ -139,51 +135,47 @@ public:
     V* newv_marked = newv;
 
     flck::skip_if_done([&] {
-    if (newv_ == nullptr || flck::commit(newv_->time_stamp.load() != tbd)) {
-      newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
-      newv_marked = ((newv_ == nullptr)
-		     ? add_null_mark(newv)
-		     : add_indirect_mark(newv));
-    } else {
-      IT initial_ptr = bad_ptr;
-      if(newv->next_version == initial_ptr)
-	newv->next_version.compare_exchange_strong(initial_ptr,
-						   (IT) oldv_tagged);
-    }
-    // swap in new pointer but marked as "unset" since time stamp is tbd
-    V* newv_unset = add_unset(newv_marked);
-    bool succeeded = TV::cas(v, oldv_tagged, newv_unset);
-    IT x = flck::commit(v.load());
-    
-    if (is_indirect(oldv_tagged)) {
-      if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
-      else if (TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
-	succeeded = TV::cas(v, x, newv_unset);
- 	x = flck::commit(v.load());
+      if (newv_ == nullptr || flck::commit(newv_->time_stamp.load() != tbd)) {
+        newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
+        newv_marked = add_indirect_mark(newv);
+      } else {
+        IT initial_ptr = bad_ptr;
+        if(newv->next_version == initial_ptr)
+          newv->next_version.compare_exchange_strong(initial_ptr, 
+            (IT) oldv_tagged);
       }
-    } 
+      bool succeeded = TV::cas(v, oldv_tagged, newv_marked);
+      IT x = flck::commit(v.load());
+      
+      if (is_indirect(oldv_tagged)) {
+        if (succeeded) link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
+        else if (TV::get_tag(x) == TV::get_tag(oldv_tagged)) { 
+          succeeded = TV::cas(v, x, newv_marked);
+         	x = flck::commit(v.load());
+        }
+      } 
 
-    // now set the stamp from tbd to a real stamp
-    set_stamp(x);
+      // now set the stamp from tbd to a real stamp
+      set_stamp(x);
 
-    // try to shortcut indirection out, and if not, clear unset mark
-    // for time stamp
-    if (!shortcut_indirect(x).second)
-      TV::cas(v, x, remove_unset(TV::value(x)));  // clear the "unset" mark
+      // try to shortcut indirection out, and if not, clear unset mark
+      // for time stamp
+      if (!shortcut_indirect(x).second && newv_ == nullptr)
+        TV::cas(v, x, add_null_mark(TV::value(x)));  // clear the "unset" mark
 
-    // shortcut version list if appropriate, getting rid of redundant
-    // time stamps.  
-    // if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 
-    //   newv->next_version = oldv->next_version.load();
+      // shortcut version list if appropriate, getting rid of redundant
+      // time stamps.  
+      // if (oldv != nullptr && newv->time_stamp == oldv->time_stamp) 
+      //   newv->next_version = oldv->next_version.load();
 
-    // free if allocated link was not used
-    if (!succeeded && is_indirect((IT) newv_marked))
-      link_pool.destruct((plink*) newv);
-    		 });
+      // free if allocated link was not used
+      if (!succeeded && is_indirect((IT) newv_marked))
+        link_pool.destruct((plink*) newv);
+    });
   }
   
   bool cas(V* expv_, V* newv_) {
-    // CAS could be interuupted once by shortcut indirect and once by clearing mark
+    // CAS could be interuupted once by shortcut indirect and once by setting null bit
     for(int ii = 0; ii < 3; ii++) {
       IT oldv_tagged = v.load();
       set_stamp(oldv_tagged);
@@ -197,25 +189,22 @@ public:
 
       if(use_indirect) {
         newv = (V*) link_pool.new_obj((IT) oldv_tagged, (IT) newv);
-        newv_marked = ((newv_ == nullptr)
-           ? add_null_mark(newv)
-           : add_indirect_mark(newv));
+        newv_marked = add_indirect_mark(newv);
       } else newv->next_version = (IT) oldv_tagged;
 
-      // swap in new pointer but marked as "unset" since time stamp is tbd
-      V* newv_unset = add_unset(newv_marked);
+      // swap in new pointer
       IT x = oldv_tagged;
       // use cas_with_same_tag to avoid picking new timestamp
-      bool succeeded = TV::cas_with_same_tag(v, x, newv_unset); 
+      bool succeeded = TV::cas_with_same_tag(v, x, newv_marked); 
       
       if(succeeded) {
-        set_stamp((IT) newv_unset);
+        set_stamp((IT) newv_marked);
         // try to shortcut indirection out, and if not, clear unset mark
         // for time stamp
         if(is_indirect(oldv_tagged))
           link_pool.retire((plink*) strip_mark_and_tag(oldv_tagged));
-        if (use_indirect && !shortcut_indirect((IT) newv_unset).second)
-          TV::cas_with_same_tag(v, (IT) newv_unset, remove_unset(newv_unset)); 
+        if (use_indirect && !shortcut_indirect((IT) newv_marked).second && newv_ == nullptr)
+          TV::cas_with_same_tag(v, (IT) newv_marked, add_null_mark(newv_marked)); 
         return true;
       }
       if(use_indirect) link_pool.destruct((plink*) newv);
