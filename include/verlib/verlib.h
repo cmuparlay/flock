@@ -20,7 +20,7 @@
 #elif FullyIndirect
 #include "versioned_indirect.h"
 #elif Simple
-#include "versioned_simple.h"
+#include "versioned_opt.h"
 #else
 #include "versioned.h"
 #endif

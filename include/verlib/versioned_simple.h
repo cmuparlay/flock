@@ -88,7 +88,7 @@ public:
 
   V* read_snapshot() {
     TS ls = local_stamp;
-    V* head = v.load();
+    V* head = v.read();
     set_stamp(head);
     while (head != nullptr && head->read_stamp() > ls)
       head = (V*) head->get_next();

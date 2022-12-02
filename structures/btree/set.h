@@ -454,11 +454,18 @@ struct Set {
 	  }
 	  return true;
 	} else { // c has degree 1 and not a leaf
-	  // c needs to be copied so it is not recorded a second time
+#ifdef Recorded_Once
+	  // if recorded once then child of c needs to be copied
 	  return c->lck.try_lock([=] {
 	      root->children[0] = copy_node_or_leaf(c->children[0].load());
 	      node_pool.retire(c);
 	      return true;});
+#else
+	  // if not recorded once then can be updated in place
+	  root->children[0] = c->children[0].load();
+	  node_pool.retire(c);
+	  return true;
+#endif
 	}});
   }
 
