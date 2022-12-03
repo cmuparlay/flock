@@ -207,19 +207,21 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 
     // generate 2*n unique numbers in random order
     parlay::sequence<key_type> a;
+    key_type range_gap;
     if (use_sparse) {
       auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
 			 return (key_type) ((parlay::hash64(i) << 1) >> 1);}); // generate 63-bit keys
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
+      range_gap = (max_key/nn)*range_size;
     } else {
       max_key = nn;
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
 					   return i+1;}));
+      range_gap = 2*range_size;
     }
-    key_type range_gap = (max_key/n)*range_size;
-    
+
     parlay::sequence<key_type> b;
     if (use_zipfian) { 
       Zipfian z(nn, zipfian_param);
@@ -396,7 +398,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	      long query_sum = parlay::reduce(query_counts);
 	      std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
 	    }
-	    if (verbose && range_percent > 0) {
+	    if (range_percent > 0) {
 	      long range_sum = parlay::reduce(range_counts);
 	      long num_queries = num_ops * range_percent / 100;
 	      std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
