@@ -352,14 +352,14 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	           long tmp_sum = 0;
 		   for (int k = 0; k < range_size; k++) {
 		     auto val = os.find_(tr, b[j]);
+		     j += 1;
+		     if (j >= (i+1)*mp) j -= mp;
 		     if(val.has_value()) tmp_sum += val.value();
 #ifdef LazyStamp
 		     if (vl::aborted) return 0l;
 #endif
 		   }
 		   return tmp_sum;});
-		 j += range_size;
-		 if (j >= (i+1)*mp) j -= mp;
 		 cnt += range_size;
 		 total += range_size;
 		 continue;
