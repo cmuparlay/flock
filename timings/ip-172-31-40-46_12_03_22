@@ -1,0 +1,1663 @@
+49bf757
+./hash_block_lf,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,1097
+./hash_block_lf,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,974.8
+./hash_block_lf_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,697.3
+ retries = 0, final stamp = 1
+./hash_block_lf_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,699.9
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,837.1
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,810
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,859.2
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,712.7
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,968.9
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,766.1
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,961.9
+./hash_block_lf_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,738.4
+./hash_block_lf_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,752.3
+./hash_block_lf_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,466.3
+./hash_block_lf_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,958.2
+./hash_block_lf_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,730.4
+./hash_block_lf_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,967.5
+./hash_block_lf_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,710.8
+./hash_block_lf_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,932.5
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,740.6
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,918.3
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,767.9
+ retries = 0, final stamp = 1
+...
+./hash_block_lf,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,1314
+./hash_block_lf,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,1288
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,803.2
+ retries = 370747, final stamp = 325513
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,698.6
+ retries = 28839861, final stamp = 3812665
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,928.9
+ retries = 434493, final stamp = 377083
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,749.7
+ retries = 32476112, final stamp = 4058393
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,1041
+ retries = 486704, final stamp = 417545
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,774.2
+ retries = 33874238, final stamp = 4040621
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,1061
+ retries = 498199, final stamp = 426488
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,807.9
+ retries = 36185191, final stamp = 4320570
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,392.4
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,387.3
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,720.4
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,538.2
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,1076
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,1001
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,507.5
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,421.8
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,1029
+ retries = 487017, final stamp = 417354
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,792.9
+ retries = 34767943, final stamp = 4236529
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,934.5
+ retries = 438613, final stamp = 379144
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,731.1
+ retries = 31498973, final stamp = 4004792
+...
+./hash_block_lf,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1717
+./hash_block_lf,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,1857
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1012
+ retries = 363714, final stamp = 300187
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,911.9
+ retries = 29456413, final stamp = 2984187
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1186
+ retries = 431552, final stamp = 352680
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,996.4
+ retries = 32489686, final stamp = 3211752
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1383
+ retries = 506739, final stamp = 407626
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,1053
+ retries = 34926534, final stamp = 3479482
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1426
+ retries = 522711, final stamp = 418958
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,1106
+ retries = 36898577, final stamp = 3618511
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,759.9
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,764.6
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1122
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,927.5
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1374
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,1467
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,883.6
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,778.5
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1362
+ retries = 500728, final stamp = 403063
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,1072
+ retries = 35412997, final stamp = 3447385
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,1116
+ retries = 405914, final stamp = 331268
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,964.8
+ retries = 31851587, final stamp = 3246338
+...
+./hash_block_lf,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,42.35
+average range size: 48.5
+./hash_block_lf,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,52.3
+average range size: 41.24
+./hash_block_lf_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,18.26
+average range size: 48.48
+ retries = 111211, final stamp = 94526
+./hash_block_lf_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,21.47
+average range size: 40.77
+ retries = 367237, final stamp = 265156
+./hash_block_lf_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,19.98
+average range size: 48.5
+ retries = 122195, final stamp = 103467
+./hash_block_lf_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,22.36
+average range size: 40.72
+ retries = 387741, final stamp = 278204
+./hash_block_lf_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,23.73
+average range size: 48.52
+ retries = 145046, final stamp = 122369
+./hash_block_lf_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,23.28
+average range size: 40.72
+ retries = 478001, final stamp = 326676
+./hash_block_lf_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,26.19
+average range size: 48.52
+ retries = 160033, final stamp = 134628
+./hash_block_lf_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,27.68
+average range size: 40.6
+ retries = 556396, final stamp = 370433
+./hash_block_lf_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,22.9
+average range size: 48.51
+./hash_block_lf_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,23.62
+average range size: 40.62
+./hash_block_lf_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,27.64
+average range size: 48.5
+./hash_block_lf_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,29.41
+average range size: 40.54
+./hash_block_lf_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,33.6
+average range size: 48.49
+./hash_block_lf_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,41.8
+average range size: 40.91
+./hash_block_lf_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,26.9
+average range size: 48.52
+./hash_block_lf_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,28.5
+average range size: 40.56
+./hash_block_lf_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,25.03
+average range size: 48.51
+ retries = 156115, final stamp = 131151
+./hash_block_lf_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,26.98
+average range size: 40.57
+ retries = 545172, final stamp = 364178
+./hash_block_lf_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,23.1
+average range size: 48.53
+ retries = 140834, final stamp = 118957
+./hash_block_lf_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,22.72
+average range size: 40.73
+ retries = 466747, final stamp = 322264
+...
+./hash_block_lf,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,491.2
+./hash_block_lf,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,258.1
+./hash_block_lf_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,284
+ retries = 0, final stamp = 1
+./hash_block_lf_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,206.8
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,356.5
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,235.3
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,393.6
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,221.5
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,394.9
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,220.1
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,402.5
+./hash_block_lf_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,219.5
+./hash_block_lf_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,178.3
+./hash_block_lf_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,119.4
+./hash_block_lf_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,415.9
+./hash_block_lf_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,220.6
+./hash_block_lf_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,423.7
+./hash_block_lf_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,231.7
+./hash_block_lf_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,368.5
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,245
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,367.8
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,243.8
+ retries = 0, final stamp = 1
+...
+./hash_block_lf,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,376.6
+./hash_block_lf,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,548.8
+./hash_block_lf_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,227.4
+ retries = 0, final stamp = 1
+./hash_block_lf_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,342.5
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,305.9
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,457.3
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,352
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,510.8
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,351.9
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,509.1
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,344.6
+./hash_block_lf_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,501.7
+./hash_block_lf_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,328.3
+./hash_block_lf_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,393.7
+./hash_block_lf_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,347
+./hash_block_lf_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,502.8
+./hash_block_lf_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,346.3
+./hash_block_lf_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,503
+./hash_block_lf_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,343.3
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,495.9
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,342.6
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,499
+ retries = 0, final stamp = 1
+...
+./hash_block_lf,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,447.8
+./hash_block_lf,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,665.3
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,247.1
+ retries = 11860, final stamp = 11733
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,362.1
+ retries = 6756269, final stamp = 1735868
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,327.8
+ retries = 15401, final stamp = 15265
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,475.9
+ retries = 9769698, final stamp = 2293921
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,379.7
+ retries = 16911, final stamp = 16737
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,516.7
+ retries = 10830318, final stamp = 2462758
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,381.2
+ retries = 16838, final stamp = 16657
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,523.4
+ retries = 10989867, final stamp = 2474868
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,242.5
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,288.9
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,335.5
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,418.1
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,371
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,557.4
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,287.4
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,351.6
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,372.5
+ retries = 16665, final stamp = 16473
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,513.2
+ retries = 10631793, final stamp = 2433160
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,352.9
+ retries = 16071, final stamp = 15861
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,483.6
+ retries = 9909976, final stamp = 2299656
+...
+./hash_block_lf,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,522.6
+./hash_block_lf,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,785.9
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,290.1
+ retries = 10273, final stamp = 10102
+./hash_block_lf_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,407.2
+ retries = 7095080, final stamp = 1045601
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,385.1
+ retries = 12180, final stamp = 11959
+./hash_block_lf_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,543.7
+ retries = 10029171, final stamp = 1414399
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,445.8
+ retries = 12786, final stamp = 12581
+./hash_block_lf_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,587.4
+ retries = 10840929, final stamp = 1532422
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,450.2
+ retries = 12973, final stamp = 12724
+./hash_block_lf_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,599
+ retries = 11103844, final stamp = 1540757
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,363.3
+./hash_block_lf_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,477.7
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,427.7
+./hash_block_lf_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,580
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,431.1
+./hash_block_lf_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,651.6
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,372.4
+./hash_block_lf_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,512.5
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,434.4
+ retries = 12810, final stamp = 12552
+./hash_block_lf_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,584.8
+ retries = 10677628, final stamp = 1486152
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,390.9
+ retries = 12204, final stamp = 11984
+./hash_block_lf_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,536.8
+ retries = 9785512, final stamp = 1371352
+...
+./hash_block_lf,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,9.259
+average range size: 48.5
+./hash_block_lf,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,12.4
+average range size: 48.37
+./hash_block_lf_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,4.443
+average range size: 48.51
+ retries = 2846, final stamp = 2767
+./hash_block_lf_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,5.936
+average range size: 48.52
+ retries = 53830, final stamp = 49404
+./hash_block_lf_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.262
+average range size: 48.51
+ retries = 3366, final stamp = 3279
+./hash_block_lf_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.074
+average range size: 48.5
+ retries = 64161, final stamp = 58892
+./hash_block_lf_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.182
+average range size: 48.51
+ retries = 4257, final stamp = 4151
+./hash_block_lf_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,9.663
+average range size: 48.43
+ retries = 90402, final stamp = 79963
+./hash_block_lf_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.2
+average range size: 48.51
+ retries = 4264, final stamp = 4148
+./hash_block_lf_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,9.77
+average range size: 48.43
+ retries = 91343, final stamp = 80577
+./hash_block_lf_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.661
+average range size: 48.51
+./hash_block_lf_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,10.3
+average range size: 48.41
+./hash_block_lf_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.662
+average range size: 48.5
+./hash_block_lf_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,10.37
+average range size: 48.41
+./hash_block_lf_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.701
+average range size: 48.5
+./hash_block_lf_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,10.48
+average range size: 48.41
+./hash_block_lf_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.677
+average range size: 48.51
+./hash_block_lf_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,10.44
+average range size: 48.41
+./hash_block_lf_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.146
+average range size: 48.51
+ retries = 4367, final stamp = 4270
+./hash_block_lf_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,9.728
+average range size: 48.43
+ retries = 90778, final stamp = 80635
+./hash_block_lf_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,7.078
+average range size: 48.51
+ retries = 4222, final stamp = 4126
+./hash_block_lf_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,9.596
+average range size: 48.43
+ retries = 88558, final stamp = 79405
+...
+./hash_block_lf,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,243.4
+./hash_block_lf,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,290.3
+./hash_block_lf_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,131.2
+ retries = 0, final stamp = 1
+./hash_block_lf_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,162.6
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,178
+ retries = 0, final stamp = 1
+./hash_block_lf_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,212.5
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,209.3
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,233
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,209.9
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,228.5
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,206.8
+./hash_block_lf_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,233.2
+./hash_block_lf_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,128.7
+./hash_block_lf_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,118.3
+./hash_block_lf_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,210.4
+./hash_block_lf_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,227.1
+./hash_block_lf_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,208.2
+./hash_block_lf_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,225.1
+./hash_block_lf_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,190.7
+ retries = 0, final stamp = 1
+./hash_block_lf_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,231.6
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,197.5
+ retries = 0, final stamp = 1
+./hash_block_lf_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,232.3
+ retries = 0, final stamp = 1
+...
+./arttree,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,398.2
+./arttree,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,465.4
+./arttree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,235.8
+ retries = 0, final stamp = 1
+./arttree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,294.6
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,316.5
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,371
+ retries = 0, final stamp = 1
+./arttree_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,362.2
+ retries = 0, final stamp = 1
+./arttree_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,419.2
+ retries = 0, final stamp = 1
+./arttree_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,381.2
+ retries = 0, final stamp = 1
+./arttree_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,429.3
+ retries = 0, final stamp = 1
+./arttree_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,384.4
+./arttree_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,433
+./arttree_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,367.4
+./arttree_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,325.6
+./arttree_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,376.7
+./arttree_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,423.5
+./arttree_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,385.3
+./arttree_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,425
+./arttree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,424.7
+ retries = 0, final stamp = 1
+./arttree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,473.1
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,416.2
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,474.9
+ retries = 0, final stamp = 1
+...
+./arttree,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,476.8
+./arttree,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,578.7
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,246.6
+ retries = 83515, final stamp = 78814
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,307.6
+ retries = 9341287, final stamp = 1896027
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,340.6
+ retries = 116767, final stamp = 109455
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,382.9
+ retries = 13464667, final stamp = 2568712
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,378.9
+ retries = 128625, final stamp = 120348
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,402.4
+ retries = 14623842, final stamp = 2700660
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,396.7
+ retries = 136129, final stamp = 127101
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,421.2
+ retries = 15729864, final stamp = 2801386
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,248.4
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,268.6
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,363.5
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,356.1
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,399.7
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,474.5
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,316.9
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,316.4
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,428.2
+ retries = 144765, final stamp = 134868
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,455.8
+ retries = 17066487, final stamp = 2876745
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,407.6
+ retries = 137800, final stamp = 128566
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,427.9
+ retries = 15826784, final stamp = 2708548
+...
+./arttree,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,568.8
+./arttree,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,715.3
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,269.3
+ retries = 70594, final stamp = 63287
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,334.9
+ retries = 8878293, final stamp = 1086383
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,391.7
+ retries = 102607, final stamp = 91479
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,442.8
+ retries = 12499535, final stamp = 1563303
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,425.6
+ retries = 111008, final stamp = 98829
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,473.5
+ retries = 13664386, final stamp = 1713214
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,447.1
+ retries = 117876, final stamp = 104731
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,487.4
+ retries = 14444725, final stamp = 1795731
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,370.6
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,425.1
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,441.2
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,493.7
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,450.8
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,573.2
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,414.4
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,470.7
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,487.1
+ retries = 126982, final stamp = 112553
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,531.1
+ retries = 15591267, final stamp = 1825253
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,469.4
+ retries = 121980, final stamp = 108180
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,502.2
+ retries = 14573443, final stamp = 1729342
+...
+./arttree,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,19.16
+average range size: 48.49
+./arttree,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,22.13
+average range size: 39.74
+./arttree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,10.33
+average range size: 48.49
+ retries = 66100, final stamp = 49708
+./arttree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,12.01
+average range size: 40.92
+ retries = 335374, final stamp = 124409
+./arttree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,12.54
+average range size: 48.49
+ retries = 81766, final stamp = 61516
+./arttree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,14.33
+average range size: 40.41
+ retries = 409392, final stamp = 148905
+./arttree_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,14.4
+average range size: 48.48
+ retries = 92687, final stamp = 69635
+./arttree_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,17.05
+average range size: 40.1
+ retries = 493975, final stamp = 176133
+./arttree_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,15.8
+average range size: 48.49
+ retries = 102047, final stamp = 76721
+./arttree_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,18.13
+average range size: 40.01
+ retries = 533901, final stamp = 185578
+./arttree_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,14.3
+average range size: 48.47
+./arttree_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,15.94
+average range size: 40.2
+./arttree_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,15.85
+average range size: 48.48
+./arttree_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,18.31
+average range size: 39.98
+./arttree_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,16.65
+average range size: 48.47
+./arttree_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,19.1
+average range size: 39.93
+./arttree_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,15.93
+average range size: 48.47
+./arttree_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,18.41
+average range size: 40
+./arttree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,15.79
+average range size: 48.48
+ retries = 101726, final stamp = 76249
+./arttree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,18.31
+average range size: 40.02
+ retries = 536878, final stamp = 187512
+./arttree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,14.41
+average range size: 48.46
+ retries = 93071, final stamp = 69922
+./arttree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,17.21
+average range size: 40.15
+ retries = 500102, final stamp = 177872
+...
+./arttree,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,237.6
+./arttree,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,214.8
+./arttree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,146
+ retries = 0, final stamp = 1
+./arttree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,134.4
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,181.8
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,167.9
+ retries = 0, final stamp = 1
+./arttree_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,205.2
+ retries = 0, final stamp = 1
+./arttree_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,180
+ retries = 0, final stamp = 1
+./arttree_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,211
+ retries = 0, final stamp = 1
+./arttree_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,178.5
+ retries = 0, final stamp = 1
+./arttree_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,211.8
+./arttree_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,180.9
+./arttree_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,129
+./arttree_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,105.1
+./arttree_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,209
+./arttree_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,180.6
+./arttree_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,209
+./arttree_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,177.6
+./arttree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,255.2
+ retries = 0, final stamp = 1
+./arttree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,222.3
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,247.6
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,216.6
+ retries = 0, final stamp = 1
+...
+./arttree,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,144.8
+./arttree,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,226.5
+./arttree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,76.71
+ retries = 0, final stamp = 1
+./arttree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,116.1
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,116.5
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,184.1
+ retries = 0, final stamp = 1
+./arttree_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,138.7
+ retries = 0, final stamp = 1
+./arttree_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,208.8
+ retries = 0, final stamp = 1
+./arttree_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,139.3
+ retries = 0, final stamp = 1
+./arttree_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,215
+ retries = 0, final stamp = 1
+./arttree_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,139.5
+./arttree_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,213.4
+./arttree_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,137.6
+./arttree_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,204.9
+./arttree_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,139
+./arttree_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,213.8
+./arttree_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,139.3
+./arttree_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,213.7
+./arttree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,141.2
+ retries = 0, final stamp = 1
+./arttree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,214.1
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,143.6
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,217.3
+ retries = 0, final stamp = 1
+...
+./arttree,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,165.7
+./arttree,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,259.7
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,78.92
+ retries = 2625, final stamp = 2563
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,117.7
+ retries = 1681885, final stamp = 542411
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,122.8
+ retries = 3993, final stamp = 3929
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,190.6
+ retries = 3011091, final stamp = 908311
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,142.7
+ retries = 4554, final stamp = 4492
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,205.4
+ retries = 3309196, final stamp = 981105
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,142.6
+ retries = 4502, final stamp = 4441
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,211.2
+ retries = 3406344, final stamp = 1015576
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,123.8
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,166.8
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,140.9
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,208.3
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,142.2
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,221.7
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,139.2
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,190.8
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,149.1
+ retries = 4780, final stamp = 4730
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,217.1
+ retries = 3539234, final stamp = 1032653
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,149.6
+ retries = 4701, final stamp = 4639
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,212.3
+ retries = 3464778, final stamp = 1008007
+...
+./arttree,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,183.9
+./arttree,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,288.8
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,82.19
+ retries = 2044, final stamp = 1983
+./arttree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,118.1
+ retries = 1802920, final stamp = 267449
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,129.6
+ retries = 3209, final stamp = 3125
+./arttree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,195.2
+ retries = 3086890, final stamp = 459086
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,148.6
+ retries = 3480, final stamp = 3407
+./arttree_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,208
+ retries = 3262094, final stamp = 489987
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,148
+ retries = 3494, final stamp = 3428
+./arttree_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,213
+ retries = 3349893, final stamp = 504029
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,146
+./arttree_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,213.9
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,146.9
+./arttree_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,227.7
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,147.6
+./arttree_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,232.4
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,146.1
+./arttree_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,223.7
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,159.1
+ retries = 3721, final stamp = 3623
+./arttree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,220.7
+ retries = 3497663, final stamp = 515635
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,159.1
+ retries = 3736, final stamp = 3662
+./arttree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,219.3
+ retries = 3467858, final stamp = 513492
+...
+./arttree,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,6.258
+average range size: 48.5
+./arttree,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,8.663
+average range size: 48.92
+./arttree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,2.886
+average range size: 48.5
+ retries = 1716, final stamp = 1542
+./arttree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,3.81
+average range size: 49.04
+ retries = 48364, final stamp = 29299
+./arttree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,4.268
+average range size: 48.5
+ retries = 2464, final stamp = 2284
+./arttree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,5.752
+average range size: 48.98
+ retries = 74566, final stamp = 43487
+./arttree_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.629
+average range size: 48.5
+ retries = 3043, final stamp = 2856
+./arttree_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.617
+average range size: 48.94
+ retries = 102425, final stamp = 57815
+./arttree_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.719
+average range size: 48.5
+ retries = 3080, final stamp = 2889
+./arttree_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.689
+average range size: 48.94
+ retries = 100998, final stamp = 57737
+./arttree_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.708
+average range size: 48.5
+./arttree_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.798
+average range size: 48.93
+./arttree_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.604
+average range size: 48.5
+./arttree_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.792
+average range size: 48.93
+./arttree_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.801
+average range size: 48.5
+./arttree_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.684
+average range size: 48.94
+./arttree_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.711
+average range size: 48.5
+./arttree_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.966
+average range size: 48.93
+./arttree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.593
+average range size: 48.5
+ retries = 3019, final stamp = 2830
+./arttree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.688
+average range size: 48.94
+ retries = 102536, final stamp = 58526
+./arttree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,5.597
+average range size: 48.5
+ retries = 3010, final stamp = 2828
+./arttree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,7.667
+average range size: 48.94
+ retries = 100896, final stamp = 57443
+...
+./arttree,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,118.3
+./arttree,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,154.8
+./arttree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,59.26
+ retries = 0, final stamp = 1
+./arttree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,76.9
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,89.04
+ retries = 0, final stamp = 1
+./arttree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,113.7
+ retries = 0, final stamp = 1
+./arttree_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,103
+ retries = 0, final stamp = 1
+./arttree_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,128.4
+ retries = 0, final stamp = 1
+./arttree_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,104.2
+ retries = 0, final stamp = 1
+./arttree_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,130.7
+ retries = 0, final stamp = 1
+./arttree_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,103.9
+./arttree_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,128.9
+./arttree_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,81.38
+./arttree_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,85.35
+./arttree_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,104.4
+./arttree_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,128.4
+./arttree_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,104.6
+./arttree_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,129.6
+./arttree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,112
+ retries = 0, final stamp = 1
+./arttree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,139.4
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,112.4
+ retries = 0, final stamp = 1
+./arttree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,137.8
+ retries = 0, final stamp = 1
+...
+./btree,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,263.6
+./btree,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,302.1
+./btree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,183.6
+ retries = 0, final stamp = 1
+./btree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,212.6
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,237.4
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,273.6
+ retries = 0, final stamp = 1
+./btree_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,238.5
+ retries = 0, final stamp = 1
+./btree_simple_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,278.8
+ retries = 0, final stamp = 1
+./btree_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,245.3
+ retries = 0, final stamp = 1
+./btree_ver_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,285.1
+ retries = 0, final stamp = 1
+./btree_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,253.7
+./btree_ver_rs,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,294.4
+./btree_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,244.4
+./btree_ver_ws,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,279.3
+./btree_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,248.4
+./btree_ver_ns,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,293.9
+./btree_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,244.3
+./btree_ver_ss,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,283.5
+./btree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,252.7
+ retries = 0, final stamp = 1
+./btree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,297.6
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,249.4
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,289.4
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,260.1
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,303.7
+ retries = 0, final stamp = 1
+...
+./btree,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,276.9
+./btree,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,329
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,191.4
+ retries = 308549, final stamp = 247899
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,215.3
+ retries = 6063541, final stamp = 1359988
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,247.2
+ retries = 409920, final stamp = 324606
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,276.3
+ retries = 8304213, final stamp = 1779293
+./btree_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,247.1
+ retries = 408870, final stamp = 323684
+./btree_simple_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,275.7
+ retries = 8313704, final stamp = 1782085
+./btree_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,254.9
+ retries = 423117, final stamp = 333850
+./btree_ver_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,282
+ retries = 8588073, final stamp = 1812178
+./btree_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,184
+./btree_ver_rs,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,205.9
+./btree_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,241
+./btree_ver_ws,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,261.4
+./btree_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,257.3
+./btree_ver_ns,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,304.8
+./btree_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,220.7
+./btree_ver_ss,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,238.8
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,260.8
+ retries = 431347, final stamp = 339771
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,289.4
+ retries = 8878020, final stamp = 1846552
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,256
+ retries = 424615, final stamp = 334416
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,285.2
+ retries = 8752405, final stamp = 1830047
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0,264.8
+ retries = 438678, final stamp = 344415
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=100000,p=63,z=0.99,294.7
+ retries = 9184918, final stamp = 1921643
+...
+./btree,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,297.5
+./btree,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,378.1
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,198.4
+ retries = 282432, final stamp = 184478
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,225.9
+ retries = 5754137, final stamp = 724519
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,270
+ retries = 381972, final stamp = 247355
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,295.6
+ retries = 7728092, final stamp = 985160
+./btree_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,264.6
+ retries = 377413, final stamp = 244731
+./btree_simple_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,295.1
+ retries = 7726473, final stamp = 971789
+./btree_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,273.4
+ retries = 388448, final stamp = 250696
+./btree_ver_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,303.2
+ retries = 8075867, final stamp = 1021081
+./btree_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,254.3
+./btree_ver_rs,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,300
+./btree_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,275.6
+./btree_ver_ws,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,341.1
+./btree_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,280.2
+./btree_ver_ns,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,357
+./btree_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,272.6
+./btree_ver_ss,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,324.9
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,280.2
+ retries = 398155, final stamp = 256165
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,307.9
+ retries = 8172617, final stamp = 1020414
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,276.5
+ retries = 389347, final stamp = 251012
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,302.9
+ retries = 8060208, final stamp = 998365
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0,283.5
+ retries = 404284, final stamp = 259618
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=100000,p=63,z=0.99,312.3
+ retries = 8343330, final stamp = 1052937
+...
+./btree,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,97.47
+average range size: 48.48
+./btree,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,128.4
+average range size: 43.63
+./btree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,67.81
+average range size: 48.48
+ retries = 494941, final stamp = 343947
+./btree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,88.2
+average range size: 42.27
+ retries = 3170946, final stamp = 958535
+./btree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,87.38
+average range size: 48.47
+ retries = 651547, final stamp = 443527
+./btree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,109.3
+average range size: 43.09
+ retries = 4302940, final stamp = 1234332
+./btree_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,87.04
+average range size: 48.47
+ retries = 653616, final stamp = 444064
+./btree_simple_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,109.8
+average range size: 43.06
+ retries = 4270221, final stamp = 1237598
+./btree_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,89.03
+average range size: 48.46
+ retries = 671116, final stamp = 454578
+./btree_ver_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,110.5
+average range size: 43.16
+ retries = 4405494, final stamp = 1245802
+./btree_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,47.37
+average range size: 48.48
+./btree_ver_rs,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,52.91
+average range size: 40.6
+./btree_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,85.35
+average range size: 48.46
+./btree_ver_ws,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,100.3
+average range size: 42.72
+./btree_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,91.44
+average range size: 48.47
+./btree_ver_ns,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,119.7
+average range size: 43.32
+./btree_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,70.69
+average range size: 48.48
+./btree_ver_ss,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,82.6
+average range size: 42.05
+./btree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,90.24
+average range size: 48.46
+ retries = 680409, final stamp = 457635
+./btree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,113.5
+average range size: 43.21
+ retries = 4536252, final stamp = 1257494
+./btree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,89.49
+average range size: 48.44
+ retries = 673046, final stamp = 453134
+./btree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,111.3
+average range size: 43.14
+ retries = 4489577, final stamp = 1239995
+./btree_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0,91.68
+average range size: 48.44
+ retries = 687397, final stamp = 463417
+./btree_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=100000,p=63,z=0.99,114.6
+average range size: 43.24
+ retries = 4583761, final stamp = 1291562
+...
+./btree,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,145.6
+./btree,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,135.5
+./btree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,100.5
+ retries = 0, final stamp = 1
+./btree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,99.02
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,130.5
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,124.6
+ retries = 0, final stamp = 1
+./btree_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,130.6
+ retries = 0, final stamp = 1
+./btree_simple_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,124.6
+ retries = 0, final stamp = 1
+./btree_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,132.9
+ retries = 0, final stamp = 1
+./btree_ver_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,124.5
+ retries = 0, final stamp = 1
+./btree_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,134.2
+./btree_ver_rs,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,126.1
+./btree_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,97.92
+./btree_ver_ws,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,86.94
+./btree_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,134.4
+./btree_ver_ns,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,125.1
+./btree_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,133.8
+./btree_ver_ss,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,124.9
+./btree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,152.7
+ retries = 0, final stamp = 1
+./btree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,161.9
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,151.8
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,158.7
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0,147.9
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=100000,p=63,z=0.99,133.3
+ retries = 0, final stamp = 1
+...
+./btree,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,114.2
+./btree,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,157.8
+./btree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,64.63
+ retries = 0, final stamp = 1
+./btree_indirect_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,89.62
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,106
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,144.5
+ retries = 0, final stamp = 1
+./btree_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,108
+ retries = 0, final stamp = 1
+./btree_simple_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,146
+ retries = 0, final stamp = 1
+./btree_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110.2
+ retries = 0, final stamp = 1
+./btree_ver_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,149
+ retries = 0, final stamp = 1
+./btree_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110.8
+./btree_ver_rs,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,152.2
+./btree_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110.4
+./btree_ver_ws,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,149.2
+./btree_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110.5
+./btree_ver_ns,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,150.7
+./btree_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110
+./btree_ver_ss,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,149.5
+./btree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,110.6
+ retries = 0, final stamp = 1
+./btree_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,151.6
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,107.4
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,146
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,112.6
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,156
+ retries = 0, final stamp = 1
+...
+./btree,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,118
+./btree,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,164.2
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,65.72
+ retries = 11898, final stamp = 11581
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,90.7
+ retries = 1253250, final stamp = 415756
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,109.5
+ retries = 18846, final stamp = 18348
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,145.7
+ retries = 2156191, final stamp = 672145
+./btree_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,108.2
+ retries = 18644, final stamp = 18159
+./btree_simple_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,145
+ retries = 2164334, final stamp = 674418
+./btree_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,111.8
+ retries = 18985, final stamp = 18503
+./btree_ver_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,148.3
+ retries = 2223154, final stamp = 690496
+./btree_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,99.41
+./btree_ver_rs,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,127.8
+./btree_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,111.5
+./btree_ver_ws,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,151.8
+./btree_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,113.1
+./btree_ver_ns,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,154.7
+./btree_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,109.2
+./btree_ver_ss,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,142.9
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,112.4
+ retries = 19367, final stamp = 18870
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,151.7
+ retries = 2257931, final stamp = 693070
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,109.3
+ retries = 18624, final stamp = 18179
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,148.2
+ retries = 2196941, final stamp = 677755
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0,114.1
+ retries = 19378, final stamp = 18919
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=10000000,p=63,z=0.99,153.6
+ retries = 2305137, final stamp = 708424
+...
+./btree,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,122.1
+./btree,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,173.5
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,68.75
+ retries = 9727, final stamp = 9175
+./btree_indirect_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,90.85
+ retries = 1357512, final stamp = 205777
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,113.4
+ retries = 15770, final stamp = 14854
+./btree_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,146
+ retries = 2260091, final stamp = 337822
+./btree_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,111.7
+ retries = 15549, final stamp = 14621
+./btree_simple_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,145.5
+ retries = 2253653, final stamp = 338486
+./btree_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,115.3
+ retries = 15916, final stamp = 14999
+./btree_ver_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,149.5
+ retries = 2336652, final stamp = 350638
+./btree_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,116.3
+./btree_ver_rs,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,162.7
+./btree_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,116.2
+./btree_ver_ws,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,162.6
+./btree_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,116.7
+./btree_ver_ns,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,164.5
+./btree_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,115.9
+./btree_ver_ss,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,161.3
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,115.4
+ retries = 16031, final stamp = 15124
+./btree_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,150.4
+ retries = 2333699, final stamp = 344120
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,113.6
+ retries = 15781, final stamp = 14810
+./btree_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,148.8
+ retries = 2303681, final stamp = 339522
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0,117.7
+ retries = 16199, final stamp = 15307
+./btree_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=10000000,p=63,z=0.99,154.1
+ retries = 2387305, final stamp = 352169
+...
+./btree,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,41.22
+average range size: 48.5
+./btree,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,57.85
+average range size: 48.24
+./btree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,23.29
+average range size: 48.5
+ retries = 15528, final stamp = 14931
+./btree_indirect_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,32.42
+average range size: 48.55
+ retries = 470382, final stamp = 252395
+./btree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,35.96
+average range size: 48.5
+ retries = 23551, final stamp = 22619
+./btree_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,51.14
+average range size: 48.32
+ retries = 794135, final stamp = 396958
+./btree_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,35.83
+average range size: 48.5
+ retries = 23550, final stamp = 22629
+./btree_simple_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,50.74
+average range size: 48.32
+ retries = 787430, final stamp = 393615
+./btree_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,37.17
+average range size: 48.5
+ retries = 24190, final stamp = 23251
+./btree_ver_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,52.4
+average range size: 48.3
+ retries = 814461, final stamp = 410504
+./btree_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,27.4
+average range size: 48.5
+./btree_ver_rs,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,33.92
+average range size: 48.53
+./btree_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,36.78
+average range size: 48.5
+./btree_ver_ws,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,52.35
+average range size: 48.3
+./btree_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,37.11
+average range size: 48.5
+./btree_ver_ns,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,53.08
+average range size: 48.3
+./btree_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,34.86
+average range size: 48.5
+./btree_ver_ss,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,46.66
+average range size: 48.37
+./btree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,37.29
+average range size: 48.5
+ retries = 24369, final stamp = 23344
+./btree_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,52.99
+average range size: 48.3
+ retries = 826545, final stamp = 408396
+./btree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,36.23
+average range size: 48.5
+ retries = 23552, final stamp = 22656
+./btree_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,51.58
+average range size: 48.31
+ retries = 798847, final stamp = 399302
+./btree_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0,37.66
+average range size: 48.5
+ retries = 24756, final stamp = 23722
+./btree_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=10000000,p=63,z=0.99,53.39
+average range size: 48.29
+ retries = 826229, final stamp = 414809
+...
+./btree,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,86.36
+./btree,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,100.5
+./btree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,47.62
+ retries = 0, final stamp = 1
+./btree_indirect_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,57.54
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,77.78
+ retries = 0, final stamp = 1
+./btree_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,90.45
+ retries = 0, final stamp = 1
+./btree_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,78.13
+ retries = 0, final stamp = 1
+./btree_simple_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,91.98
+ retries = 0, final stamp = 1
+./btree_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,79.68
+ retries = 0, final stamp = 1
+./btree_ver_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,92.17
+ retries = 0, final stamp = 1
+./btree_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,79.49
+./btree_ver_rs,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,91.12
+./btree_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,66.5
+./btree_ver_ws,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,70.57
+./btree_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,79.21
+./btree_ver_ns,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,92.31
+./btree_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,79.76
+./btree_ver_ss,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,91.33
+./btree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,84.18
+ retries = 0, final stamp = 1
+./btree_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,101.6
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,85.03
+ retries = 0, final stamp = 1
+./btree_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,104.5
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0,81.67
+ retries = 0, final stamp = 1
+./btree_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=10000000,p=63,z=0.99,96.17
+ retries = 0, final stamp = 1
+...
+./list,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,142.9
+./list,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,138.9
+./list_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,94.54
+ retries = 0, final stamp = 1
+./list_indirect_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,91.35
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,100.4
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,97.68
+ retries = 0, final stamp = 1
+./list_simple_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,101.6
+ retries = 0, final stamp = 1
+./list_simple_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,99.59
+ retries = 0, final stamp = 1
+./list_ver_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,97.16
+ retries = 0, final stamp = 1
+./list_ver_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,95.03
+ retries = 0, final stamp = 1
+./list_ver_rs,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,97.2
+./list_ver_rs,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,95.26
+./list_ver_ws,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,69.6
+./list_ver_ws,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,66.98
+./list_ver_ns,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,97.37
+./list_ver_ns,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,95.26
+./list_ver_ss,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,97.92
+./list_ver_ss,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,95.76
+./list_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,102.4
+ retries = 0, final stamp = 1
+./list_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,99.1
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,92.49
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,89.67
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,120.9
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,118.8
+ retries = 0, final stamp = 1
+...
+./list,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,170.8
+./list,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,164.7
+./list_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,83.45
+ retries = 19492475, final stamp = 1524462
+./list_indirect_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,79.89
+ retries = 18941325, final stamp = 1506449
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,85.98
+ retries = 20020319, final stamp = 1626894
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,83.09
+ retries = 19382861, final stamp = 1633723
+./list_simple_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,82.84
+ retries = 19297629, final stamp = 1567245
+./list_simple_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,80.06
+ retries = 18743472, final stamp = 1588061
+./list_ver_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,90.55
+ retries = 20883228, final stamp = 1726030
+./list_ver_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,87.5
+ retries = 20289753, final stamp = 1761354
+./list_ver_rs,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,88.53
+./list_ver_rs,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,87.05
+./list_ver_ws,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,86.2
+./list_ver_ws,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,83.36
+./list_ver_ns,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,126.7
+./list_ver_ns,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,122.9
+./list_ver_ss,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,88.44
+./list_ver_ss,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,85.68
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,96.66
+ retries = 22761833, final stamp = 1886361
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,92.93
+ retries = 21969987, final stamp = 1907884
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,89
+ retries = 21118398, final stamp = 1719265
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,86.08
+ retries = 20600404, final stamp = 1766949
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0,109.9
+ retries = 25031221, final stamp = 2144821
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=100,p=63,z=0.99,107.2
+ retries = 24771556, final stamp = 2087280
+...
+./list,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,220.2
+./list,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,210.7
+./list_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,96.73
+ retries = 9582140, final stamp = 873522
+./list_indirect_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,92.7
+ retries = 9182893, final stamp = 860800
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,109.6
+ retries = 10944133, final stamp = 1003305
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,105.8
+ retries = 10489135, final stamp = 1007592
+./list_simple_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,107.5
+ retries = 10724952, final stamp = 993769
+./list_simple_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,104.6
+ retries = 10360684, final stamp = 1007539
+./list_ver_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,115.7
+ retries = 11489973, final stamp = 1100706
+./list_ver_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,112.6
+ retries = 11096083, final stamp = 1094455
+./list_ver_rs,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,133.8
+./list_ver_rs,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,129.5
+./list_ver_ws,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,121.8
+./list_ver_ws,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,117.4
+./list_ver_ns,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,174.5
+./list_ver_ns,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,166.8
+./list_ver_ss,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,132.7
+./list_ver_ss,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,129.1
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,123.9
+ retries = 12327459, final stamp = 1196630
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,120.1
+ retries = 11886565, final stamp = 1195944
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,113.5
+ retries = 11360927, final stamp = 1092426
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,110.3
+ retries = 10979962, final stamp = 1091450
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0,138.9
+ retries = 13728070, final stamp = 1353403
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=100,p=63,z=0.99,133.1
+ retries = 13142020, final stamp = 1309543
+...
+./list,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,100.6
+average range size: 35.48
+./list_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,43.46
+average range size: 35.44
+ retries = 41389833, final stamp = 2366307
+./list_indirect_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,41.4
+average range size: 37.46
+ retries = 41416980, final stamp = 2186897
+./list_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,44.74
+average range size: 35.43
+ retries = 42879638, final stamp = 2857720
+./list_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,42.72
+average range size: 37.44
+ retries = 42240469, final stamp = 2831465
+./list_simple_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,45
+average range size: 35.38
+ retries = 42989184, final stamp = 2877657
+./list_simple_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,43.44
+average range size: 37.46
+ retries = 42719704, final stamp = 2820026
+./list_ver_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,47.5
+average range size: 35.37
+ retries = 45022207, final stamp = 3093407
+./list_ver_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,46.14
+average range size: 37.4
+ retries = 45420386, final stamp = 2958673
+./list_ver_rs,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,38.8
+average range size: 35.43
+./list_ver_rs,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,37.27
+average range size: 37.53
+./list_ver_ws,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,50.14
+average range size: 35.46
+./list_ver_ws,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,49.94
+average range size: 37.44
+./list_ver_ns,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,86.93
+average range size: 35.43
+./list_ver_ns,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,83.48
+average range size: 37.44
+./list_ver_ss,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,48.54
+average range size: 35.4
+./list_ver_ss,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,46.67
+average range size: 37.47
+./list_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,49.12
+average range size: 35.43
+ retries = 49847636, final stamp = 3240283
+./list_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,47.14
+average range size: 37.34
+ retries = 49446284, final stamp = 3091852
+./list_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,46.33
+average range size: 35.37
+ retries = 47021443, final stamp = 3023665
+./list_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,44.97
+average range size: 37.46
+ retries = 46967659, final stamp = 3022616
+./list_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0,55.92
+average range size: 35.5
+ retries = 51593939, final stamp = 3422084
+./list_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=100,p=63,z=0.99,53.75
+average range size: 37.48
+ retries = 51607300, final stamp = 3336236
+...
+./list,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,51.29
+./list,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,49.53
+./list_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,33.52
+ retries = 0, final stamp = 1
+./list_indirect_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,33.31
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,38.34
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.83
+ retries = 0, final stamp = 1
+./list_simple_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,40.62
+ retries = 0, final stamp = 1
+./list_simple_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,38.97
+ retries = 0, final stamp = 1
+./list_ver_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,37.76
+ retries = 0, final stamp = 1
+./list_ver_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.43
+ retries = 0, final stamp = 1
+./list_ver_rs,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,37.77
+./list_ver_rs,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.44
+./list_ver_ws,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,22.9
+./list_ver_ws,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,23.15
+./list_ver_ns,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,37.77
+./list_ver_ns,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.44
+./list_ver_ss,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,37.73
+./list_ver_ss,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.4
+./list_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,40.59
+ retries = 0, final stamp = 1
+./list_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,38.83
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,37.64
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,36.28
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0,38
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=100,p=63,z=0.99,37.3
+ retries = 0, final stamp = 1
+...
+./list,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,16.45
+./list,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,21.3
+./list_indirect_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,7.646
+ retries = 0, final stamp = 1
+./list_indirect_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,9.695
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,10.78
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,13.98
+ retries = 0, final stamp = 1
+./list_simple_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,14.38
+ retries = 0, final stamp = 1
+./list_simple_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,18.29
+ retries = 0, final stamp = 1
+./list_ver_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,14.6
+ retries = 0, final stamp = 1
+./list_ver_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,18.72
+ retries = 0, final stamp = 1
+./list_ver_rs,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,14.88
+./list_ver_rs,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,18.72
+./list_ver_ws,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.97
+./list_ver_ws,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,16.98
+./list_ver_ns,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,14.79
+./list_ver_ns,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,18.63
+./list_ver_ss,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,14.89
+./list_ver_ss,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,18.67
+./list_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,15.4
+ retries = 0, final stamp = 1
+./list_ver_lock_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,19.62
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,15.02
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,19.08
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,15.4
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,5%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,19.62
+ retries = 0, final stamp = 1
+...
+./list,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,16.73
+./list,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,21.32
+./list_indirect_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,6.255
+ retries = 1428665, final stamp = 110897
+./list_indirect_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,8.121
+ retries = 1824631, final stamp = 144948
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,8.595
+ retries = 1930713, final stamp = 150856
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,11.05
+ retries = 2484594, final stamp = 199743
+./list_simple_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,10.2
+ retries = 2287577, final stamp = 178943
+./list_simple_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,13.2
+ retries = 2938506, final stamp = 236524
+./list_ver_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,11
+ retries = 2464926, final stamp = 194731
+./list_ver_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,14.3
+ retries = 3143708, final stamp = 254690
+./list_ver_rs,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,13.73
+./list_ver_rs,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,17.54
+./list_ver_ws,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,13.61
+./list_ver_ws,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,17.73
+./list_ver_ns,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,15.12
+./list_ver_ns,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,18.97
+./list_ver_ss,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,13.71
+./list_ver_ss,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,17.57
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,11.55
+ retries = 2551445, final stamp = 204514
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,14.86
+ retries = 3218417, final stamp = 264989
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,10.6
+ retries = 2345797, final stamp = 184020
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,13.55
+ retries = 3000596, final stamp = 241473
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0,11.94
+ retries = 2684786, final stamp = 209250
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=4,n=1000,p=63,z=0.99,15.08
+ retries = 3390749, final stamp = 269953
+...
+./list,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,16.92
+./list,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,22.39
+./list_indirect_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,6.293
+ retries = 617663, final stamp = 51890
+./list_indirect_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,8.526
+ retries = 826369, final stamp = 69401
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,9.031
+ retries = 873733, final stamp = 73356
+./list_noshortcut_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,11.79
+ retries = 1167151, final stamp = 98769
+./list_simple_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,10.4
+ retries = 1026858, final stamp = 86474
+./list_simple_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,13.62
+ retries = 1350893, final stamp = 114785
+./list_ver_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,11.35
+ retries = 1125920, final stamp = 95355
+./list_ver_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,15.16
+ retries = 1483630, final stamp = 126937
+./list_ver_rs,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,14.05
+./list_ver_rs,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,19.27
+./list_ver_ws,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,14.28
+./list_ver_ws,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,18.85
+./list_ver_ns,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,14.68
+./list_ver_ns,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,19.48
+./list_ver_ss,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,14.48
+./list_ver_ss,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,18.92
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,12.12
+ retries = 1176293, final stamp = 100023
+./list_ver_lock_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,15.91
+ retries = 1554216, final stamp = 133197
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,10.98
+ retries = 1072663, final stamp = 90284
+./list_simple_lock_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,14.85
+ retries = 1448273, final stamp = 123310
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0,11.57
+ retries = 1161254, final stamp = 97711
+./list_ver_ro_ls,5%update,0%range,25%mfind,rs=16,n=1000,p=63,z=0.99,15.49
+ retries = 1519137, final stamp = 128921
+...
+./list,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,14.37
+average range size: 47.64
+./list,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,18.44
+average range size: 48.19
+./list_indirect_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,5.359
+average range size: 47.7
+ retries = 3447656, final stamp = 208585
+./list_indirect_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,6.825
+average range size: 47.76
+ retries = 4228244, final stamp = 271324
+./list_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,7.123
+average range size: 47.65
+ retries = 4511531, final stamp = 294250
+./list_noshortcut_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,9.191
+average range size: 48.05
+ retries = 5661409, final stamp = 391254
+./list_simple_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,8.736
+average range size: 47.71
+ retries = 5610333, final stamp = 355172
+./list_simple_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,11.22
+average range size: 47.97
+ retries = 6983552, final stamp = 471314
+./list_ver_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,9.143
+average range size: 47.6
+ retries = 5935173, final stamp = 378231
+./list_ver_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,11.87
+average range size: 47.82
+ retries = 7465533, final stamp = 503398
+./list_ver_rs,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,11.43
+average range size: 47.62
+./list_ver_rs,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,13.8
+average range size: 47.99
+./list_ver_ws,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,11.6
+average range size: 47.62
+./list_ver_ws,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,14.93
+average range size: 48.1
+./list_ver_ns,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,12.7
+average range size: 47.64
+./list_ver_ns,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,15.91
+average range size: 48.1
+./list_ver_ss,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,11.35
+average range size: 47.65
+./list_ver_ss,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,14.89
+average range size: 48.03
+./list_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,9.303
+average range size: 47.58
+ retries = 5979916, final stamp = 382748
+./list_ver_lock_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,12.11
+average range size: 47.99
+ retries = 7606955, final stamp = 518858
+./list_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,8.922
+average range size: 47.61
+ retries = 5725782, final stamp = 365486
+./list_simple_lock_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,11.43
+average range size: 47.98
+ retries = 7215895, final stamp = 488584
+./list_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0,10.06
+average range size: 47.66
+ retries = 6501315, final stamp = 407370
+./list_ver_ro_ls,5%update,95%range,0%mfind,rs=48,n=1000,p=63,z=0.99,12.84
+average range size: 48.15
+ retries = 8146844, final stamp = 530460
+...
+./list,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,13.98
+./list,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,17.34
+./list_indirect_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,6.245
+ retries = 0, final stamp = 1
+./list_indirect_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,6.605
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,8.127
+ retries = 0, final stamp = 1
+./list_noshortcut_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,9.763
+ retries = 0, final stamp = 1
+./list_simple_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.25
+ retries = 0, final stamp = 1
+./list_simple_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,14.93
+ retries = 0, final stamp = 1
+./list_ver_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.44
+ retries = 0, final stamp = 1
+./list_ver_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,15.22
+ retries = 0, final stamp = 1
+./list_ver_rs,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.47
+./list_ver_rs,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,15.2
+./list_ver_ws,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,9.29
+./list_ver_ws,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,11.46
+./list_ver_ns,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.42
+./list_ver_ns,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,15.29
+./list_ver_ss,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.38
+./list_ver_ss,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,15.21
+./list_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,13.17
+ retries = 0, final stamp = 1
+./list_ver_lock_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,16.42
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.9
+ retries = 0, final stamp = 1
+./list_simple_lock_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,16.04
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0,12.3
+ retries = 0, final stamp = 1
+./list_ver_ro_ls,50%update,0%range,0%mfind,rs=0,n=1000,p=63,z=0.99,15.03
+ retries = 0, final stamp = 1
+...
