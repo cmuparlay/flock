@@ -20,9 +20,9 @@
 #elif FullyIndirect
 #include "versioned_indirect.h"
 #elif Simple
-#include "versioned_opt.h"
+#include "versioned_simple.h"
 #else
-#include "versioned.h"
+#include "versioned_opt.h"
 #endif
 
 # else // Not Versioned

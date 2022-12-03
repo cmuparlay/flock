@@ -57,7 +57,7 @@ else :
     lists = []
     lists_ro = ["list"]
     list_sizes = [100,1000]
-    trees = ["hash_block_lf", "hash_block", "arttree"]
+    trees = ["hash_block_lf", "arttree"]
     trees_ro = ["btree"]
     tree_sizes = [100000,10000000]
 
