@@ -335,6 +335,12 @@ struct Set {
 		      std::optional<K> start, std::optional<K> end, int pos) {
     if (a == nullptr) return;
     std::optional<K> empty;
+    if (a->nt == Leaf) {
+      if ((!start.has_value() || start.value() <= a->key)
+	  && (!end.has_value() || end.value() >= a->key)) 
+	add(a->key, ((leaf*) a)->value);
+      return;
+    }
     for (int i = pos; i < a->byte_num; i++) {
       if (start == empty && end == empty) break;
       if (start.has_value() && get_byte(start.value(), i) > get_byte(a->key, i)
@@ -345,10 +351,6 @@ struct Set {
       if (end.has_value() && get_byte(end.value(), i) > get_byte(a->key, i)) {
 	end = empty;
       }
-    }
-    if (a->nt == Leaf) {
-      add(a->key, ((leaf*) a)->value);
-      return;
     }
     int sb = start.has_value() ? get_byte(start.value(), a->byte_num) : 0;
     int eb = end.has_value() ? get_byte(end.value(), a->byte_num) : 255;

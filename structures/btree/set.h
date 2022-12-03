@@ -482,7 +482,7 @@ struct Set {
     while (true) {
       node* p = root;
       int cidx = 0;
-      node* c = p->children[cidx].read();
+      node* c = p->children[cidx].load();
       if (c->status == isOver || (!c->is_leaf && c->size == 1))
         fix_root(root, c);
       else while (true) {

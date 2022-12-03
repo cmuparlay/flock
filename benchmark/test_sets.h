@@ -203,24 +203,26 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
   } else {  // main test
     using key_type = unsigned long;
-    key_type max_key = std::numeric_limits<key_type>::max();
 
     // generate 2*n unique numbers in random order
     parlay::sequence<key_type> a;
-    key_type range_gap;
+    key_type max_key;
+
     if (use_sparse) {
+      // don't use top bit since it breaks setbench version of arttree (leis_olt_art)
+      max_key = ~0ul >> 1; 
       auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
 			 return (key_type) ((parlay::hash64(i) << 1) >> 1);}); // generate 63-bit keys
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
-      a = parlay::tabulate(nn, [&] (size_t i) {return y[i]+1;});
-      range_gap = (max_key/nn)*range_size;
+      // don't use zero since it breaks setbench code
+      a = parlay::tabulate(nn, [&] (size_t i) {return std::min(max_key,y[i]+1);});
     } else {
       max_key = nn;
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
 					   return i+1;}));
-      range_gap = 2*range_size;
     }
+    key_type range_gap = (max_key/n)*range_size;
 
     parlay::sequence<key_type> b;
     if (use_zipfian) { 

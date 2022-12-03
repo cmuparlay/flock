@@ -67,12 +67,6 @@ private:
     } else return (V*) ptr_u;
   }
 
-  V* get_ptr(IT ptr) {
-    if (is_indirect(ptr))
-      return (V*) ((plink*) strip_mark(ptr))->value;
-    else return (V*) ptr;
-  }
-
   static IT set_stamp(IT ptr) {
     V* ptr_u = strip_mark(ptr);
     if (ptr != nullptr && ptr_u->read_stamp() == tbd)
@@ -103,6 +97,8 @@ public:
     TS ls = local_stamp;
     IT head = v.read();
     set_stamp(head);
+    //if (is_indirect(head)) shortcut(head);
+
     V* head_unmarked = strip_mark(head);
 
     // chase down version chain
@@ -115,12 +111,14 @@ public:
 	&& speculative)
       aborted = true;
 #endif
-    return get_ptr(head);
+    if (is_indirect(head)) {
+      //shortcut(head);
+      return (V*) ((plink*) head_unmarked)->value;
+    } else return (V*) head;
   }
 
   V* load() {  // can be used anywhere
-    if (local_stamp != -1) 
-      return read_snapshot();
+    if (local_stamp != -1) return read_snapshot();
     else return get_ptr_shortcut(set_stamp(v.load()));
   }
   
