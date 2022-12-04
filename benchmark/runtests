@@ -33,7 +33,7 @@ rounds = int(getArg("-r", 3));
 
 time = float(getArg("-t", 3.0));
 
-shuffle = True #getOption("-shuffle");
+shuffle = getOption("-shuffle");
 
 if (getOption("-help") or getOption("-help")) :
     print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")

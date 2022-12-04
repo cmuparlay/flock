@@ -105,6 +105,7 @@ struct alignas(64) mem_pool {
 private:
 
   static constexpr double milliseconds_between_epoch_updates = 20.0;
+  long update_threshold;
   using sys_time = time_point<std::chrono::system_clock>;
 
   // each thread keeps one of these
@@ -136,10 +137,10 @@ public:
 
   mem_pool() {
     workers = parlay::num_workers();
-    //update_threshold = 10*workers;
+    update_threshold = 10 * workers;
     pools = std::vector<old_current>(workers);
     for (int i = 0; i < workers; i++) {
-      //pools[i].count = parlay::hash64(i) % update_threshold;
+      pools[i].count = parlay::hash64(i) % update_threshold;
       pools[i].time = system_clock::now();
     }
   }
@@ -191,10 +192,10 @@ public:
     }
     // a heuristic
     auto now = system_clock::now();
-    if (duration_cast<milliseconds>(now - pid.time).count() >
-	milliseconds_between_epoch_updates) {
-      //if (++pid.count == 10 * workers) {
-      //pid.count = 0;
+    if (++pid.count == update_threshold ||
+	duration_cast<milliseconds>(now - pid.time).count() >
+    	milliseconds_between_epoch_updates) {
+      pid.count = 0;
       pid.time = now;
       epoch.update_epoch();
     }

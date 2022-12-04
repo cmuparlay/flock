@@ -267,12 +267,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	  auto y = x.head(x.size());
 	  insert_balanced(os, tr, y);
 	} else {
-          parlay::parallel_for(0, nn, [&] (size_t i) {
-                os.insert(tr, a[i], 123); });
-          parlay::parallel_for(n, nn, [&] (size_t i) {
-                os.remove(tr, a[i]); });
-          // parlay::parallel_for(0, n, [&] (size_t i) {
-                // os.insert(tr, a[i], 123); });
+          // parlay::parallel_for(0, nn, [&] (size_t i) {
+          //       os.insert(tr, a[i], 123); });
+          // parlay::parallel_for(n, nn, [&] (size_t i) {
+          //       os.remove(tr, a[i]); });
+           parlay::parallel_for(0, n, [&] (size_t i) {
+                 os.insert(tr, a[i], 123); });
 	}
 	//long start_timestamp = global_stamp.get_stamp();
   
