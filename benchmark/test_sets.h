@@ -292,6 +292,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	parlay::sequence<long> addeds(p);
 	parlay::sequence<long> range_counts(p);
 	parlay::sequence<long> mfind_counts(p);
+	parlay::sequence<long> retry_counts(p);
 	parlay::sequence<long> update_counts(p);
 	parlay::sequence<long> query_counts(p);
         size_t mp = m/p;
@@ -305,6 +306,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	     long added = 0;
 	     long range_count = 0;
 	     long mfind_count = 0;
+	     long retry_count = 0;
 	     long update_count = 0;
 	     long query_count = 0;
 	     volatile long keysum = 0;
@@ -319,6 +321,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 		   addeds[i] = added;
 		   range_counts[i] = range_count;
 		   mfind_counts[i] = mfind_count;
+		   retry_counts[i] = retry_count;
 		   update_counts[i] = update_count;
 		   query_counts[i] = query_count;
                    return;
@@ -346,22 +349,31 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 				    long cnt=0;
 				    auto addf = [&] (K x, V y) { cnt++;};
 				    os.range_(tr, addf, b[j], end);
+#ifdef LazyStamp
+				    if (vl::aborted) retry_count++;
+#endif
 				    return cnt;});
 #endif
 	       } else { // multifind
 		 mfind_count++;
 		 keysum += vl::with_snapshot([&] {
 	           long tmp_sum = 0;
-		   for (int k = 0; k < range_size; k++) {
-		     auto val = os.find_(tr, b[j]);
-		     j += 1;
-		     if (j >= (i+1)*mp) j -= mp;
+		   long loc = j;
+		   for (long k = 0; k < range_size; k++) {
+		     auto val = os.find_(tr, b[loc]);
+		     loc += 1;
+		     if (loc >= (i+1)*mp) loc -= mp;
 		     if(val.has_value()) tmp_sum += val.value();
 #ifdef LazyStamp
-		     if (vl::aborted) return 0l;
+		     if (vl::aborted) {
+		       retry_count++;
+		       return 0l;
+		     }
 #endif
 		   }
 		   return tmp_sum;});
+		 j += range_size;
+		 if (j >= (i+1)*mp) j -= mp;
 		 cnt += range_size;
 		 total += range_size;
 		 continue;
@@ -394,16 +406,23 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	  if (do_check) {
 	    size_t final_cnt = os.check(tr);
 	    long updates = parlay::reduce(addeds);
-	    if (false && multifind_percent > 0) {
+	    if (multifind_percent > 0) {
 	      long mfind_sum = parlay::reduce(mfind_counts);
-	      long update_sum = parlay::reduce(update_counts);
-	      long query_sum = parlay::reduce(query_counts);
-	      std::cout << "multifinds = " << mfind_sum << " updates = " << update_sum << " queries = " << query_sum << std::endl;
+	      long retry_sum = parlay::reduce(retry_counts);
+#ifdef LazyStamp
+	      std::cout << "retry percent = " << (double) 100 * retry_sum / mfind_sum
+			<< std::endl;
+#endif
 	    }
 	    if (range_percent > 0) {
 	      long range_sum = parlay::reduce(range_counts);
+	      long retry_sum = parlay::reduce(retry_counts);
 	      long num_queries = num_ops * range_percent / 100;
-	      std::cout << "average range size: " << ((float) range_sum) / num_queries  << std::endl;
+	      std::cout << "average range size = " << ((float) range_sum) / num_queries
+#ifdef LazyStamp
+			<< ", retry percent = " << (double) 100 * retry_sum / num_queries 
+#endif
+			<< std::endl;
 	    }
 
 	    if (n + updates != final_cnt) {

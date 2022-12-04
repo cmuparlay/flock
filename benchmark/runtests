@@ -126,6 +126,7 @@ def runstring(op) :
     if (x) :
         if (os.WEXITSTATUS(x) == 0) : raise NameError("  aborted: " + op)
         os.system("echo Failed")
+        runstring("echo Failed")
     
 def runtest(test,procs,n,z,mix) :
     num_threads = maxcpus-1

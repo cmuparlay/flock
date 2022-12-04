@@ -11,10 +11,4 @@ int main(int argc, char* argv[]) {
   Set<K,V> lst;
   size_t default_size = 100000;
   test_sets(lst, default_size, P);
-#if defined(Persistent) && ! defined(Recorded_Once)
-  //  print_counts();
-#endif
-#if defined(LazyStamp)
-  vl::print_retries();
-#endif
 }
