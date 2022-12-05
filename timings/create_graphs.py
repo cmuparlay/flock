@@ -2,6 +2,8 @@
 import os
 import re
 from tabulate import tabulate
+import matplotlib.pyplot as plt
+import numpy as np
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
 input_files = ["ip-172-31-40-46_11_26_22"]
@@ -87,15 +89,61 @@ def readResultsFile(throughputs, parameters):
     throughputs[key] = sum(throughputs_raw[key])/len(throughputs_raw[key])
   for p in param_list:
     parameters[p].sort()
-  
+
+def transpose(data_):
+  data = []
+  for x in data_[0]:
+    data.append([])
+
+  for r in range(len(data_)):
+    for c in range(len(data_[0])):
+      data[c].append(data_[r][c])
+  return data
+
+
+colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6']
+
+def plot_bar_graph(data_, headers, title, x_axis):
+  x_labels = []
+  for r in range(len(data_)):
+    for c in range(len(data_[0])):
+      if c == 0 or data_[r][c] == '-':
+        if c == 0:
+          x_labels.append(data_[r][c])
+        data_[r][c] = 0
+  data = np.transpose(np.array(data_, dtype=np.uint32))[1:]
+  # data = [x if x != '-' else 0 for x in transpose(data_)[1:]]
+  # print(data)
+  barWidth = 1/(len(data)+3)
+  fig = plt.subplots(figsize =(12, 8))
+  # Set position of bar on X axis
+  X = np.arange(len(data[0]))
+
+  for i in range(len(data)):
+    plt.bar(X + i*barWidth, data[i], color=colors[i], width = barWidth,
+        edgecolor ='grey', label =headers[i+1])
+
+  plt.xlabel('x_axis', fontweight ='bold', fontsize = 15)
+  plt.ylabel('Throughput (Mop/s)', fontweight ='bold', fontsize = 15)
+  plt.xticks([r + barWidth*(len(data)-1)/2 for r in range(len(data[0]))], x_labels)
+
+  plt.title(title)
+
+  plt.legend()
+  plt.savefig(output_folder + '/' + title + ".png", bbox_inches='tight')
+
+
 def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]):
   p = params.copy()
   p[row] = '*'
   p[col] = '*'
-  output = toString(p) + '\n========================================= \n\n'
-  f = open(output_folder + '/' + toString(p) + ".txt", "w")
+  title = toString(p)
+  output = title + '\n========================================= \n\n'
+  f = open(output_folder + '/' + title + ".txt", "w")
   if rowvals == []:
     rowvals = parameters[row]
+  if 'hash_block' in rowvals:
+    rowvals.remove('hash_block')
   if colvals == []:
     colvals = parameters[col]
   headers = ['ds'] + ['direct' if x == 'ro' else x for x in colvals]
@@ -119,6 +167,7 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
   print()
   f.write(output)
   f.close()
+  plot_bar_graph(data, headers, title, "Data Structure")
 
 def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['up'] = mix_percent[0]
@@ -126,14 +175,14 @@ def print_table_mix_percent(throughput, parameters, mix_percent, params):
   params['range'] = mix_percent[2]
   params['rs'] = mix_percent[3]
   rowvals = parameters['ds']
-  colvals = ['indirect_ls', 'noshortcut_ls', 'simple_ls', 'ver_ls', 'ver_lock_ls', 'ver_ro_ls', 'non_per']
+  colvals = ['indirect_ls', 'noshortcut_ls', 'ver_ls', 'ver_lock_ls', 'ver_ro_ls', 'non_per']
   print_table(throughput, parameters, 'ds', 'per', params, rowvals, colvals)
 
 def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percents, params):
   p = params.copy()
   p['ds'] = ds
   p['n'] = size
-  title = 'inc_policy_' + ds + '_' + per + '_size_' + str(size)
+  title = 'inc_policy_' + ds + '_' + per + '_size_' + str(size) + '_z_' + str(params['z'])
   output = title + '\n========================================= \n\n'
   f = open(output_folder + '/' + title + ".txt", "w")
 
@@ -164,6 +213,7 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   print(output)
   f.write(output)
   f.close()
+  plot_bar_graph(data, headers, title, "Workload")
 
 def print_scalability_graphs(throughput, parameters, ds, per, size, mix_percents, params):
   
