@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-input_files = ["ip-172-31-40-46_11_26_22"]
-output_folder = "nov28"
+input_files = ["ip-172-31-35-105_12_04_22"]
+output_folder = "dec5"
 zipfs = [0, 0.99]
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
@@ -106,11 +106,19 @@ colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6']
 def plot_bar_graph(data_, headers, title, x_axis):
   x_labels = []
   for r in range(len(data_)):
+    is_list = False
     for c in range(len(data_[0])):
       if c == 0 or data_[r][c] == '-':
         if c == 0:
-          x_labels.append(data_[r][c])
+          if data_[r][c] == 'list':
+            x_labels.append('list (10x)')
+            is_list = True
+          else:
+            x_labels.append(data_[r][c])
         data_[r][c] = 0
+      elif is_list:
+        # print("true")
+        data_[r][c] = data_[r][c]*10
   data = np.transpose(np.array(data_, dtype=np.uint32))[1:]
   # data = [x if x != '-' else 0 for x in transpose(data_)[1:]]
   # print(data)
@@ -131,6 +139,7 @@ def plot_bar_graph(data_, headers, title, x_axis):
 
   plt.legend()
   plt.savefig(output_folder + '/' + title + ".png", bbox_inches='tight')
+  plt.close('all')
 
 
 def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]):
@@ -154,7 +163,7 @@ def print_table(throughput, parameters, row, col, params, rowvals=[], colvals=[]
       p[row] = r
       p[col] = c
       # print(p)
-      if toString(p) in throughputs:
+      if toString(p) in throughputs and (r != 'hash_block_lf' or c != 'ver_lock_ls'):
         row_data.append(custom_round(throughputs[toString(p)]))
       else:
         row_data.append('-')
@@ -186,8 +195,8 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   output = title + '\n========================================= \n\n'
   f = open(output_folder + '/' + title + ".txt", "w")
 
-  colvals = ['_ss', '_rs', '_ws', '_ls', '_ns', 'non_per']
-  headers = ['workload (up-mfind-range-rs)', 'switch', 'read', 'write', 'lazy', 'no_inc', 'non_per']
+  colvals = ['_rs', '_ws', '_ls', '_ns', 'non_per']
+  headers = ['workload (up-mfind-range-rs)', 'read', 'write', 'lazy', 'no_inc', 'non_per']
   data = []
   for mix_percent in mix_percents:
     row_data = [mix_percent]
