@@ -128,6 +128,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
   // shuffles the memory pool to break sharing of cache lines
   // by neighboring list/tree nodes
   bool shuffle = P.getOption("-shuffle");
+  bool initialize_with_deletes = P.getOption("-id");
 
   // verbose
   bool verbose = P.getOption("-v");
@@ -210,9 +211,11 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 
     if (use_sparse) {
       // don't use top bit since it breaks setbench version of arttree (leis_olt_art)
-      max_key = ~0ul >> 1; 
+      //max_key = ~0ul >> 1;
+      max_key = ~0ul;
       auto x = parlay::delayed_tabulate(1.2*nn,[&] (size_t i) {
-			 return (key_type) ((parlay::hash64(i) << 1) >> 1);}); // generate 63-bit keys
+			 return (key_type) parlay::hash64(i);}); // generate 64-bit keys
+      //return (key_type) ((parlay::hash64(i) << 1) >> 1);}); // generate 63-bit keys
       auto xx = parlay::remove_duplicates(x);
       auto y = parlay::random_shuffle(xx);
       // don't use zero since it breaks setbench code
@@ -247,10 +250,10 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     
     parlay::internal::timer t;
     if (shuffle) os.shuffle(n);
+    auto tr = os.empty(buckets);
 
     for (int i = 0; i < rounds+1; i++) {
       long len;
-      auto tr = os.empty(buckets);
       if (do_check) {
 	size_t len = os.check(tr);
 	if (len != 0) {
@@ -267,12 +270,15 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	  auto y = x.head(x.size());
 	  insert_balanced(os, tr, y);
 	} else {
-          // parlay::parallel_for(0, nn, [&] (size_t i) {
-          //       os.insert(tr, a[i], 123); });
-          // parlay::parallel_for(n, nn, [&] (size_t i) {
-          //       os.remove(tr, a[i]); });
-           parlay::parallel_for(0, n, [&] (size_t i) {
-                 os.insert(tr, a[i], 123); });
+	  if (initialize_with_deletes) {
+	    parlay::parallel_for(0, nn, [&] (size_t i) {
+					  os.insert(tr, a[i], 123); });
+	    parlay::parallel_for(n, nn, [&] (size_t i) {
+					  os.remove(tr, a[i]); });
+	  } else {
+	    parlay::parallel_for(0, n, [&] (size_t i) {
+					 os.insert(tr, a[i], 123); });
+	  }
 	}
 	//long start_timestamp = global_stamp.get_stamp();
   
@@ -504,7 +510,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           //if (stats) os.stats();
         }
       }
-      os.retire(tr); // free the ord_set (should be empty, but not with arttree)
+      //os.retire(tr); // free the ord_set (should be empty, but not with arttree)
       if (clear) {
 	os.clear();
 	//descriptor_pool.clear();
@@ -517,6 +523,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         os.stats();
       }
     }
+    os.retire(tr);
   }
   //if (verbose)
   //  std::cout << "final timestamp: " << vl::global_stamp.get_stamp() << std::endl;

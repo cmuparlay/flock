@@ -21,7 +21,7 @@ def getArg(str, default) :
 all = getOption("-all")
 short = getOption("-short")
 
-suffixes_all = ["","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_lock_ls"]
+suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_nohelp_ls"]
 
 suffixes_ro = suffixes_all + ["_ver_ro_ls"] # , "_ro_rs", "_ro_ws", "_ro_ns", "_ro_ss"]
 

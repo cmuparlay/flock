@@ -1,0 +1,18 @@
+numactl -i all ./arttree -n 10000000 -u 5 -r 3 -z 0
+numactl -i all ./arttree -n 10000000 -u 5 -r 3 -z .99
+numactl -i all ./arttree -n 10000000 -u 50 -r 3 -z 0
+numactl -i all ./arttree -n 10000000 -u 5 -r 3 -z .99
+numactl -i all ./arttree -n 100000 -u 5 -r 3 -t 1 -z 0
+numactl -i all ./arttree -n 100000 -u 5 -r 3 -t 1 -z .99
+numactl -i all ./arttree -n 100000 -u 50 -r 3 -t 1 -z 0
+numactl -i all ./arttree -n 100000 -u 50 -r 3 -t 1 -z .99
+pushd ../setbench
+numactl -i all ./leis_olc_art -n 10000000 -u 5 -r 3 -z 0
+numactl -i all ./leis_olc_art -n 10000000 -u 5 -r 3 -z .99
+numactl -i all ./leis_olc_art -n 10000000 -u 50 -r 3 -z 0
+numactl -i all ./leis_olc_art -n 10000000 -u 50 -r 3 -z .99
+numactl -i all ./leis_olc_art -n 100000 -u 5 -r 3 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 100000 -u 5 -r 3 -t 1 -z .99
+numactl -i all ./leis_olc_art -n 100000 -u 50 -r 3 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 100000 -u 50 -r 3 -t 1 -z .99
+popd
