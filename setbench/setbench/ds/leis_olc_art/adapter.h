@@ -18,7 +18,7 @@ using namespace std;
 #include "Tree.h"
 #include "N.h"
 
-#define RECORD_MANAGER_T record_manager<Reclaim, Alloc, Pool, ART_OLC::N4, ART_OLC::N16, ART_OLC::N48, ART_OLC::N256>
+#define RECORD_MANAGER_T record_manager<Reclaim, Alloc, Pool, ART_OLC::N4, ART_OLC::N16, ART_OLC::N48, ART_OLC::N256, ART_OLC::Keyval>
 #define DATA_STRUCTURE_T ART_OLC::Tree<RECORD_MANAGER_T>
 
 void loadKey(TID tid, Key &key) {

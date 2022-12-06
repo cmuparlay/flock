@@ -306,12 +306,13 @@ namespace ART_OLC {
         return (reinterpret_cast<uint64_t>(n) & (static_cast<uint64_t>(1) << 63)) == (static_cast<uint64_t>(1) << 63);
     }
 
-    N *N::setLeaf(TID tid) {
-        return reinterpret_cast<N *>(tid | (static_cast<uint64_t>(1) << 63));
+    N *N::setLeaf(Keyval* kv) {
+        return reinterpret_cast<N*>((uint64_t) kv | (static_cast<uint64_t>(1) << 63));
     }
 
     TID N::getLeaf(const N *n) {
-        return (reinterpret_cast<uint64_t>(n) & ((static_cast<uint64_t>(1) << 63) - 1));
+        Keyval* kv = reinterpret_cast<Keyval*>(((uint64_t) n) & ((1ull << 63)-1));
+        return (TID) kv->key;
     }
 
     std::tuple<N *, uint8_t> N::getSecondChild(N *node, const uint8_t key) {

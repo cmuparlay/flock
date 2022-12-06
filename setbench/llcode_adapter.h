@@ -80,7 +80,7 @@ public:
   size_t check(adapter_t* ds) {
     init_thread(ds);
     auto tree_stats = ds->createTreeStats(KEY_NEG_INFTY, KEY_POS_INFTY);
-    std::cout << "average height: " << tree_stats->getAverageKeyDepth() << std::endl;
+    // std::cout << "average height: " << tree_stats->getAverageKeyDepth() << std::endl;
     size_t size = tree_stats->getKeys();
     delete tree_stats;
     return size;

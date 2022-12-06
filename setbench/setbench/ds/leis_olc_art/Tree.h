@@ -245,7 +245,9 @@ namespace ART_OLC {
                         if (needRestart) goto restart;
 
                         TID tid = N::getLeaf(node);
+                        // std::cout << tid << std::endl;
                         if (level < k.getKeyLen() - 1 || optimisticPrefixMatch) {
+                            // std::cout << "checkKey " << tid << std::endl;
                             return checkKey(tid, k);
                         }
                         return tid;
@@ -315,7 +317,9 @@ namespace ART_OLC {
                     newNode->setPrefix(node->getPrefix(), nextLevel - level);
 
                     // 2)  add node and (tid, *k) as children
-                    newNode->insert(k[nextLevel], N::setLeaf(tid)); // Anubhav: Looks like k has to be malloc'd
+                    Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                    kv->key = tid;
+                    newNode->insert(k[nextLevel], N::setLeaf(kv)); // Anubhav: Looks like k has to be malloc'd
                     newNode->insert(nonMatchingKey, node);
 
                     // 3) upgradeToWriteLockOrRestart, update parentNode to point to the new node, unlock
@@ -339,7 +343,9 @@ namespace ART_OLC {
             if (needRestart) goto restart;
 
             if (nextNode == nullptr) {
-                N::insertAndUnlock(threadID, recmgr, node, v, parentNode, parentVersion, parentKey, nodeKey, N::setLeaf(tid), needRestart);
+                Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                kv->key = tid;
+                N::insertAndUnlock(threadID, recmgr, node, v, parentNode, parentVersion, parentKey, nodeKey, N::setLeaf(kv), needRestart);
                 if (needRestart) goto restart;
                 return true;
             }
@@ -369,7 +375,9 @@ namespace ART_OLC {
 
                 N4* n4 = recmgr->template allocate<N4>(threadID);
                 n4->setPrefix(&k[level], prefixLength);
-                n4->insert(k[level + prefixLength], N::setLeaf(tid));
+                Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                kv->key = tid;
+                n4->insert(k[level + prefixLength], N::setLeaf(kv));
                 n4->insert(key[level + prefixLength], nextNode);
                 N::change(node, k[level - 1], n4);
                 node->writeUnlock();
