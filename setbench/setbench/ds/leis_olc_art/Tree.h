@@ -431,6 +431,7 @@ namespace ART_OLC {
                         if (N::getLeaf(nextNode) != tid) {
                             return false;
                         }
+                        Keyval* kv = getKeyval(nextNode);
                         assert(parentNode == nullptr || node->getCount() != 1);
                         if (node->getCount() == 2 && parentNode != nullptr) {
                             parentNode->upgradeToWriteLockOrRestart(parentVersion, needRestart);
@@ -476,6 +477,7 @@ namespace ART_OLC {
                             N::removeAndUnlock(threadID, recmgr, node, v, k[level], parentNode, parentVersion, parentKey, needRestart);
                             if (needRestart) goto restart;
                         }
+                        recmgr->retire(threadID, kv);
                         return true;
                     }
                     level++;

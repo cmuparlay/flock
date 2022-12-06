@@ -310,6 +310,8 @@ namespace ART_OLC {
         return reinterpret_cast<N*>((uint64_t) kv | (static_cast<uint64_t>(1) << 63));
     }
 
+    Keyval* getKeyval(const N *n) { return reinterpret_cast<Keyval*>(((uint64_t) n) & ((1ull << 63)-1)); }
+
     TID N::getLeaf(const N *n) {
         Keyval* kv = reinterpret_cast<Keyval*>(((uint64_t) n) & ((1ull << 63)-1));
         return (TID) kv->key;
