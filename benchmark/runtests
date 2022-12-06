@@ -18,16 +18,8 @@ def getArg(str, default) :
         return sys.argv[i+1]
   return default
 
-all = getOption("-all")
-short = getOption("-short")
-
-suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_nohelp_ls"]
-
-suffixes_ro = suffixes_all + ["_ver_ro_ls"] # , "_ro_rs", "_ro_ws", "_ro_ns", "_ro_ss"]
-
-# updates, multifind, range (rest are queries), range/multifind size
-# mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [5,5,0,16], [50,0,0,0], [50,50,0,16]]
-mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [50,0,0,0]]
+compare = getOption("-compare")
+test_only = getOption("-test")
 
 rounds = int(getArg("-r", 3));
 
@@ -36,23 +28,29 @@ time = float(getArg("-t", 3.0));
 shuffle = getOption("-shuffle");
 
 if (getOption("-help") or getOption("-help")) :
-    print("./runall [-all] [-short] [-t t] [-hl] [-twenty] [-test] [-r n] [-help]")
+    print("./runall [-compare] [-shuffle] [-t t] [-test] [-r n] [-help]")
 
-zipfians = [0, .99]
-# zipfians = [.99]
+zipfians = []
+file_suffix = ""
+lists = []
+lists_ro = []
+list_sizes = []
+trees = []
+trees_ro = []
+tree_sizes = []
+suffixes_all = [""]
+suffixes_ro = []
+mix_percents = []
 
-suffixes_other = []
-
-if short :
-    lists = ["list"]
-    list_sizes = [10,1000]
-    trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
-    tree_sizes = [1000,10000000]
-elif all :
-    lists = ["list"]
-    list_sizes = [100,1000]
-    trees = ["btree", "hash_block", "arttree", "hash_block_lf"]
-    tree_sizes = [100,1000,100000,1000000,10000000,100000000]
+if compare :
+    file_suffix = "_compare"
+    trees = ["arttree","arttree_nohelp","../setbench/leis_olc_art","btree","btree_nohelp","../setbench/srivastava_abtree_pub"]
+    tree_sizes = [100000, 10000000]
+    lists = ["list", "list_nohelp", "harris_list"]
+    list_sizes = [100, 1000]
+    zipfians = [0, .99]
+    suffixes_all = [""]
+    mix_percents = [[5,0,0,0], [50,0,0,0]]
 else :
     lists = []
     lists_ro = ["list"]
@@ -60,30 +58,29 @@ else :
     trees = ["hash_block_lf", "arttree"]
     trees_ro = ["btree"]
     tree_sizes = [100000,10000000]
+    zipfians = [0, .99]
+    mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [50,0,0,0]]
+    suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_nohelp_ls"]
+    suffixes_ro = suffixes_all + ["_ver_ro_ls"]
 
-
+if test_only :
+    time = .1
+    rounds = 1
+    list_sizes = [100]
+    tree_sizes = [1000000]
+    zipfians = [.99]
+    
 today = date.today().strftime("%m_%d_%y")
 hostname = socket.gethostname()
 
 print(hostname)
 print(today)
-if short :
-    filename = "../../timings/short_" + hostname + "_" + today
-else :
-    filename = "../../timings/" + hostname + "_" + today
+filename = "../../timings/" + hostname + "_" + today + file_suffix
     
 if os.path.exists(filename) :
     os.remove(filename)
 
-test_only = False
-if (sys.argv.count("-test") > 0):
-    test_only = True
-    rounds = 1
-    time = .1
-    zipfians = [.99]
-    mix_percents = [[50,5,5,1]]
-    tree_sizes = [100,1000000]
-    list_sizes = [10,1000]
+
     
 def detectCPUs():
     """

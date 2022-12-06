@@ -1,6 +1,6 @@
 set(SOURCES test_sets.cpp)
 
-set(BENCH_FILES "runtests" "run_art" "run_sanity_checks.py")
+set(BENCH_FILES "runtests" "run_sanity_checks.py")
 
 function(copy_bench_file NAME)
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}
@@ -64,5 +64,3 @@ foreach(bench ${FLOCK_BENCH_USE_CAS})
   add_benchmark(${bench}_lf_ver_nohelp_ls ${STRUCT_DIR}/${bench} "UseCAS;Versioned;LazyStamp")
 #  add_benchmark(${bench}_lf_simple_nohelp_ls ${STRUCT_DIR}/${bench} "UseCAS;Versioned;Simple;LazyStamp")
 endforeach()
-
-
