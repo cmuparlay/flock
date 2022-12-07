@@ -1,7 +1,7 @@
 set(SOURCES bst_bench.cpp llcode_adapter.h ../benchmark/test_sets.h ../benchmark/zipfian.h ../benchmark/parse_command_line.h)
 set(SET_BENCH_DIR ${CMAKE_CURRENT_SOURCE_DIR}/setbench)
 
-set(SET_BENCH "leis_olc_art" "ellen_ext_bst_lf" "brown_ext_chromatic_lf" "bronson_pext_bst_occ" "srivastava_abtree_pub" "drachsler_pext_bst_lock" "natarajan_ext_bst_lf")
+set(SET_BENCH "leis_olc_art" "ellen_ext_bst_lf" "brown_ext_chromatic_lf" "bronson_pext_bst_occ" "srivastava_abtree_pub" "drachsler_pext_bst_lock" "natarajan_ext_bst_lf" "winblad_catree")
 
 # A hack to get a list of include directories
 execute_process(COMMAND find ${SET_BENCH_DIR}/common -type d OUTPUT_VARIABLE INCL_STRING)

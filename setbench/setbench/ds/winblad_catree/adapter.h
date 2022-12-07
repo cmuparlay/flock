@@ -17,6 +17,9 @@ using namespace std;
 #endif
 #include "ca_tree.h"
 
+#include <parlay/random.h>
+#include <parlay/primitives.h>
+
 #define RECORD_MANAGER_T record_manager<Reclaim, Alloc, Pool, RouteNode<K,V>, BaseNode<K,V>>
 #define DATA_STRUCTURE_T CATree<RECORD_MANAGER_T, K, V>
 
@@ -44,6 +47,21 @@ public:
     V getNoValue() {
         return NO_VALUE;
     }
+
+    template<typename _T>
+    static void shuffleHelper(size_t n) {
+      auto ptrs = parlay::tabulate(n, [&] (size_t i) {return parlay::type_allocator<_T>::alloc();});
+      ptrs = parlay::random_shuffle(ptrs);
+      parlay::parallel_for(0, n, [&] (size_t i) {parlay::type_allocator<_T>::free(ptrs[i]);});
+    }
+
+    static void shuffle(size_t n) {
+      shuffleHelper<RouteNode<K,V>>(n);
+      shuffleHelper<BaseNode<K,V>>(n);
+    }
+    // static void shuffle(size_t n) {}
+
+    static void reserve(size_t n) {}
 
     void initThread(const int tid) {
         ds->initThread(tid);
