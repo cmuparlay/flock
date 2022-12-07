@@ -183,7 +183,8 @@ public:
 
   // destruction and freeing is delayed until a future epoch
   void retire(T* p) {
-    auto &pid = pools[parlay::worker_id()];
+    auto i = parlay::worker_id();
+    auto &pid = pools[i];
     if (pid.epoch < epoch.get_current()) {
       clear_list(pid.old);
       pid.old = pid.current;
@@ -192,9 +193,9 @@ public:
     }
     // a heuristic
     auto now = system_clock::now();
-    if (++pid.count == update_threshold ||
+    if (++pid.count == update_threshold  ||
 	duration_cast<milliseconds>(now - pid.time).count() >
-    	milliseconds_between_epoch_updates) {
+	milliseconds_between_epoch_updates * (1 + ((float) i)/workers)) {
       pid.count = 0;
       pid.time = now;
       epoch.update_epoch();
