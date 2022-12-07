@@ -35,7 +35,9 @@ namespace vl {
   using versioned_ptr = flck::atomic<T*>;
 
   template <typename F>
-  auto with_snapshot(F f) { return f();}
+  auto with_snapshot(F f) {
+    return flck::with_epoch([&] { return f();});
+  }
 }
 
 #endif
