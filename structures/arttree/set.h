@@ -156,7 +156,7 @@ struct Set {
     }
     return false;
   }
-		 
+
   // Adds a new child to p with key k and value v
   // gp is p's parent (i.e. grandparent)
   // This might involve copying p either because
@@ -299,7 +299,24 @@ struct Set {
     });
   }
 
-  // currently a "lazy" remove that only removes the leaf
+  // returns other child if node is sparse and has two children, one
+  // of which is c, otherwise returns nullptr
+  node* single_other_child(node* p, node* c) {
+    if (p->nt != Sparse) return nullptr;
+    sparse_node* ps = (sparse_node*) p;
+    node* result = nullptr;
+    for (int i=0; i < ps->num_used; i++) {
+      node* oc = ps->ptr[i].load();
+      if (oc != nullptr && oc != c)
+	if (result != nullptr) return nullptr; // quit if second child
+	else result = oc; // set first child
+    }
+    return result;
+  }
+				 
+  // currently a "lazy" remove that only removes
+  //   1) the leaf
+  //   2) its parent if it is sparse with just two children
   bool remove(node* root, K k) {
     return vl::with_epoch([=] {
       while (true) {
@@ -308,15 +325,30 @@ struct Set {
 	if (c == nullptr || !(c->nt == Leaf && c->byte_num == byte_pos))
 	  return false;
 	if (p->try_lock([=] {
-	      if (p->removed.load() || cptr->load() != c) return false;
+	    if (p->removed.load() || cptr->load() != c) return false;
+
+  	    node* other_child = single_other_child(p,c);
+	    if (other_child != nullptr) {
+	      // if parent will become singleton try to remove parent as well
+	      return gp->try_lock([=] {
+		  auto child_ptr = get_child(gp, p->key);
+		  if (gp->removed.load() || child_ptr->load() != p)
+		    return false;
+		  *child_ptr = other_child;
+		  p->removed = true;
+		  sparse_pool.retire((sparse_node*) p);
+		  leaf_pool.retire((leaf*) c);
+		  return true;});
+	    } else { // just remove child
 	      *cptr = nullptr; 
 	      leaf_pool.retire((leaf*) c);
 	      return true;
-	    })) return true;
-	// try again
+	    }}))
+	  return true;
       }
+      // try again
     });
-  }	       
+  }
 
   std::optional<V> find_(node* root, K k) {
     auto [gp, p, cptr, l, pos] = find_location(root, k);
