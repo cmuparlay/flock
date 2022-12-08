@@ -265,6 +265,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       
       if (verbose) std::cout << "round " << i << std::endl;
       if (fixed_time) {
+        size_t initial_size = n;
 	if (balanced_tree) {
 	  auto x = parlay::sort(parlay::remove_duplicates(a.head(n)));
 	  auto y = x.head(x.size());
@@ -279,18 +280,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	    parlay::parallel_for(0, n, [&] (size_t i) {
 					  os.insert(tr, a[i], 123); });
 
-      if (do_check) {
-        //size_t expected = parlay::remove_duplicates(a.head(n)).size();
-        size_t expected = n;
-        size_t got = os.check(tr);
-        if (expected != got) {
-          std::cout << "expected " << expected
-              << " keys after insertion, found " << got << std::endl;
-          abort();
-        } else if(verbose) {
-          std::cout << "CHECK PASSED" << std::endl;
-        }
-      }
+      // if (do_check) {
+      //   //size_t expected = parlay::remove_duplicates(a.head(n)).size();
+      //   size_t expected = n;
+      //   size_t got = os.check(tr);
+      //   if (expected != got) {
+      //     std::cout << "expected " << expected
+      //         << " keys after insertion, found " << got << std::endl;
+      //     abort();
+      //   } else if(verbose) {
+      //     std::cout << "CHECK PASSED" << std::endl;
+      //   }
+      // }
 
       parlay::parallel_for(0, 2*nn, [&] (size_t i) {
             auto k = a[parlay::hash64(i+3*nn) % nn];
@@ -302,6 +303,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         //size_t expected = parlay::remove_duplicates(a.head(n)).size();
         size_t expected = n;
         size_t got = os.check(tr);
+        initial_size = got;
         double ratio = 1.0*got/expected;
         if (ratio < 0.9 || ratio > 1.1) {
           std::cout << "expected approxiamtely " << expected
@@ -455,7 +457,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	    }
 
 	    if (n + updates != final_cnt) {
-	      std::cout << "bad size: intial size = " << n 
+	      std::cout << "bad size: intial size = " << initial_size 
 			<< ", added " << updates
 			<< ", final size = " << final_cnt 
 			<< std::endl;
