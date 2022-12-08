@@ -252,7 +252,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     if (shuffle) os.shuffle(n);
     auto tr = os.empty(buckets);
 
-    for (int i = 0; i < rounds+1; i++) {
+    for (int i = 1; i < rounds+1; i++) {
       long len;
       if (do_check) {
 	size_t len = os.check(tr);
@@ -277,23 +277,46 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 					  os.remove(tr, a[i]); });
 	  } else {
 	    parlay::parallel_for(0, n, [&] (size_t i) {
-					 os.insert(tr, a[i], 123); });
+					  os.insert(tr, a[i], 123); });
+
+      if (do_check) {
+        //size_t expected = parlay::remove_duplicates(a.head(n)).size();
+        size_t expected = n;
+        size_t got = os.check(tr);
+        if (expected != got) {
+          std::cout << "expected " << expected
+              << " keys after insertion, found " << got << std::endl;
+          abort();
+        } else if(verbose) {
+          std::cout << "CHECK PASSED" << std::endl;
+        }
+      }
+
+      parlay::parallel_for(0, 2*nn, [&] (size_t i) {
+            auto k = a[parlay::hash64(i+3*nn) % nn];
+            if(i%2==0) os.insert(tr, k, 123); 
+            else os.remove(tr, k);
+      });
+
+      if (do_check) {
+        //size_t expected = parlay::remove_duplicates(a.head(n)).size();
+        size_t expected = n;
+        size_t got = os.check(tr);
+        double ratio = 1.0*got/expected;
+        if (ratio < 0.9 || ratio > 1.1) {
+          std::cout << "expected approxiamtely " << expected
+              << " keys after random inserts and deletes, found " << got << std::endl;
+          std::cout << "ratio " << ratio << std::endl;
+          abort();
+        } else if(verbose) {
+          std::cout << "CHECK PASSED" << std::endl;
+        }
+      }
 	  }
 	}
 	//long start_timestamp = global_stamp.get_stamp();
   
-        if (do_check) {
-          //size_t expected = parlay::remove_duplicates(a.head(n)).size();
-	  size_t expected = n;
-          size_t got = os.check(tr);
-          if (expected != got) {
-            std::cout << "expected " << expected
-                << " keys after insertion, found " << got << std::endl;
-            abort();
-          } else if(verbose) {
-            std::cout << "CHECK PASSED" << std::endl;
-          }
-        }
+
         parlay::sequence<size_t> totals(p);
 	parlay::sequence<long> addeds(p);
 	parlay::sequence<long> range_counts(p);
