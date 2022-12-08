@@ -456,7 +456,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 			<< std::endl;
 	    }
 
-	    if (n + updates != final_cnt) {
+	    if (initial_size + updates != final_cnt) {
 	      std::cout << "bad size: intial size = " << initial_size 
 			<< ", added " << updates
 			<< ", final size = " << final_cnt 
