@@ -20,11 +20,12 @@ protected:
         Treap::Deallocate();
     }
 
-    void insertHelper(int val) {
-        treap = treap->immutableInsert(val);
+    void insertHelper(long val) {
+        bool success;
+        treap = treap->immutableInsert(val, &success);
     }
 
-    bool removeHelper(int val) {
+    bool removeHelper(long val) {
         bool success;
 
         treap = treap->immutableRemove(val, &success);
@@ -88,7 +89,7 @@ TEST_F(TreapTest, RemoveNonExisting) {
 TEST_F(TreapTest, FillingToLimit) {
     ASSERT_EQ(treap->getSize(), 0);
 
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         insertHelper(i);
         ASSERT_EQ(i, treap->getSize());
         ASSERT_TRUE(treap->contains(i));
@@ -111,14 +112,14 @@ TEST_F(TreapTest, FillingAndEmptying) {
     ASSERT_EQ(treap->getSize(), 0);
 
     // Fill the treap
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         insertHelper(i);
         ASSERT_EQ(i, treap->getSize());
         ASSERT_TRUE(treap->contains(i));
     }
 
     // Empty the treap
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         ASSERT_TRUE(removeHelper(i));
         ASSERT_EQ(TREAP_NODES - i, treap->getSize());
         ASSERT_FALSE(treap->contains(i));
@@ -129,20 +130,20 @@ TEST_F(TreapTest, FullSplit) {
     ASSERT_EQ(treap->getSize(), 0);
 
     // Fill the treap
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         insertHelper(i);
         ASSERT_EQ(i, treap->getSize());
         ASSERT_TRUE(treap->contains(i));
     }
-    int medianVal = (TREAP_NODES + 1) / 2;
+    long medianVal = (TREAP_NODES + 1) / 2;
 
     // Split the treap
-    int actualSplit = treap->split(&left, &right);
+    long actualSplit = treap->split(&left, &right);
 
     // The split is non-deterministic, but there are certain properties that must hold. Test for these
 
     // Test that all numbers are in one of the two treaps
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         bool inLeft = left->contains(i);
         bool inRight = right->contains(i);
 
@@ -154,11 +155,11 @@ TEST_F(TreapTest, FullSplit) {
     }
 
     // Test that all numbers in the left treap are smaller than in the right treap
-    int minInt = numeric_limits<int>::min();
-    int maxInt = numeric_limits<int>::max();
-    int largestInLeft = minInt;
-    int smallestInRight = maxInt;
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    long minlong = numeric_limits<long>::min();
+    long maxlong = numeric_limits<long>::max();
+    long largestInLeft = minlong;
+    long smallestInRight = maxlong;
+    for (long i = 1; i <= TREAP_NODES; i++) {
         if (left->contains(i) && i > largestInLeft) {
             largestInLeft = i;
         }
@@ -197,15 +198,15 @@ TEST_F(TreapTest, MergeFull) {
     ASSERT_EQ(0, left->getSize());
     ASSERT_EQ(0, right->getSize());
 
-    int halfSize = TREAP_NODES / 2;
+    long halfSize = TREAP_NODES / 2;
 
-    // Insert half of the nodes into the left, and half into the right
-    for (int i = 1; i <= halfSize; i++) {
+    // Insert half of the nodes longo the left, and half longo the right
+    for (long i = 1; i <= halfSize; i++) {
         left->sequentialInsert(i);
         ASSERT_EQ(i, left->getSize());
         ASSERT_TRUE(left->contains(i));
     }
-    for (int i = halfSize + 1; i <= TREAP_NODES; i++) {
+    for (long i = halfSize + 1; i <= TREAP_NODES; i++) {
         right->sequentialInsert(i);
         ASSERT_EQ(i - halfSize, right->getSize());
         ASSERT_TRUE(right->contains(i));
@@ -215,7 +216,7 @@ TEST_F(TreapTest, MergeFull) {
     merged = Treap::merge(left, right);
 
     // Ensure all values make it to the merged Treap
-    for (int i = 1; i <= TREAP_NODES; i++) {
+    for (long i = 1; i <= TREAP_NODES; i++) {
         ASSERT_TRUE(merged->contains(i));
     }
     ASSERT_EQ(TREAP_NODES, merged->getSize());

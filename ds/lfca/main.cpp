@@ -35,9 +35,9 @@ struct OpWeights {
     double removeWeight;
     double lookupWeight;
     double rangeQueryWeight;
-    int rangeQuerySize;
+    long rangeQuerySize;
 
-    OpWeights(double insertWeight, double removeWeight, double lookupWeight, double rangeQueryWeight, int rangeQuerySize) {
+    OpWeights(double insertWeight, double removeWeight, double lookupWeight, double rangeQueryWeight, long rangeQuerySize) {
         this->insertWeight = insertWeight;
         this->removeWeight = removeWeight;
         this->lookupWeight = lookupWeight;
@@ -46,28 +46,28 @@ struct OpWeights {
     }
 };
 
-static mt19937 randEngine {(unsigned int)time(NULL)};
-static uniform_int_distribution<int> valDist {numeric_limits<int>::min(), numeric_limits<int>::max()};
+static mt19937 randEngine {(unsigned long)time(NULL)};
+static uniform_int_distribution<long> valDist {numeric_limits<long>::min(), numeric_limits<long>::max()};
 
-Operation getRandOp(discrete_distribution<int> opDist) {
-    int randNum = opDist(randEngine);
+Operation getRandOp(discrete_distribution<long> opDist) {
+    long randNum = opDist(randEngine);
     return (Operation)randNum;
 }
 
 struct RandomOpVals {
-    vector<int> insertVals;
-    vector<int> removeVals;
-    vector<int> lookupVals;
-    vector<int> rangeQueryMinVals;
-    vector<int> rangeQueryMaxVals;
-    vector<int> randomOps;
+    vector<long> insertVals;
+    vector<long> removeVals;
+    vector<long> lookupVals;
+    vector<long> rangeQueryMinVals;
+    vector<long> rangeQueryMaxVals;
+    vector<long> randomOps;
 
     RandomOpVals(int numOps, OpWeights weights) {
         // Create distribution of operations
-        discrete_distribution<int> opDist {weights.insertWeight, weights.removeWeight, weights.lookupWeight, weights.rangeQueryWeight};
+        discrete_distribution<long> opDist {weights.insertWeight, weights.removeWeight, weights.lookupWeight, weights.rangeQueryWeight};
 
         // Create range query distribution based on the range query size. This ensures the range never exceeds the max integer value
-        uniform_int_distribution<int> rqDist {numeric_limits<int>::min(), numeric_limits<int>::max() - weights.rangeQuerySize};
+        uniform_int_distribution<long> rqDist {numeric_limits<long>::min(), numeric_limits<long>::max() - weights.rangeQuerySize};
 
         // Pre-allocate space
         randomOps.reserve(numOps);
@@ -81,7 +81,7 @@ struct RandomOpVals {
         for (int i = 0; i < numOps; i++) {
             insertVals.push_back(valDist(randEngine));
 
-            int rangeQueryMin = rqDist(randEngine);
+            long rangeQueryMin = rqDist(randEngine);
 
             rangeQueryMinVals.push_back(rangeQueryMin);
             rangeQueryMaxVals.push_back(rangeQueryMin + weights.rangeQuerySize);
@@ -100,7 +100,7 @@ struct RandomOpVals {
 
 static void mixedThread(SearchTree *tree, int numOps, RandomOpVals *randomOpVals) {
     try {
-        int op;
+        long op;
         for (int i = 0; i < numOps; i++) {
             op = randomOpVals->randomOps.at(i);
 

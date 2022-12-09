@@ -19,18 +19,17 @@
 using namespace std;
 
 // Forward declare helper functions as needed
-node *find_base_stack(node *n, int i, stack<node *> *s);
-node *find_base_node(node *n, int i);
+node *find_base_stack(node *n, long i, stack<node *> *s);
+node *find_base_node(node *n, long i);
 node *leftmost_and_stack(node *n, stack<node *> *s);
 
 // Helper functions for do_update
-Treap *treap_insert(Treap *treap, int val, bool *result) {
-    Treap *newTreap = treap->immutableInsert(val);
-    *result = true;  // Inserts always succeed
+Treap *treap_insert(Treap *treap, long val, bool *result) {
+    Treap *newTreap = treap->immutableInsert(val, result);
     return newTreap;
 }
 
-Treap *treap_remove(Treap *treap, int val, bool *result) {
+Treap *treap_remove(Treap *treap, long val, bool *result) {
     Treap *newTreap = treap->immutableRemove(val, result);
     return newTreap;
 }
@@ -145,7 +144,7 @@ void LfcaTree::adapt_if_needed(node *b) {
     }
 }
 
-bool LfcaTree::do_update(Treap *(*u)(Treap *, int, bool *), int i) {
+bool LfcaTree::do_update(Treap *(*u)(Treap *, long, bool *), long i) {
     contention_info cont_info = uncontened;
 
     while (true) {
@@ -186,20 +185,20 @@ LfcaTree::LfcaTree() {
     root.store(rootNode);
 }
 
-void LfcaTree::insert(int i) {
-    do_update(treap_insert, i);
+bool LfcaTree::insert(long i) {
+    return do_update(treap_insert, i);
 }
 
-bool LfcaTree::remove(int i) {
+bool LfcaTree::remove(long i) {
     return do_update(treap_remove, i);
 }
 
-bool LfcaTree::lookup(int i) {
+bool LfcaTree::lookup(long i) {
     node *base = find_base_node(root.load(), i);
     return base->data->contains(i);
 }
 
-vector<int> LfcaTree::rangeQuery(int lo, int hi) {
+vector<long> LfcaTree::rangeQuery(long lo, long hi) {
     return all_in_range(lo, hi, nullptr);
 }
 
@@ -218,7 +217,7 @@ node *find_next_base_stack(stack<node *> *s) {
         return leftmost_and_stack(t->right.load(), s);
     }
 
-    int be_greater_than = t->key;
+    long be_greater_than = t->key;
     while (true) {
         if (t->valid.load() && (t->key > be_greater_than)) {
             return leftmost_and_stack(t->right.load(), s);
@@ -238,7 +237,7 @@ node *find_next_base_stack(stack<node *> *s) {
     return nullptr;
 }
 
-node *new_range_base(node *b, int lo, int hi, rs *s) {
+node *new_range_base(node *b, long lo, long hi, rs *s) {
     // Copy the other node
     node *new_base = node::New(*b);
 
@@ -250,7 +249,7 @@ node *new_range_base(node *b, int lo, int hi, rs *s) {
     return new_base;
 }
 
-vector<int> LfcaTree::all_in_range(int lo, int hi, rs *help_s) {
+vector<long> LfcaTree::all_in_range(long lo, long hi, rs *help_s) {
     stack<node *> s;
     stack<node *> backup_s;
     vector<node *> done;
@@ -327,13 +326,13 @@ find_first:
     }
 
     // stack_array[0] gets the item at the bottom of the stack. Replicate this with a vector
-    vector<int> *res = new vector<int>(done.front()->data->rangeQuery(lo, hi));  // done->stack_array[0]->data;
+    vector<long> *res = new vector<long>(done.front()->data->rangeQuery(lo, hi));  // done->stack_array[0]->data;
     for (size_t i = 1; i < done.size(); i++) {
-        vector<int> resTemp = done.at(i)->data->rangeQuery(lo, hi);
+        vector<long> resTemp = done.at(i)->data->rangeQuery(lo, hi);
         res->insert(end(*res), begin(resTemp), end(resTemp));
     }
 
-    vector<int> *expectedResult = NOT_SET;
+    vector<long> *expectedResult = NOT_SET;
     if (my_s->result.compare_exchange_strong(expectedResult, res)) {
         if (done.size() > 1) {
             my_s->more_than_one_base.store(true);
@@ -511,7 +510,7 @@ void LfcaTree::high_contention_adaptation(node *b) {
     // Split the treap
     Treap *leftTreap;
     Treap *rightTreap;
-    int splitVal = b->data->split(&leftTreap, &rightTreap);
+    long splitVal = b->data->split(&leftTreap, &rightTreap);
 
     // Create left base node
     node *leftNode = node::New();
@@ -536,7 +535,7 @@ void LfcaTree::high_contention_adaptation(node *b) {
 }
 
 // Auxilary functions
-node *find_base_node(node *n, int i) {
+node *find_base_node(node *n, long i) {
     while (n->type == route) {
         if (i <= n->key) {
             n = n->left.load();
@@ -549,7 +548,7 @@ node *find_base_node(node *n, int i) {
     return n;
 }
 
-node *find_base_stack(node *n, int i, stack<node *> *s) {
+node *find_base_stack(node *n, long i, stack<node *> *s) {
     // Empty the stack
     while (s->size() > 0) {
         s->pop();

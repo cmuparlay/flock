@@ -13,15 +13,16 @@ using namespace std;
 
 #define TREAP_NODES 64
 
-typedef int TreapIndex;
+typedef long TreapIndex;
 const TreapIndex NullNode = -1;
 const TreapIndex ControlNode = TREAP_NODES;  // The extra node allocated beyond the size of the treap
 
 class Treap : public Preallocatable<Treap> {
 private:
     struct TreapNode {
-        int val;
-        int weight;
+        long val;
+        long payload;
+        long weight;
 
         TreapIndex parent {NullNode};
         TreapIndex left {NullNode};
@@ -40,11 +41,11 @@ private:
 
     void moveNode(TreapIndex srcIndex, TreapIndex dstIndex);
 
-    TreapIndex createNewNode(int val);
+    TreapIndex createNewNode(long val);
     TreapIndex transferNodesFrom(Treap *other, TreapIndex rootIndex);
 
     void bstInsert(TreapIndex index);
-    TreapIndex bstFind(int val);
+    TreapIndex bstFind(long val);
 
     void leftRotate(TreapIndex index);
     void rightRotate(TreapIndex index);
@@ -52,29 +53,29 @@ private:
     void moveUp(TreapIndex index);
     void moveDown(TreapIndex index);
 
-    void insert(int val);
-    bool remove(int val);
+    bool insert(long val);
+    bool remove(long val);
 
-    int getMedianVal();
+    long getMedianVal();
 
 public:
-    Treap *immutableInsert(int val);
-    Treap *immutableRemove(int val, bool *success);
+    Treap *immutableInsert(long val, bool *success);
+    Treap *immutableRemove(long val, bool *success);
 
-    bool contains(int val);
+    bool contains(long val);
 
-    vector<int> rangeQuery(int min, int max);
+    vector<long> rangeQuery(long min, long max);
 
     int getSize();
-    int getMaxValue();
+    long getMaxValue();
 
     static Treap *merge(Treap *left, Treap *right);
-    int split(Treap **left, Treap **right);
+    long split(Treap **left, Treap **right);
 
-    void sequentialInsert(int val);
-    bool sequentialRemove(int val);
+    void sequentialInsert(long val);
+    bool sequentialRemove(long val);
 
-    int getRoot();
+    long getRoot();
 
     Treap *operator=(const Treap &other);
 };

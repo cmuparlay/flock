@@ -60,12 +60,12 @@ TEST_F(LfcaTreeTest, InsertAndRemoveAndLookup) {
 }
 
 TEST_F(LfcaTreeTest, RangeQuery) {
-    for (int i = 1; i <= 9; i++) {
+    for (long i = 1; i <= 9; i++) {
         lfcaTree->insert(i);
     }
 
-    vector<int> expectedQuery = {3, 4, 5, 6, 7, 8, 9};
-    vector<int> actualQuery = lfcaTree->rangeQuery(3, 100);
+    vector<long> expectedQuery = {3, 4, 5, 6, 7, 8, 9};
+    vector<long> actualQuery = lfcaTree->rangeQuery(3, 100);
     sort(actualQuery.begin(), actualQuery.end());
     EXPECT_EQ(expectedQuery, actualQuery);
 
@@ -81,41 +81,41 @@ TEST_F(LfcaTreeTest, RangeQuery) {
 }
 
 TEST_F(LfcaTreeTest, RangeQueryEmptyTree) {
-    vector<int> expectedQuery = { };
-    vector<int> actualQuery = lfcaTree->rangeQuery(0, 0);
+    vector<long> expectedQuery = { };
+    vector<long> actualQuery = lfcaTree->rangeQuery(0, 0);
     EXPECT_EQ(expectedQuery, actualQuery);
 }
 
 TEST_F(LfcaTreeTest, SplitAndMergeBulkTest) {
-    for (int i = 0; i < 1024; i++) {
+    for (long i = 0; i < 1024; i++) {
         lfcaTree->insert(i);
     }
 
-    for (int i = 0; i < 1024; i++) {
+    for (long i = 0; i < 1024; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 
-    for (int i = 0; i < 1024; i++) {
+    for (long i = 0; i < 1024; i++) {
         lfcaTree->remove(i);
-        for (int j = i + 1; j < 1024; j++)
+        for (long j = i + 1; j < 1024; j++)
         {
             ASSERT_TRUE(lfcaTree->lookup(j));
         }
     }
 
-    for (int i = 0; i < 1024; i++) {
+    for (long i = 0; i < 1024; i++) {
         ASSERT_FALSE(lfcaTree->lookup(i));
     }
 }
 
 TEST_F(LfcaTreeTest, RangeQueryBulkTest) {
-    for (int i = 0; i < 1024; i++) {
+    for (long i = 0; i < 1024; i++) {
         lfcaTree->insert(i);
     }
 
-    vector<int> expectedQuery = {};
-    vector<int> actualQuery;
-    for (int i = 100; i < 1024; i++) {
+    vector<long> expectedQuery = {};
+    vector<long> actualQuery;
+    for (long i = 100; i < 1024; i++) {
         expectedQuery.push_back(i);
         actualQuery = lfcaTree->rangeQuery(100, i);
         sort(actualQuery.begin(), actualQuery.end());
@@ -125,30 +125,30 @@ TEST_F(LfcaTreeTest, RangeQueryBulkTest) {
 
 TEST_F(LfcaTreeTest, LowContentionMergeFailure) {
     // Fill up the base node
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         lfcaTree->insert(i);
     }
 
     // Add a quarter of the nodes for each treap to the left and right side of the split base node
-    int oneQuarterOfRange = TREAP_NODES / 4;
-    for (int i = -1; i > -oneQuarterOfRange; i--) {
+    long oneQuarterOfRange = TREAP_NODES / 4;
+    for (long i = -1; i > -oneQuarterOfRange; i--) {
         lfcaTree->insert(i);
     }
-    for (int i = TREAP_NODES; i < TREAP_NODES + oneQuarterOfRange; i++) {
+    for (long i = TREAP_NODES; i < TREAP_NODES + oneQuarterOfRange; i++) {
         lfcaTree->insert(i);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the left base node without conflict
-    int uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
-    int testVal = 0;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    long uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
+    long testVal = 0;
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the right base node without conflict
     testVal = TREAP_NODES - 1;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
@@ -158,14 +158,14 @@ TEST_F(LfcaTreeTest, LowContentionMergeFailure) {
 
 TEST_F(LfcaTreeTest, LowContentionMergeLeft) {
     // Fill up the base node
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         lfcaTree->insert(i);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the left base node without conflict
-    int uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
-    int testVal = 0;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    long uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
+    long testVal = 0;
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
@@ -173,21 +173,21 @@ TEST_F(LfcaTreeTest, LowContentionMergeLeft) {
     // No exception should be thrown
 
     // Make sure all values can be found after the merge
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }
 
 TEST_F(LfcaTreeTest, LowContentionMergeRight) {
     // Fill up the base node
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         lfcaTree->insert(i);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the right base node without conflict
-    int uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
-    int testVal = TREAP_NODES - 1;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    long uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
+    long testVal = TREAP_NODES - 1;
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
@@ -195,26 +195,26 @@ TEST_F(LfcaTreeTest, LowContentionMergeRight) {
     // No exception should be thrown
 
     // Make sure all values can be found after the merge
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }
 
 TEST_F(LfcaTreeTest, LowContentionMergeLeftWithRightRoute) {
     // Fill up the base node
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         lfcaTree->insert(i);
     }
 
     // Split the right base node again by filling it up with more than it can hold
-    for (int i = TREAP_NODES; i < TREAP_NODES * 2; i++) {
+    for (long i = TREAP_NODES; i < TREAP_NODES * 2; i++) {
         lfcaTree->insert(i);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the left base node without conflict
-    int uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
-    int testVal = 0;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    long uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
+    long testVal = 0;
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
@@ -222,26 +222,26 @@ TEST_F(LfcaTreeTest, LowContentionMergeLeftWithRightRoute) {
     // No exception should be thrown
 
     // Make sure all values can be found after the merge
-    for (int i = 0; i < TREAP_NODES * 2; i++) {
+    for (long i = 0; i < TREAP_NODES * 2; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }
 
 TEST_F(LfcaTreeTest, LowContentionMergeRightWithLeftRoute) {
     // Fill up the base node
-    for (int i = 0; i < TREAP_NODES; i++) {
+    for (long i = 0; i < TREAP_NODES; i++) {
         lfcaTree->insert(i);
     }
 
     // Split the left base node again by filling it up with more than it can hold
-    for (int i = -1; i > -TREAP_NODES; i--) {
+    for (long i = -1; i > -TREAP_NODES; i--) {
         lfcaTree->insert(i);
     }
 
     // Attempt to force a low contention merge due to a large number of operations on the right base node without conflict
-    int uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
-    int testVal = TREAP_NODES - 1;
-    for (int i = 0; i < uncontendedOpsNeeded; i++) {
+    long uncontendedOpsNeeded = abs(LOW_CONT / LOW_CONT_CONTRIB);
+    long testVal = TREAP_NODES - 1;
+    for (long i = 0; i < uncontendedOpsNeeded; i++) {
         lfcaTree->remove(testVal);
         lfcaTree->insert(testVal);
     }
@@ -249,19 +249,19 @@ TEST_F(LfcaTreeTest, LowContentionMergeRightWithLeftRoute) {
     // No exception should be thrown
 
     // Make sure all values can be found after the merge
-    for (int i = -TREAP_NODES + 1; i < TREAP_NODES; i++) {
+    for (long i = -TREAP_NODES + 1; i < TREAP_NODES; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }
 
-static void insertThread(LfcaTree *tree, int start, int end, int delta) {
-    for (int i = start; i <= end; i += delta) {
+static void insertThread(LfcaTree *tree, long start, long end, long delta) {
+    for (long i = start; i <= end; i += delta) {
         tree->insert(i);
     }
 }
 
-static void removeThread(LfcaTree *tree, int start, int end, int delta) {
-    for (int i = start; i <= end; i += delta) {
+static void removeThread(LfcaTree *tree, long start, long end, long delta) {
+    for (long i = start; i <= end; i += delta) {
         tree->remove(i);
     }
 }
@@ -270,15 +270,15 @@ static void removeThread(LfcaTree *tree, int start, int end, int delta) {
 TEST_F(LfcaTreeTest, ParallelInsert) {
     vector<thread> threads;
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.push_back(thread(insertThread, lfcaTree, PARALLEL_START + i, PARALLEL_END, NUM_THREADS));
     }
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.at(i).join();
     }
 
-    for (int i = 0; i <= PARALLEL_END; i++) {
+    for (long i = 0; i <= PARALLEL_END; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }
@@ -286,55 +286,55 @@ TEST_F(LfcaTreeTest, ParallelInsert) {
 
 TEST_F(LfcaTreeTest, ParallelRemove) {
     // Insert all elements
-    for (int i = PARALLEL_START; i <= PARALLEL_END; i++) {
+    for (long i = PARALLEL_START; i <= PARALLEL_END; i++) {
         lfcaTree->insert(i);
     }
 
     vector<thread> threads;
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.push_back(thread(removeThread, lfcaTree, PARALLEL_START + i, PARALLEL_END, NUM_THREADS));
     }
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.at(i).join();
     }
 
-    for (int i = 0; i <= PARALLEL_END; i++) {
+    for (long i = 0; i <= PARALLEL_END; i++) {
         ASSERT_FALSE(lfcaTree->lookup(i));
     }
 }
 
 TEST_F(LfcaTreeTest, ParallelRemovePartial) {
     // Insert all elements
-    for (int i = PARALLEL_START; i <= PARALLEL_END; i++) {
+    for (long i = PARALLEL_START; i <= PARALLEL_END; i++) {
         lfcaTree->insert(i);
     }
 
     // Only remove the middle 50% of the values from the tree
-    int oneQuarterOfRange = (PARALLEL_END - PARALLEL_START) / 4;
-    int removeStart = PARALLEL_START + oneQuarterOfRange;
-    int removeEnd = PARALLEL_END - oneQuarterOfRange;
+    long oneQuarterOfRange = (PARALLEL_END - PARALLEL_START) / 4;
+    long removeStart = PARALLEL_START + oneQuarterOfRange;
+    long removeEnd = PARALLEL_END - oneQuarterOfRange;
 
     vector<thread> threads;
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.push_back(thread(removeThread, lfcaTree, removeStart + i, removeEnd, NUM_THREADS));
     }
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (long i = 0; i < NUM_THREADS; i++) {
         threads.at(i).join();
     }
 
-    for (int i = 0; i < removeStart; i++) {
+    for (long i = 0; i < removeStart; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 
-    for (int i = removeStart; i <= removeEnd; i++) {
+    for (long i = removeStart; i <= removeEnd; i++) {
         ASSERT_FALSE(lfcaTree->lookup(i));
     }
 
-    for (int i = removeEnd + 1; i <= PARALLEL_END; i++) {
+    for (long i = removeEnd + 1; i <= PARALLEL_END; i++) {
         ASSERT_TRUE(lfcaTree->lookup(i));
     }
 }

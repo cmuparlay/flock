@@ -5,7 +5,7 @@
 
 #include "mrlocktree.h"
 
-const int Empty = numeric_limits<int>::min();
+const long Empty = numeric_limits<long>::min();
 const int TreapSplitThreshold = TREAP_NODES;
 const int TreapMergeThreshold = TREAP_NODES / 2;
 
@@ -46,7 +46,7 @@ MrlockTree::~MrlockTree() {
     }
 }
 
-void MrlockTree::insert(int val) {
+bool MrlockTree::insert(long val) {
     // Acquire the lock
     ScopedMrLock lock(&mrlock, treeLock);
 
@@ -63,7 +63,8 @@ void MrlockTree::insert(int val) {
     }
 
     // Insert the value
-    temp->treap = temp->treap->immutableInsert(val);
+    bool success;
+    temp->treap = temp->treap->immutableInsert(val, &success);
 
     // If inserting causes the treap to become too large, split it in two
     if (temp->treap->getSize() >= TreapSplitThreshold) {
@@ -73,7 +74,7 @@ void MrlockTree::insert(int val) {
         Node *right = new Node(Empty);
         right->isRoute = false;
 
-        int splitVal = temp->treap->split(&left->treap, &right->treap);
+        long splitVal = temp->treap->split(&left->treap, &right->treap);
 
         temp->val = splitVal;
         temp->isRoute = true;
@@ -82,9 +83,10 @@ void MrlockTree::insert(int val) {
 
         temp->treap = nullptr;
     }
+    return success;
 }
 
-bool MrlockTree::remove(int val) {
+bool MrlockTree::remove(long val) {
     // Acquire the lock
     ScopedMrLock lock(&mrlock, treeLock);
 
@@ -128,7 +130,7 @@ bool MrlockTree::remove(int val) {
     return success;
 }
 
-bool MrlockTree::lookup(int val) {
+bool MrlockTree::lookup(long val) {
     // Acquire the lock
     ScopedMrLock lock(&mrlock, treeLock);
 
@@ -147,11 +149,11 @@ bool MrlockTree::lookup(int val) {
     return temp->treap->contains(val);
 }
 
-vector<int> MrlockTree::rangeQuery(int low, int high) {
+vector<long> MrlockTree::rangeQuery(long low, long high) {
     // Acquire the lock
     ScopedMrLock lock(&mrlock, treeLock);
 
-    vector<int> result;
+    vector<long> result;
     vector<Node *> nodesToCheck;
     nodesToCheck.push_back(head);
 
@@ -161,7 +163,7 @@ vector<int> MrlockTree::rangeQuery(int low, int high) {
 
         // If popped node is base node, perform range query on treap and add it to result.
         if (!temp->isRoute) {
-            vector<int> values = temp->treap->rangeQuery(low, high);
+            vector<long> values = temp->treap->rangeQuery(low, high);
             result.insert(result.end(), values.begin(), values.end());
             continue;
         }

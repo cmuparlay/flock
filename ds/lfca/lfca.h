@@ -14,8 +14,8 @@
 #define RANGE_CONTRIB 100         // ...
 #define HIGH_CONT 1000            // ...
 #define LOW_CONT -1000            // ...
-#define NOT_FOUND (node *)1       // Special pointers
-#define NOT_SET (vector<int> *)1  // ...
+#define NOT_FOUND (node *)1       // Special polongers
+#define NOT_SET (vector<long> *)1  // ...
 #define PREPARING (node *)0       // Used for join
 #define DONE (node *)1            // ...
 #define ABORTED (node *)2         // ...
@@ -36,7 +36,7 @@ enum node_type {
 
 // Data Structures
 struct rs : public Preallocatable<rs> {                                 // Result storage for range queries
-    atomic<vector<int> *> result{NOT_SET};  // The result
+    atomic<vector<long> *> result{NOT_SET};  // The result
     atomic<bool> more_than_one_base{false};
 
     rs *operator=(const rs &other) {
@@ -48,7 +48,7 @@ struct rs : public Preallocatable<rs> {                                 // Resul
 
     ~rs() {
         // Delete the result if it was set
-        vector<int> *result_local = result.load();
+        vector<long> *result_local = result.load();
         if (result_local != NOT_SET) {
             delete result_local;
         }
@@ -57,7 +57,7 @@ struct rs : public Preallocatable<rs> {                                 // Resul
 
 struct node : public Preallocatable<node> {
     // route_node
-    int key{0};                          // Split key
+    long key{0};                          // Split key
     atomic<node *> left{nullptr};              // < key
     atomic<node *> right{nullptr};             // >= key
     atomic<bool> valid{true};         // Used for join
@@ -78,8 +78,8 @@ struct node : public Preallocatable<node> {
     node *main_node = nullptr;  // The main node for the join
 
     // range_base
-    int lo = 0;
-    int hi = 0;  // Low and high key
+    long lo = 0;
+    long hi = 0;  // Low and high key
     rs *storage = nullptr;
 
     // node
@@ -117,8 +117,8 @@ class LfcaTree : public SearchTree {
 private:
     std::atomic<node *> root{nullptr};
 
-    bool do_update(Treap *(*u)(Treap *, int, bool *), int i);
-    std::vector<int> all_in_range(int lo, int hi, rs *help_s);
+    bool do_update(Treap *(*u)(Treap *, long, bool *), long i);
+    std::vector<long> all_in_range(long lo, long hi, rs *help_s);
     bool try_replace(node *b, node *new_b);
     node *secure_join(node *b, bool left);
     void complete_join(node *m);
@@ -131,10 +131,10 @@ private:
 public:
     LfcaTree();
 
-    void insert(int val);
-    bool remove(int val);
-    bool lookup(int val);
-    std::vector<int> rangeQuery(int low, int high);
+    bool insert(long val);
+    bool remove(long val);
+    bool lookup(long val);
+    std::vector<long> rangeQuery(long low, long high);
 };
 
 #endif /* _LFCA_H */

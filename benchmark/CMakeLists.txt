@@ -12,12 +12,25 @@ foreach(file ${BENCH_FILES})
 endforeach()
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
-set(FLOCK_BENCH "arttree" "btree" "dlist" "list") # "dlist" "hash_block")
+set(FLOCK_BENCH "arttree" "btree" "dlist" "list") # "dlist" "hash_block" )
 set(FLOCK_BENCH_USE_CAS "hash_block")
 set(FLOCK_BENCH_RECORDED_ONCE "btree" "list")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
 set(OTHER_LIST_BENCH "harris_list" "harris_list_opt")
+
+# compile LFCA
+
+set(
+    LFCA_SOURCE
+    ${PROJECT_SOURCE_DIR}/ds/lfca/lfca.cpp
+    ${PROJECT_SOURCE_DIR}/ds/lfca/treap.cpp
+)
+
+add_executable("lfca" ${LFCA_SOURCE} ${SOURCES})
+target_compile_definitions("lfca" PRIVATE "")
+target_link_libraries("lfca" PRIVATE verlib)
+target_include_directories("lfca" PRIVATE ${PROJECT_SOURCE_DIR}/ds/lfca)
 
 function(add_benchmark NAME STRUCT_NAME DEFS)
   add_executable(${NAME} ${SOURCES})

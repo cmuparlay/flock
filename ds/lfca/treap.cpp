@@ -8,11 +8,11 @@
 
 #include "treap.h"
 
-static const int NegInfinity = numeric_limits<int>::min();
-static const int PosInfinity = numeric_limits<int>::max();
+static const long NegInfinity = numeric_limits<long>::min();
+static const long PosInfinity = numeric_limits<long>::max();
 
 static thread_local mt19937 randEngine{(unsigned int)time(NULL)};
-static uniform_int_distribution<int> weightDist{NegInfinity + 1, PosInfinity - 1};
+static uniform_int_distribution<long> weightDist{numeric_limits<long>::min() + 1, numeric_limits<long>::max() - 1};
 
 /**
  * Copies another Treap
@@ -39,7 +39,7 @@ Treap *Treap::operator=(const Treap &other) {
  * @param dstIndex
  * The new node index to be replaced
  */
-void Treap::moveNode(int srcIndex, int dstIndex) {
+void Treap::moveNode(long srcIndex, long dstIndex) {
     if (srcIndex == dstIndex) {
         return;
     }
@@ -84,7 +84,7 @@ void Treap::moveNode(int srcIndex, int dstIndex) {
  * @return TreapIndex
  * The index of the created node
  */
-TreapIndex Treap::createNewNode(int val) {
+TreapIndex Treap::createNewNode(long val) {
     TreapIndex newNodeIndex = size++;
     Treap::TreapNode *newNode = &nodes[newNodeIndex];
     newNode->val = val;
@@ -348,7 +348,7 @@ void Treap::bstInsert(TreapIndex index) {
  * @return TreapIndex
  * The index of the node containing the search value, or NullNode if it could not be found
  */
-TreapIndex Treap::bstFind(int val) {
+TreapIndex Treap::bstFind(long val) {
     TreapIndex searchIndex = root;
     while (searchIndex != NullNode) {
         if (nodes[searchIndex].val == val) {
@@ -376,8 +376,15 @@ TreapIndex Treap::bstFind(int val) {
  * @param val
  * The value to insert
  */
-void Treap::insert(int val) {
+bool Treap::insert(long val) {
     // If the treap is full, new nodes can't be added
+    TreapIndex foundIndex = bstFind(val);
+
+    if (foundIndex != NullNode) {
+        // The value could not be found
+        return false;
+    }
+
     if (size == TREAP_NODES) {
         throw out_of_range("Treap is full");
     }
@@ -388,7 +395,7 @@ void Treap::insert(int val) {
     if (size == 1) {
         // This is the first node in the treap. Make the new node the root.
         root = newNodeIndex;
-        return;
+        return true;
     }
 
     // Perform BST insertion with the new node
@@ -396,6 +403,7 @@ void Treap::insert(int val) {
 
     // Move the new node up based on its weight
     moveUp(newNodeIndex);
+    return true;
 }
 
 /**
@@ -410,7 +418,7 @@ void Treap::insert(int val) {
  * @return false
  * If the node did not exist in the treap
  */
-bool Treap::remove(int val) {
+bool Treap::remove(long val) {
     // Search for the target value
     TreapIndex foundIndex = bstFind(val);
 
@@ -452,13 +460,13 @@ bool Treap::remove(int val) {
  * @return int
  * The median value
  */
-int Treap::getMedianVal() {
+long Treap::getMedianVal() {
     // There is no median for an empty Treap
     if (size == 0) {
         throw logic_error("Cannot calculate median of a Treap with no elements");
     }
 
-    vector<int> values;
+    vector<long> values;
 
     // Collect all values
     for (int i = 0; i < size; i++) {
@@ -471,7 +479,7 @@ int Treap::getMedianVal() {
     // Calculate the median
     if (size % 2 == 0) {
         // The median is the average of the two middle values
-        return (int)(values.at(size / 2 - 1) / 2.0) + (values.at(size / 2) / 2.0);  // Divide each term first to prevent overflow
+        return (long)(values.at(size / 2 - 1) / 2.0) + (values.at(size / 2) / 2.0);  // Divide each term first to prevent overflow
     }
     else {
         // The median is the middle value
@@ -488,12 +496,12 @@ int Treap::getMedianVal() {
  * @return Treap*
  * A pointer to a copy of the treap with the value inserted
  */
-Treap *Treap::immutableInsert(int val) {
+Treap *Treap::immutableInsert(long val, bool *success) {
     // Copy the current object
     Treap *newTreap = Treap::New(*this);
 
     // Insert the value in the copy
-    newTreap->insert(val);
+    *success = newTreap->insert(val);
 
     return newTreap;
 }
@@ -510,7 +518,7 @@ Treap *Treap::immutableInsert(int val) {
  * @return Treap*
  * A pointer to a copy of the treap with the value removed
  */
-Treap *Treap::immutableRemove(int val, bool *success) {
+Treap *Treap::immutableRemove(long val, bool *success) {
     // Copy the current object
     Treap *newTreap = Treap::New(*this);
 
@@ -532,7 +540,7 @@ Treap *Treap::immutableRemove(int val, bool *success) {
  * @return false
  * If the value is not in the treap
  */
-bool Treap::contains(int val) {
+bool Treap::contains(long val) {
     TreapIndex foundIndex = bstFind(val);
 
     return foundIndex != NullNode;
@@ -550,8 +558,8 @@ bool Treap::contains(int val) {
  * @return vector<int>
  * The values in the Treap between the minimum and maximum values
  */
-vector<int> Treap::rangeQuery(int min, int max) {
-    vector<int> values;
+vector<long> Treap::rangeQuery(long min, long max) {
+    vector<long> values;
 
     if (root == NullNode) {
         return values;
@@ -564,9 +572,9 @@ vector<int> Treap::rangeQuery(int min, int max) {
         TreapIndex currentIndex = nodesToCheck.back();
         nodesToCheck.pop_back();
 
-        int currentVal = nodes[currentIndex].val;
-        int currentLeft = nodes[currentIndex].left;
-        int currentRight = nodes[currentIndex].right;
+        long currentVal = nodes[currentIndex].val;
+        long currentLeft = nodes[currentIndex].left;
+        long currentRight = nodes[currentIndex].right;
 
         // Add this value if it is in range
         if (currentVal >= min && currentVal <= max) {
@@ -603,7 +611,7 @@ int Treap::getSize() {
  * @return int
  * The maximum value in the treap
  */
-int Treap::getMaxValue() {
+long Treap::getMaxValue() {
     if (size == 0) {
         throw logic_error("Cannot get the maximum value of an empty treap");
     }
@@ -662,9 +670,9 @@ Treap *Treap::merge(Treap *left, Treap *right) {
     TreapIndex rightRootIndex = mergedTreap->transferNodesFrom(right, right->root);
 
     // Calculate the average of the two roots
-    int leftRootVal = mergedTreap->nodes[leftRootIndex].val;
-    int rightRootVal = mergedTreap->nodes[rightRootIndex].val;
-    int avgVal = (int)((leftRootVal / 2.0) + (rightRootVal / 2.0));
+    long leftRootVal = mergedTreap->nodes[leftRootIndex].val;
+    long rightRootVal = mergedTreap->nodes[rightRootIndex].val;
+    long avgVal = (long)((leftRootVal / 2.0) + (rightRootVal / 2.0));
 
     // Add a dummy node to join the two treaps
     mergedTreap->nodes[ControlNode].val = avgVal;
@@ -705,14 +713,14 @@ Treap *Treap::merge(Treap *left, Treap *right) {
  * @returns
  * The value the treap was split at
  */
-int Treap::split(Treap **left, Treap **right) {
+long Treap::split(Treap **left, Treap **right) {
     if (size == 0) {
         throw logic_error("An empty treap cannot be split");
     }
 
     *left = Treap::New();
     *right = Treap::New();
-    int splitVal = getMedianVal();
+    long splitVal = getMedianVal();
 
     // Copy the current treap so it can be modified (the current treap should not be changed)
     Treap workingTreap(*this);
@@ -748,7 +756,7 @@ int Treap::split(Treap **left, Treap **right) {
  * @param val
  * The value to insert
  */
-void Treap::sequentialInsert(int val) {
+void Treap::sequentialInsert(long val) {
     insert(val);
 }
 
@@ -764,7 +772,7 @@ void Treap::sequentialInsert(int val) {
  * @return false
  * If the value was not in the Treap
  */
-bool Treap::sequentialRemove(int val) {
+bool Treap::sequentialRemove(long val) {
     return remove(val);
 }
 
@@ -774,6 +782,6 @@ bool Treap::sequentialRemove(int val) {
  * @return int
  * The value of the root of the treap
  */
-int Treap::getRoot() {
+long Treap::getRoot() {
     return nodes[root].val;
 }

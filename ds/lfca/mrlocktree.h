@@ -10,13 +10,13 @@ class MrlockTree : public SearchTree {
 private:
     struct Node {
         bool isRoute {true};
-        int val;
+        long val;
         Treap* treap {NULL};
 
         Node *left {NULL};
         Node *right {NULL};
 
-        Node(int val) {
+        Node(long val) {
             this->val = val;
         }
     };
@@ -46,10 +46,10 @@ public:
     MrlockTree();
     ~MrlockTree();
 
-    void insert(int val);
-    bool remove(int val);
-    bool lookup(int val);
-    vector<int> rangeQuery(int low, int high);
+    bool insert(long val);
+    bool remove(long val);
+    bool lookup(long val);
+    vector<long> rangeQuery(long low, long high);
 };
 
 #endif /* _MRLOCKTREE_H */

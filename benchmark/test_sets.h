@@ -280,18 +280,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	    parlay::parallel_for(0, n, [&] (size_t i) {
 					  os.insert(tr, a[i], 123); });
 
-      // if (do_check) {
-      //   //size_t expected = parlay::remove_duplicates(a.head(n)).size();
-      //   size_t expected = n;
-      //   size_t got = os.check(tr);
-      //   if (expected != got) {
-      //     std::cout << "expected " << expected
-      //         << " keys after insertion, found " << got << std::endl;
-      //     abort();
-      //   } else if(verbose) {
-      //     std::cout << "CHECK PASSED" << std::endl;
-      //   }
-      // }
+      if (do_check) {
+        //size_t expected = parlay::remove_duplicates(a.head(n)).size();
+        size_t expected = n;
+        size_t got = os.check(tr);
+        if (expected != got) {
+          std::cout << "expected " << expected
+              << " keys after insertion, found " << got << std::endl;
+          abort();
+        } else if(verbose) {
+          std::cout << "CHECK PASSED" << std::endl;
+        }
+      }
 
       parlay::parallel_for(0, 2*nn, [&] (size_t i) {
             auto k = a[parlay::hash64(i+3*nn) % nn];
