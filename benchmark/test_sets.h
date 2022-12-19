@@ -37,14 +37,17 @@ void test_persistence_concurrent(SetType& os) {
   parlay::parallel_for(0, num_threads, [&] (size_t tid) {
     if(tid == num_threads-1) {  // update thread
       std::cout << "starting to insert" << std::endl;
-      for(int i = 0; i < N; i++) 
+      for(int i = 0; i < N; i++) {
+        // std::cout << "inserting " << i << " " << a[i] << std::endl;
         os.insert(tr, a[i], i+1);
+      }
       std::cout << "starting to delete" << std::endl;
       for(int i = N-1; i >= 0; i--)
         os.remove(tr, a[i]);
       std::cout << "done updating" << std::endl;
       done = true;
-    } else {  // query threads
+    } 
+    else {  // query threads
       std::cout << "starting to query" << std::endl;
       int counter = 0;
       int counter2 = 0;
@@ -79,7 +82,8 @@ void test_persistence_concurrent(SetType& os) {
         std::cout << "not enough iterations by query thread" << std::endl;
         // abort();
       }
-    } }, 1);
+    } 
+  }, 1);
   os.retire(tr);
 // #endif
 }

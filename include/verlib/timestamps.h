@@ -2,6 +2,7 @@
 #include <limits>
 #include <atomic>
 #include "flock/epoch.h"
+#include <x86intrin.h>
 
 // code for timestamps for snapshots
 // namespace flck {
@@ -14,6 +15,25 @@ namespace vl {
 
 thread_local int read_delay = 1;
 thread_local int write_delay = 1;
+
+struct alignas(64) timestamp_hw {
+
+  TS rdtsc(){
+      unsigned int lo,hi;
+      __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+      return (TS) (((uint64_t)(hi & ~(1<<31)) << 32) | lo);
+  }
+
+  TS get_stamp() {return rdtsc();}
+  TS get_read_stamp() {
+    TS ts = rdtsc();
+    while(ts == rdtsc()) {}
+    return ts;
+  }
+  TS get_write_stamp() {return rdtsc();}
+  timestamp_hw() {}
+};
+
 
 struct alignas(64) timestamp_read {
   std::atomic<TS> stamp;
@@ -257,6 +277,8 @@ timestamp_read global_stamp;
 timestamp_read global_stamp{100};
 #elif WriteStamp
 timestamp_write global_stamp;
+#elif HWStamp
+timestamp_hw global_stamp;
 #elif NoIncStamp
 timestamp_no_inc global_stamp;
 #else
