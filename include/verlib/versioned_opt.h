@@ -80,6 +80,16 @@ private:
     return (IT) ptr;
   }
 
+  bool idempotent_cas(IT old_v, IT new_v) {
+#ifdef NoHelp
+    return v.cas(old_v, new_v);
+#else
+    v.cam(old_v, new_v);
+    return (v.load() == new_v ||
+	    ((plink*) strip_mark(new_v))->load_stamp() != tbd);
+#endif
+  }
+
 public:
 
   versioned_ptr(): v(nullptr) {}
@@ -172,7 +182,7 @@ public:
 	new_v = add_indirect_mark((V*) link_pool.new_obj(old_v, new_v));
       else newv->next_version = old_v;
 
-      bool succeeded = v.cas_ni(old_v, new_v);
+      bool succeeded = idempotent_cas(old_v, new_v);
 
       if(succeeded) {
         set_stamp(new_v);

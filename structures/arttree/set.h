@@ -328,7 +328,8 @@ struct Set {
 	    if (p->removed.load() || cptr->load() != c) return false;
 
   	    node* other_child = single_other_child(p,c);
-	    if (other_child != nullptr) {
+	    //node* other_child = nullptr;
+	    if (other_child != nullptr && gp->nt != Sparse) {
 	      // if parent will become singleton try to remove parent as well
 	      return gp->try_lock([=] {
 		  auto child_ptr = get_child(gp, p->key);

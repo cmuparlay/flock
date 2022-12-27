@@ -35,6 +35,16 @@ private:
     return link_pool.new_obj(zero_stamp, nullptr, (void*) ptr);
   }
 
+  bool idempotent_cas(version_link* old_v, version_link* new_v) {
+#ifdef NoHelp
+    return v.cas(old_v, new_v);
+#else
+    v.cam(old_v, new_v);
+    return (v.load() == new_v ||
+	    new_v->time_stamp.load() != tbd);
+#endif
+  }
+  
 public:
 
   versioned_ptr(): v(init_ptr(nullptr)) {}
@@ -77,7 +87,7 @@ public:
     if (old_v != old_link->value) return false;
     if (old_v == new_v) return true;
     version_link* new_link = link_pool.new_obj(tbd, old_link, (void*) new_v);
-    if (v.cas_ni(old_link, new_link)) {
+    if (idempotent_cas(old_link, new_link)) {
       set_stamp(new_link);
       link_pool.retire(old_link);
       return true;
