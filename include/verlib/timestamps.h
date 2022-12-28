@@ -28,9 +28,12 @@ struct alignas(64) timestamp_hw {
   TS get_read_stamp() {
     TS ts = rdtsc();
     while(ts == rdtsc()) {}
+    std::atomic_thread_fence(std::memory_order_seq_cst);
     return ts;
   }
-  TS get_write_stamp() {return rdtsc();}
+  TS get_write_stamp() {
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    return rdtsc();}
   timestamp_hw() {}
 };
 

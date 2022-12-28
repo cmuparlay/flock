@@ -21,11 +21,13 @@ public:
   V read_cur() {return v.load();}
   void store(V vv) { v = vv;}
   bool cas(V old_v, V new_v) {
-    return v.compare_exchange_strong(old_v,new_v);}
+    return (v.load() == old_v &&
+	    v.compare_exchange_strong(old_v, new_v));}
   bool cas_ni(V old_v, V new_v) {
-    return v.compare_exchange_strong(old_v,new_v);}
-  void cam(V oldv, V newv) {
-    v.compare_exchange_strong(oldv,newv);}
+    return cas(old_v,new_v);}
+  void cam(V old_v, V new_v) {
+    if (v.load() == old_v)
+      v.compare_exchange_strong(old_v,new_v);}
   V operator=(V b) {store(b); return b; }
 
   // compatibility with multiversioning

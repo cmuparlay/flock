@@ -60,7 +60,7 @@ else :
     tree_sizes = [100000,10000000]
     zipfians = [0, .99]
     mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [50,0,0,0]]
-    suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns", "_ver_nohelp_ls"]
+    suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns","_ver_hw", "_ver_nohelp_ls"]
     suffixes_ro = suffixes_all + ["_ver_ro_ls"]
 
 if test_only :
