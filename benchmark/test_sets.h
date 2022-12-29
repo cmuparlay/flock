@@ -224,7 +224,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       auto y = parlay::random_shuffle(xx);
       // don't use zero since it breaks setbench code
       // following lines seem problematic, y[i]+1 has the potential to overflow and pick 0, not sure why max_key is there, seems like it doesn't change anything.
-      a = parlay::tabulate(nn, [&] (size_t i) {return std::min(max_key,y[i]+1);}); 
+      a = parlay::tabulate(nn, [&] (size_t i) {return std::min(max_key-1,y[i])+1;}); 
     } else {
       max_key = nn;
       a = parlay::random_shuffle(parlay::tabulate(nn, [] (key_type i) {
