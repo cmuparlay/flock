@@ -102,7 +102,7 @@ struct Log {
   // this version tags 48th bit so value can be zero
   template<typename V>
   std::pair<V,bool> commit_value_safe(V val) {
-    static_assert(sizeof(V) <= 6 || std::is_pointer<V>::value,
+    static_assert(sizeof(V) <= 6 || std::is_pointer<V>::value ||
 		  "Type for commit_value_safe must be a pointer or at most 6 bytes");
     if (is_empty()) return std::make_pair(val, true);
     size_t set_bit = (1ul << 48);

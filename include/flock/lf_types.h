@@ -88,12 +88,19 @@ public:
 // this avoids the need for a version counter that is needed on a mutable value
 template <typename V>
 struct write_once {
-  static_assert(sizeof(V) <= 6 || std::is_pointer<V>::value,
+private:
+  constexpr static unsigned long set_bit= (1ul << 63);
+public:
+  static_assert(sizeof(V) <= 6 || std::is_pointer<V>::value ||
+		typeid(V) == typeid(unsigned long),
     "Type for write_once must be a pointer or at most 6 bytes");
   std::atomic<V> v;
   write_once(V initial) : v(initial) {}
   write_once() {}
-  V load() {return internal::lg.commit_value_safe(v.load()).first;}
+  V load() {
+    size_t x = internal::lg.commit_value((size_t) v.load() | set_bit).first;
+    return (V) (x & ~set_bit);
+  }
   V read() {return v.load();}
   void init(V vv) { v = vv; }
   void store(V vv) { v = vv; }
