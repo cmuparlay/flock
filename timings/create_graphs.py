@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # input_files = ["ip-172-31-45-236_10_25_22", "ip-172-31-40-178_10_25_22"]
-input_files = ["ip-172-31-35-105_12_04_22"]
-output_folder = "dec5"
+input_files = ["ip-172-31-35-105_12_28_22"]
+output_folder = "dec28"
 zipfs = [0, 0.99]
 
 param_list = ['ds','per','up','range','mfind','rs','n','p','z']
@@ -195,8 +195,8 @@ def print_table_timestamp_inc(throughput, parameters, ds, per, size, mix_percent
   output = title + '\n========================================= \n\n'
   f = open(output_folder + '/' + title + ".txt", "w")
 
-  colvals = ['_rs', '_ws', '_ls', '_ns', 'non_per']
-  headers = ['workload (up-mfind-range-rs)', 'read', 'write', 'lazy', 'no_inc', 'non_per']
+  colvals = ['_rs', '_ws', '_ls', '_hw', 'non_per']
+  headers = ['workload (up-mfind-range-rs)', 'read', 'write', 'lazy', 'hardware', 'non_per']
   data = []
   for mix_percent in mix_percents:
     row_data = [mix_percent]

@@ -15,14 +15,10 @@
 // versioned objects, ptr_type includes version chains
 #ifdef Recorded_Once
 #include "versioned_recorded_once.h"
-#elif Simple_Recorded_Once_
-#include "versioned_recorded_once_simple.h"
 #elif FullyIndirect
 #include "versioned_indirect.h"
-#elif Simple
-#include "versioned_simple.h"
 #else
-#include "versioned_opt.h"
+#include "versioned_hybrid.h"
 #endif
 
 # else // Not Versioned

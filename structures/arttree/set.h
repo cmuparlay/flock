@@ -17,7 +17,7 @@ struct Set {
   struct header : vl::versioned {
     K key;
     node_type nt;
-    flck::write_once<bool> removed;
+    flck::atomic_write_once<bool> removed;
     // every node has a byte position in the key
     // e.g. the root has byte_num = 0
     short int byte_num; 
@@ -58,7 +58,7 @@ struct Set {
   // has to be allocated.
   struct indirect_node : header, flck::lock {
     flck::atomic<int> num_used; // could be aba_free since only increases
-    flck::write_once<char> idx[256];  // -1 means empty
+    flck::atomic_write_once<char> idx[256];  // -1 means empty
     node_ptr ptr[64];
 
     bool is_full() {return num_used.load() == 64;}
@@ -394,7 +394,7 @@ struct Set {
     } else if (a->nt == Indirect) {
       for (int i = sb; i <= eb; i++) {
 	indirect_node* ai = (indirect_node*) a;
-	int o = ai->idx[i].read();
+	int o = ai->idx[i].load_ni();
 	if (o != -1) {
 	  range_internal(ai->ptr[o].read_snapshot(), add,
 				    start, end, a->byte_num);

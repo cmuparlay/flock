@@ -7,7 +7,7 @@ struct Set {
 
   struct alignas(64) node : vl::versioned, flck::lock {
     bool is_end;
-    flck::write_once<bool> removed;
+    flck::atomic_write_once<bool> removed;
     flck::atomic<node*> prev;
     vl::versioned_ptr<node> next;
     K key;

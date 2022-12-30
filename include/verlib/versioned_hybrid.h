@@ -13,15 +13,15 @@ void print_counts() {
 using IT = void*;
 
 struct versioned {
-  std::atomic<TS> time_stamp;
+  flck::atomic_write_once<TS> time_stamp;
   IT next_version;
   static constexpr size_t init_ptr = (1ul << 48) - 2;
   TS read_stamp() {return time_stamp.load();}
   TS load_stamp() {return flck::commit(time_stamp.load());}
   void set_stamp(TS t) {
     TS old = tbd;
-    if(time_stamp.load() == tbd)
-      time_stamp.compare_exchange_strong(old, t);
+    if(time_stamp.load_ni() == tbd)
+      time_stamp.cas_ni(old, t);
   }
   versioned() : time_stamp(tbd), next_version((IT) init_ptr) {}
   versioned(IT next) : time_stamp(tbd), next_version(next) {}
@@ -47,7 +47,7 @@ private:
   void shortcut(IT ptr) {
 #ifndef NoShortcut
     plink* ptr_u = (plink*) strip_mark(ptr);
-    if (ptr_u->read_stamp() <= done_stamp) {
+    if (ptr_u->time_stamp.load_ni() <= done_stamp) {
 #ifdef NoHelp
       if (v.cas(ptr, (IT) ptr_u->value))
 	link_pool.retire(ptr_u);
@@ -69,7 +69,7 @@ private:
 
   static IT set_stamp(IT ptr) {
     V* ptr_u = strip_mark(ptr);
-    if (ptr != nullptr && ptr_u->read_stamp() == tbd)
+    if (ptr != nullptr && ptr_u->time_stamp.load_ni() == tbd)
       ptr_u->set_stamp(global_stamp.get_write_stamp());
     return ptr;
   }

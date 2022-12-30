@@ -9,7 +9,7 @@ struct Set {
     K key;
     V value;
     bool is_end;
-    flck::write_once<bool> removed;
+    flck::atomic_write_once<bool> removed;
     flck::lock lck;
     node(K key, V value, node* next)
       : key(key), value(value), next(next), is_end(false), removed(false) {};

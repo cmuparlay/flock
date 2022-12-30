@@ -25,6 +25,7 @@ public:
   atomic() : v(TV::init(0)) {}
   void init(V vv) {v = TV::init(vv);}
   V load() {return TV::value(get_val(internal::lg));}
+  V load_ni() {return TV::value(v.load());}
   V read() {return TV::value(v.load());}
   V read_snapshot() {return TV::value(v.load());}
   void store(V vv) {TV::cas(v, get_val(internal::lg), vv);}
@@ -83,27 +84,23 @@ public:
   }
 };
 
-// a write once variable can be initialized and then written up to once after that
-// a read can happen before or after the write
-// this avoids the need for a version counter that is needed on a mutable value
+// cannot store the value 0
 template <typename V>
-struct write_once {
+struct atomic_write_once {
 private:
-  constexpr static unsigned long set_bit= (1ul << 63);
+   constexpr static unsigned long set_bit= (1ul << 63);
 public:
-  static_assert(sizeof(V) <= 6 || std::is_pointer<V>::value ||
-		typeid(V) == typeid(unsigned long),
-    "Type for write_once must be a pointer or at most 6 bytes");
   std::atomic<V> v;
-  write_once(V initial) : v(initial) {}
-  write_once() {}
-  V load() {
+  atomic_write_once(V initial) : v(initial) {}
+  atomic_write_once() {}
+  V load() { // set then mask high bit to ensure not zero
     size_t x = internal::lg.commit_value((size_t) v.load() | set_bit).first;
     return (V) (x & ~set_bit);
   }
-  V read() {return v.load();}
+  V load_ni() {return v.load();}
   void init(V vv) { v = vv; }
   void store(V vv) { v = vv; }
+  bool cas_ni(V exp_v, V new_v) {return v.compare_exchange_strong(exp_v, new_v);}
   V operator=(V b) { store(b); return b; }
   // inline operator V() { return load(); } // implicit conversion
 };

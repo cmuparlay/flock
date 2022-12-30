@@ -45,7 +45,7 @@ struct Set {
   // being removed.
   // A node needs to be copied to add, remove, or rebalance children.
   struct alignas(64) node : header {
-    flck::write_once<bool> removed;
+    flck::atomic_write_once<bool> removed;
     K keys[node_block_size-1];
     vl::versioned_ptr<node> children[node_block_size];
     flck::lock lck;

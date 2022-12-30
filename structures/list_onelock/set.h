@@ -21,7 +21,7 @@ struct Set {
     K key;
     V value;
     bool is_end;
-    write_once<bool> removed;
+    atomic_write_once<bool> removed;
     lock_type lck;
     node(K key, V value, node* next)
       : key(key), value(value), next(next), is_end(false), removed(false) {};
