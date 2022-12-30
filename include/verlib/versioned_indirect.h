@@ -6,7 +6,7 @@ namespace vl {
 struct versioned {};
 
 struct version_link {
-  std::atomic<TS> time_stamp;
+  flck::atomic_write_once<long> time_stamp;
   version_link* next_version;
   void* value;
   version_link() : time_stamp(tbd) {}
@@ -22,11 +22,11 @@ private:
   flck::atomic<version_link*> v;
 
   static version_link* set_stamp(version_link* ptr) {
-    if (ptr->time_stamp.load() == tbd) {
+    if (ptr->time_stamp.load_ni() == tbd) {
       TS old_t = tbd;
       TS new_t = global_stamp.get_write_stamp();
-      if (ptr->time_stamp.load() == tbd)
-        ptr->time_stamp.compare_exchange_strong(old_t, new_t);
+      if (ptr->time_stamp.load_ni() == tbd)
+        ptr->time_stamp.cas_ni(old_t, new_t);
     }
     return ptr;
   }
