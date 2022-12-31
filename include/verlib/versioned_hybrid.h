@@ -16,13 +16,6 @@ struct versioned {
   flck::atomic_write_once<TS> time_stamp;
   IT next_version;
   static constexpr size_t init_ptr = (1ul << 48) - 2;
-  TS read_stamp() {return time_stamp.load();}
-  TS load_stamp() {return flck::commit(time_stamp.load());}
-  void set_stamp(TS t) {
-    TS old = tbd;
-    if(time_stamp.load_ni() == tbd)
-      time_stamp.cas_ni(old, t);
-  }
   versioned() : time_stamp(tbd), next_version((IT) init_ptr) {}
   versioned(IT next) : time_stamp(tbd), next_version(next) {}
 };
@@ -69,13 +62,16 @@ private:
 
   static IT set_stamp(IT ptr) {
     V* ptr_u = strip_mark(ptr);
-    if (ptr != nullptr && ptr_u->time_stamp.load_ni() == tbd)
-      ptr_u->set_stamp(global_stamp.get_write_stamp());
+    if (ptr != nullptr && ptr_u->time_stamp.load_ni() == tbd) {
+      TS t = global_stamp.get_write_stamp();
+      if(ptr_u->time_stamp.load_ni() == tbd)
+        ptr_u->time_stamp.cas_ni(tbd, t);
+    }
     return ptr;
   }
 
   static IT set_zero_stamp(V* ptr) {
-    if (ptr != nullptr && ptr->read_stamp() == tbd)
+    if (ptr != nullptr && ptr->time_stamp.load_ni() == tbd)
       ptr->time_stamp = zero_stamp;
     return (IT) ptr;
   }
@@ -86,7 +82,7 @@ private:
 #else
     v.cam(old_v, new_v);
     return (v.load() == new_v ||
-	    ((plink*) strip_mark(new_v))->load_stamp() != tbd);
+	    ((plink*) strip_mark(new_v))->time_stamp.load() != tbd);
 #endif
   }
 
@@ -112,12 +108,12 @@ public:
     V* head_unmarked = strip_mark(head);
 
     // chase down version chain
-    while (head != nullptr && head_unmarked->read_stamp() > ls) {
+    while (head != nullptr && head_unmarked->time_stamp.load() > ls) {
       head = head_unmarked->next_version;
       head_unmarked = strip_mark(head);
     }
 #ifdef LazyStamp
-    if (head != nullptr && head_unmarked->read_stamp() == ls
+    if (head != nullptr && head_unmarked->time_stamp.load() == ls
 	&& speculative)
       aborted = true;
 #endif
@@ -143,7 +139,7 @@ public:
   void store(V* ptr) {
     IT old_v = v.load();
     IT new_v = (IT) ptr;
-    bool use_indirect = (ptr == nullptr || ptr->load_stamp() != tbd);
+    bool use_indirect = (ptr == nullptr || ptr->time_stamp.load() != tbd);
 
     if (use_indirect) 
       new_v = add_indirect_mark((V*) link_pool.new_obj(old_v, new_v));
@@ -175,7 +171,7 @@ public:
       set_stamp(old_v);
       if(old != expv) return false;
       if (old == newv) return true;
-      bool use_indirect = (newv == nullptr || newv->load_stamp() != tbd);
+      bool use_indirect = (newv == nullptr || newv->time_stamp.load() != tbd);
       IT new_v = (IT) newv;
 
       if(use_indirect)
