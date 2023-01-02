@@ -5,84 +5,82 @@
 
 namespace vl {
 
-parlay::sequence<long> i_counts(parlay::num_workers()*16, 0);
-void print_counts() {
-  std::cout << " indirect = " << parlay::reduce(i_counts) << std::endl;
-}
-
-using IT = void*;
+struct ver_link;
 
 struct versioned {
   flck::atomic_write_once<TS> time_stamp;
-  IT next_version;
+  ver_link* next_version;
   static constexpr size_t init_ptr = (1ul << 48) - 2;
-  versioned() : time_stamp(tbd), next_version((IT) init_ptr) {}
-  versioned(IT next) : time_stamp(tbd), next_version(next) {}
+  versioned() : time_stamp(tbd), next_version((ver_link*) init_ptr) {}
+  versioned(ver_link* next) : time_stamp(tbd), next_version(next) {}
 };
 
-struct plink : versioned {
+struct ver_link : versioned {
   void* value;
-  plink(IT next, void* value) : versioned{next}, value(value) {}  
+  ver_link(ver_link* next, void* value) : versioned{next}, value(value) {}  
 };
 
- flck::memory_pool<plink> link_pool;
+flck::memory_pool<ver_link> link_pool;
 
 template <typename V>
 struct versioned_ptr {
 private:
-  flck::atomic<IT> v;
+  flck::atomic<ver_link*> v;
 
   // uses lowest bit of pointer to indicate whether indirect (1) or not (0)
-  static V* add_indirect_mark(IT ptr) {return (V*) (1ul | (size_t) ptr);};
-  static bool is_indirect(IT ptr) {return (size_t) ptr & 1;}
-  static V* strip_mark(IT ptr) {return (V*) ((size_t) ptr & ~1ul);}
+  static ver_link* add_indirect(ver_link* ptr) {
+    return (ver_link*) (1ul | (size_t) ptr);};
+  static ver_link* strip_indirect(ver_link* ptr) {
+    return (ver_link*) ((size_t) ptr & ~1ul);}
+  static bool is_indirect(ver_link* ptr) {
+    return (size_t) ptr & 1;}
 
-  void shortcut(IT ptr) {
+  void shortcut(ver_link* ptr) {
 #ifndef NoShortcut
-    plink* ptr_u = (plink*) strip_mark(ptr);
-    if (ptr_u->time_stamp.load_ni() <= done_stamp) {
+    ver_link* ptr_ = strip_indirect(ptr);
+    if (ptr_->time_stamp.load_ni() <= done_stamp) {
 #ifdef NoHelp
-      if (v.cas(ptr, (IT) ptr_u->value))
-	link_pool.retire(ptr_u);
+      if (v.cas(ptr, (ver_link*) ptr_->value))
+	link_pool.retire(ptr_);
 #else
-      if (v.cas_ni(ptr, (IT) ptr_u->value))
-	link_pool.retire_ni(ptr_u);
+      if (v.cas_ni(ptr, (ver_link*) ptr_->value))
+	link_pool.retire_ni(ptr_);
 #endif
     }
 #endif
   }
 
-  V* get_ptr_shortcut(IT ptr) {
-    plink* ptr_u = (plink*) strip_mark(ptr);
+  V* get_ptr_shortcut(ver_link* ptr) {
+    ver_link* ptr_ = strip_indirect(ptr);
     if (is_indirect(ptr)) {
       shortcut(ptr);
-      return (V*) ptr_u->value;
-    } else return (V*) ptr_u;
+      return (V*) ptr_->value;
+    } else return (V*) ptr_;
   }
 
-  static IT set_stamp(IT ptr) {
-    V* ptr_u = strip_mark(ptr);
-    if (ptr != nullptr && ptr_u->time_stamp.load_ni() == tbd) {
+  static ver_link* set_stamp(ver_link* ptr) {
+    ver_link* ptr_ = strip_indirect(ptr);
+    if (ptr != nullptr && ptr_->time_stamp.load_ni() == tbd) {
       TS t = global_stamp.get_write_stamp();
-      if(ptr_u->time_stamp.load_ni() == tbd)
-        ptr_u->time_stamp.cas_ni(tbd, t);
+      if(ptr_->time_stamp.load_ni() == tbd)
+        ptr_->time_stamp.cas_ni(tbd, t);
     }
     return ptr;
   }
 
-  static IT set_zero_stamp(V* ptr) {
+  static ver_link* set_zero_stamp(V* ptr) {
     if (ptr != nullptr && ptr->time_stamp.load_ni() == tbd)
       ptr->time_stamp = zero_stamp;
-    return (IT) ptr;
+    return (ver_link*) ptr;
   }
 
-  bool idempotent_cas(IT old_v, IT new_v) {
+  bool cas_from_cam(ver_link* old_v, ver_link* new_v) {
 #ifdef NoHelp
     return v.cas(old_v, new_v);
 #else
     v.cam(old_v, new_v);
     return (v.load() == new_v ||
-	    ((plink*) strip_mark(new_v))->time_stamp.load() != tbd);
+	    strip_indirect(new_v)->time_stamp.load() != tbd);
 #endif
   }
 
@@ -92,25 +90,22 @@ public:
   versioned_ptr(V* ptr) : v(set_zero_stamp(ptr)) {}
 
   ~versioned_ptr() {
-    IT ptr = v.load();
+    ver_link* ptr = v.load();
     if (is_indirect(ptr))
-      link_pool.destruct((plink*) strip_mark(ptr));
+      link_pool.destruct(strip_indirect(ptr));
   }
 
   void init(V* ptr) {v = set_zero_stamp(ptr);}
 
   V* read_snapshot() {
     TS ls = local_stamp;
-    IT head = v.read();
-    set_stamp(head);
-    //if (is_indirect(head)) shortcut(head);
-
-    V* head_unmarked = strip_mark(head);
+    ver_link* head = set_stamp(v.read());
+    ver_link* head_unmarked = strip_indirect(head);
 
     // chase down version chain
     while (head != nullptr && head_unmarked->time_stamp.load() > ls) {
       head = head_unmarked->next_version;
-      head_unmarked = strip_mark(head);
+      head_unmarked = strip_indirect(head);
     }
 #ifdef LazyStamp
     if (head != nullptr && head_unmarked->time_stamp.load() == ls
@@ -118,8 +113,7 @@ public:
       aborted = true;
 #endif
     if (is_indirect(head)) {
-      //shortcut(head);
-      return (V*) ((plink*) head_unmarked)->value;
+      return (V*) head_unmarked->value;
     } else return (V*) head;
   }
 
@@ -137,24 +131,24 @@ public:
   }
   
   void store(V* ptr) {
-    IT old_v = v.load();
-    IT new_v = (IT) ptr;
+    ver_link* old_v = v.load();
+    ver_link* new_v = (ver_link*) ptr;
     bool use_indirect = (ptr == nullptr || ptr->time_stamp.load() != tbd);
 
     if (use_indirect) 
-      new_v = add_indirect_mark((V*) link_pool.new_obj(old_v, new_v));
+      new_v = add_indirect(link_pool.new_obj(old_v, new_v));
     else ptr->next_version = old_v;
 
 #ifdef NoShortcut
     v = new_v;
     if (is_indirect(old_v))
-      link_pool.retire((plink*) strip_mark(old_v));
+      link_pool.retire(strip_indirect(old_v));
 #else
     v.cam(old_v, new_v);
     if (is_indirect(old_v)) {
-      IT val = v.load();
-      if (val != (V*) ((plink*) strip_mark(old_v))->value)
-	link_pool.retire((plink*) strip_mark(old_v));
+      ver_link* val = v.load();
+      if (val != strip_indirect(old_v)->value)
+	link_pool.retire(strip_indirect(old_v));
       else v.cam(val, new_v);
     }
 #endif
@@ -162,34 +156,32 @@ public:
     if (use_indirect) shortcut(new_v);
   }
   
-  bool cas(V* expv, V* newv) {
+  bool cas(V* exp, V* ptr) {
 #ifndef NoShortcut
     for(int ii = 0; ii < 2; ii++) {
 #endif
-      IT old_v = v.load();
+      ver_link* old_v = v.load();
+      ver_link* new_v = (ver_link*) ptr;
       V* old = get_ptr_shortcut(old_v);
       set_stamp(old_v);
-      if(old != expv) return false;
-      if (old == newv) return true;
-      bool use_indirect = (newv == nullptr || newv->time_stamp.load() != tbd);
-      IT new_v = (IT) newv;
+      if(old != exp) return false;
+      if (exp == ptr) return true;
+      bool use_indirect = (ptr == nullptr || ptr->time_stamp.load() != tbd);
 
       if(use_indirect)
-	new_v = add_indirect_mark((V*) link_pool.new_obj(old_v, new_v));
-      else newv->next_version = old_v;
+	new_v = add_indirect(link_pool.new_obj(old_v, new_v));
+      else ptr->next_version = old_v;
 
-      bool succeeded = idempotent_cas(old_v, new_v);
-
-      if(succeeded) {
+      if (cas_from_cam(old_v, new_v)) {
         set_stamp(new_v);
         if (is_indirect(old_v))
-	  link_pool.retire((plink*) strip_mark(old_v));
+	  link_pool.retire(strip_indirect(old_v));
 #ifndef NoShortcut
 	if (use_indirect) shortcut(new_v);
 #endif
         return true;
       }
-      if (use_indirect) link_pool.destruct((plink*) strip_mark(new_v));
+      if (use_indirect) link_pool.destruct(strip_indirect(new_v));
 #ifndef NoShortcut
     }
 #endif

@@ -4,12 +4,6 @@
 #include "flock/epoch.h"
 #include <x86intrin.h>
 
-// code for timestamps for snapshots
-// namespace flck {
-//   template <typename Thunk>
-//   typename std::result_of<Thunk()>::type with_epoch(Thunk f);
-// }
-
 namespace vl {
   using TS = long;
 
@@ -301,7 +295,6 @@ thread_local TS current_stamp;
   
   bool add_epoch_hooks() {
     flck::internal::epoch.before_epoch_hooks.push_back([&] {
-       // is this correct?  should it increment the stamp?
        current_stamp = global_stamp.get_stamp();});
     flck::internal::epoch.after_epoch_hooks.push_back([&] {
 	done_stamp = prev_stamp;
