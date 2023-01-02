@@ -320,7 +320,6 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           long retry_count = 0;
           long update_count = 0;
           long query_count = 0;
-	  std::vector<K> range_keys{10ul + 2*range_size};
           volatile long keysum = 0;
           while (true) {
             // every once in a while check if time is over
@@ -355,11 +354,12 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
               if (os.remove(tr, b[j])) added--;}
             else if (op_types[j] == Range) {
 #ifdef Range_Search
+	      std::vector<K> range_keys{100ul + 2*range_size};
               key_type end = ((b[j] > max_key - range_gap)
                              ? max_key : b[j] + range_gap);
               range_count += vl::with_snapshot([&] {
                 long cnt=0;
-                auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
+		auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
                 os.range_(tr, addf, b[j], end);
 #ifdef LazyStamp
                 if (vl::aborted) retry_count++;
