@@ -52,7 +52,7 @@ if compare :
     suffixes_all = [""]
     mix_percents = [[5,0,0,0], [50,0,0,0]]
 else :
-    lists = []
+    lists = ["dlist"]
     lists_ro = ["list"]
     list_sizes = [100,1000]
     trees = ["hash_block_lf", "arttree"]
@@ -66,6 +66,7 @@ else :
 if test_only :
     time = .1
     rounds = 1
+    mix_percents = [[25,25,25,16]]
     list_sizes = [100]
     tree_sizes = [1000000]
     zipfians = [.99]
