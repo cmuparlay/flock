@@ -49,9 +49,9 @@ if compare :
     suffixes_all = [""]
     mix_percents = [[5,0,0,0], [50,0,0,0]]
 else :
-    lists = ["dlist", "list"]
+    lists = ["dlist", "list", "list_onelock"]
     list_sizes = [100,1000]
-    trees = ["hash_block_lf", "arttree", "btree", "leaftree", "blockleaftree", "hash"]
+    trees = ["hash", "hash_block", "arttree", "btree", "leaftree", "blockleaftree"]
     tree_sizes = [100000,10000000]
     zipfians = [0, .99]
     mix_percents = [[5,0,0,0], [50,0,0,0]]

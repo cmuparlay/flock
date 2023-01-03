@@ -226,6 +226,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
         parlay::sequence<long> retry_counts(p);
         parlay::sequence<long> update_counts(p);
         parlay::sequence<long> query_counts(p);
+	parlay::sequence<long> query_success_counts(p);
         size_t mp = m/p;
         t.start();
         auto start = std::chrono::system_clock::now();
@@ -240,7 +241,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
           long retry_count = 0;
           long update_count = 0;
           long query_count = 0;
-          volatile long keysum = 0;
+          long query_success_count = 0;
           while (true) {
             // every once in a while check if time is over
             if (cnt >= 100) { 
@@ -255,6 +256,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                 retry_counts[i] = retry_count;
                 update_counts[i] = update_count;
                 query_counts[i] = query_count;
+		query_success_counts[i] = query_success_count;
                 return;
               }
             }
@@ -263,8 +265,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
          
             if (op_types[j] == Find) {
               query_count++;
-              auto val = os.find(tr, b[j]);
-              if(val.has_value()) keysum += val.value();
+	      query_success_count += os.find(tr, b[j]).has_value();
             }
             else if (op_types[j] == Insert) {
               update_count++;
@@ -272,33 +273,33 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
             else if (op_types[j] == Remove) {
               update_count++;
               if (os.remove(tr, b[j])) added--;}
-            else if (op_types[j] == Range) {
-#ifdef Range_Search
-	      std::vector<K> range_keys{100ul + 2*range_size};
-              key_type end = ((b[j] > max_key - range_gap)
-                             ? max_key : b[j] + range_gap);
-	      long cnt=0;
-	      auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
-	      os.range_(tr, addf, b[j], end);
-              range_count += cnt;
-#endif
-            } else { // multifind
-              mfind_count++;
-	      long tmp_sum = 0;
-	      long loc = j;
-	      for (long k = 0; k < range_size; k++) {
-		auto val = os.find_(tr, b[loc]);
-		loc += 1;
-		if (loc >= (i+1)*mp) loc -= mp;
-		if(val.has_value()) tmp_sum += val.value();
-	      }
-              keysum += tmp_sum;
-              j += range_size;
-              if (j >= (i+1)*mp) j -= mp;
-              cnt += range_size;
-              total += range_size;
-              continue;
-            }
+//             else if (op_types[j] == Range) {
+// #ifdef Range_Search
+// 	      std::vector<K> range_keys{100ul + 2*range_size};
+//               key_type end = ((b[j] > max_key - range_gap)
+//                              ? max_key : b[j] + range_gap);
+// 	      long cnt=0;
+// 	      auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
+// 	      os.range_(tr, addf, b[j], end);
+//               range_count += cnt;
+// #endif
+//             } else { // multifind
+//               mfind_count++;
+// 	      long tmp_sum = 0;
+// 	      long loc = j;
+// 	      for (long k = 0; k < range_size; k++) {
+// 		auto val = os.find_(tr, b[loc]);
+// 		loc += 1;
+// 		if (loc >= (i+1)*mp) loc -= mp;
+// 		if(val.has_value()) tmp_sum += val.value();
+// 	      }
+//               keysum += tmp_sum;
+//               j += range_size;
+//               if (j >= (i+1)*mp) j -= mp;
+//               cnt += range_size;
+//               total += range_size;
+//               continue;
+//             }
             if (++j >= (i+1)*mp) j -= mp;
             cnt++;
             total++;
@@ -323,28 +324,24 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
               << "p=" << p << ","
               << "z=" << zipfian_param << ","
               << num_ops / (duration * 1e6) << std::endl;
-          // std::cout << "timestamp increments (per microsecond): " << (global_stamp.get_stamp()-start_timestamp)*1.0/(duration * 1e6) << std::endl;
-          // std::cout << "final timestamp: " << global_stamp.get_stamp() << std::endl;
           if (do_check) {
+	    size_t queries = parlay::reduce(query_counts);
+	    size_t queries_success = parlay::reduce(query_success_counts);
+	    double qratio = (double) queries_success / queries;
+	    if (qratio < .4 || qratio > .6)
+	      std::cout << "warning: query success ratio = " << qratio;
             size_t final_cnt = os.check(tr);
             long updates = parlay::reduce(addeds);
             if (multifind_percent > 0) {
               long mfind_sum = parlay::reduce(mfind_counts);
               long retry_sum = parlay::reduce(retry_counts);
-      #ifdef LazyStamp
-              std::cout << "retry percent = " << (double) 100 * retry_sum / mfind_sum
-            << std::endl;
-      #endif
             }
             if (range_percent > 0) {
               long range_sum = parlay::reduce(range_counts);
               long retry_sum = parlay::reduce(retry_counts);
               long num_queries = num_ops * range_percent / 100;
               std::cout << "average range size = " << ((float) range_sum) / num_queries
-      #ifdef LazyStamp
-            << ", retry percent = " << (double) 100 * retry_sum / num_queries 
-      #endif
-            << std::endl;
+			<< std::endl;
             }
 
             if (initial_size + updates != final_cnt) {

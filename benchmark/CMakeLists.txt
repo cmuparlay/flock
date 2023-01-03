@@ -12,7 +12,7 @@ foreach(file ${BENCH_FILES})
 endforeach()
 	
 set(STRUCT_DIR ${PROJECT_SOURCE_DIR}/structures)
-set(FLOCK_BENCH "leaftree" "blockleaftree" "arttree" "btree" "dlist" "list" "hash_block" "hash")
+set(FLOCK_BENCH "leaftree" "blockleaftree" "arttree" "btree" "dlist" "list" "list_onelock" "hash_block" "hash")
 set(FLOCK_BENCH_USE_CAS "hash_block")
 
 set(OTHER_LIST_DIR ${PROJECT_SOURCE_DIR}/ds)
