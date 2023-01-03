@@ -1,4 +1,4 @@
-#include <verlib/verlib.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 #define Range_Search 1
 
@@ -14,7 +14,7 @@ struct Set {
     return (key >> (8*(sizeof(K)-1-pos))) & 255;
   }
 
-  struct header : verlib::versioned {
+  struct header {
     K key;
     node_type nt;
     flck::atomic_write_once<bool> removed;
@@ -28,7 +28,7 @@ struct Set {
 
   // generic node
   struct node : header, flck::lock {};
-  using node_ptr = verlib::versioned_ptr<node>;
+  using node_ptr = flck::atomic<node*>;
 
   // 256 entries, one for each value of a byte, null if empty
   struct full_node : header, flck::lock {
@@ -131,10 +131,10 @@ struct Set {
     leaf(K key, V value) : header(key, Leaf, sizeof(K)), value(value) {};
   };
 
-  verlib::memory_pool<full_node> full_pool;
-  verlib::memory_pool<indirect_node> indirect_pool;
-  verlib::memory_pool<sparse_node> sparse_pool;
-  verlib::memory_pool<leaf> leaf_pool;
+  flck::memory_pool<full_node> full_pool;
+  flck::memory_pool<indirect_node> indirect_pool;
+  flck::memory_pool<sparse_node> sparse_pool;
+  flck::memory_pool<leaf> leaf_pool;
 
   // dispatch based on node type
   // A returned nullptr means no child matching the key
@@ -267,7 +267,7 @@ struct Set {
   }
 
   bool insert(node* root, K k, V v) {
-    return verlib::with_epoch([=] {
+    return flck::with_epoch([=] {
       while (true) {		 
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	if (c != nullptr && c->nt == Leaf && c->byte_num == byte_pos)
@@ -318,7 +318,7 @@ struct Set {
   //   1) the leaf
   //   2) its parent if it is sparse with just two children
   bool remove(node* root, K k) {
-    return verlib::with_epoch([=] {
+    return flck::with_epoch([=] {
       while (true) {
 	auto [gp, p, cptr, c, byte_pos] = find_location(root, k);
 	// if not found return
@@ -360,7 +360,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return verlib::with_epoch([&] {return find_(root, k);});
+    return flck::with_epoch([&] {return find_(root, k);});
   }
 
   template<typename AddF>

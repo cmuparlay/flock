@@ -1,5 +1,5 @@
 #include <parlay/primitives.h>
-#include <verlib/verlib.h>
+#include <flock/flock.h>
 #define Range_Search 1
 #define Dense_Keys 1
 
@@ -7,7 +7,7 @@ template <typename K, typename V>
 struct Set {
 
   template <int Size>
-  struct Node : verlib::versioned {
+  struct Node {
     using node = Node<0>;
     struct KV {K key; V value;};
     int cnt;
@@ -43,7 +43,7 @@ struct Set {
 #else
   struct slot : flck::lock {
 #endif
-    verlib::versioned_ptr<node> ptr;
+    flck::atomic<node*> ptr;
     slot() : ptr(nullptr) {}
   };
 
@@ -61,10 +61,10 @@ struct Set {
     }
   };
   
-  verlib::memory_pool<Node<1>> node_pool_1;
-  verlib::memory_pool<Node<3>> node_pool_3;
-  verlib::memory_pool<Node<7>> node_pool_7;
-  verlib::memory_pool<Node<31>> node_pool_31;
+  flck::memory_pool<Node<1>> node_pool_1;
+  flck::memory_pool<Node<3>> node_pool_3;
+  flck::memory_pool<Node<7>> node_pool_7;
+  flck::memory_pool<Node<31>> node_pool_31;
 
   node* insert_to_node(node* old, K k, V v) {
     if (old == nullptr) return (node*) node_pool_1.new_obj(k, v);
@@ -111,7 +111,7 @@ struct Set {
   std::optional<V> find(Table& table, K k) {
     slot* s = table.get_slot(k);
     __builtin_prefetch (s);
-    auto x = verlib::with_epoch([&] { return find_at(s, k);});
+    auto x = flck::with_epoch([&] { return find_at(s, k);});
     return x;
   }
 
@@ -144,7 +144,7 @@ struct Set {
 
   bool insert(Table& table, K k, V v) {
     slot* s = table.get_slot(k); 
-    return verlib::with_epoch([&] {return insert_at(s, k, v);});
+    return flck::with_epoch([&] {return insert_at(s, k, v);});
   }
   
   bool remove_at(slot* s, K k) {
@@ -173,16 +173,13 @@ struct Set {
 
   bool remove(Table& table, K k) {
     slot* s = table.get_slot(k);
-    return verlib::with_epoch([&] {return remove_at(s, k);});
+    return flck::with_epoch([&] {return remove_at(s, k);});
   }
 
   template<typename AddF>
   void range_(Table& table, AddF& add, K start, K end) {
       for (K k = start; k <= end; k++) {
 	auto x = find_(table, k);
-#ifdef LazyStamp
-	if (verlib::aborted) return;
-#endif
 	if (x.has_value()) add(k, x.value());
       }
   }

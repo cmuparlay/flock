@@ -4,11 +4,11 @@ template <typename K, typename V>
 struct Set {
 
   // common header for internal nodes and leaves
-  struct header : ll_head {
+  struct header {
     K key;
     bool is_leaf;
     bool is_sentinal;
-    write_once<bool> removed; // not used for leaves, but fits here
+    flck::atomic_write_once<bool> removed; // not used for leaves, but fits here
     header(K key, bool is_leaf)
       : key(key), is_leaf(is_leaf), is_sentinal(false), removed(false) {}
     header(bool is_sentinal) :
@@ -16,9 +16,9 @@ struct Set {
   };
 
   // internal node
-  struct node : header, lock_type {
-    ptr_type<node> left;
-    ptr_type<node> right;
+  struct node : header, flck::lock {
+    flck::atomic<node*> left;
+    flck::atomic<node*> right;
     node(K k, node* left, node* right)
       : header{k,false}, left(left), right(right) {};
     node(node* left) // for the root, only has a left pointer
@@ -31,8 +31,8 @@ struct Set {
     leaf() : header{true} {}; // for the sentinal leaf
   };
 
-  memory_pool<node> node_pool;
-  memory_pool<leaf> leaf_pool;
+  flck::memory_pool<node> node_pool;
+  flck::memory_pool<leaf> leaf_pool;
 
   size_t max_iters = 10000000;
   
@@ -53,7 +53,7 @@ struct Set {
   }
   
   bool insert(node* root, K k, V v, bool upsert=false) {
-    return with_epoch([=] {
+    return flck::with_epoch([=] {
       node* prev_leaf = nullptr;
       while (true) {
 	auto [gp, gp_left, p, p_left, l] = find_location(root, k);
@@ -78,7 +78,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return with_epoch([=] {
+    return flck::with_epoch([=] {
        node* prev_leaf = nullptr;
        while (true) {
 	 auto [gp, gp_left, p, p_left, l] = find_location(root, k);
@@ -117,7 +117,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] { return find_(root, k);});
+    return flck::with_epoch([&] { return find_(root, k);});
   }
 
   node* empty() {
@@ -178,7 +178,7 @@ struct Set {
 	     else return rtup(lmin, rmax, lsum + rsum);
 	   };
     auto [minv, maxv, cnt] = crec(p->left.load());
-    if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
+    //if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
     return cnt;
   }
 

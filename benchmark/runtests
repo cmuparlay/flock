@@ -33,13 +33,10 @@ if (getOption("-help") or getOption("-help")) :
 zipfians = []
 file_suffix = ""
 lists = []
-lists_ro = []
 list_sizes = []
 trees = []
-trees_ro = []
 tree_sizes = []
 suffixes_all = [""]
-suffixes_ro = []
 mix_percents = []
 
 if compare :
@@ -52,21 +49,18 @@ if compare :
     suffixes_all = [""]
     mix_percents = [[5,0,0,0], [50,0,0,0]]
 else :
-    lists = ["dlist"]
-    lists_ro = ["list"]
+    lists = ["dlist", "list"]
     list_sizes = [100,1000]
-    trees = ["hash_block_lf", "arttree"]
-    trees_ro = ["btree"]
+    trees = ["hash_block_lf", "arttree", "btree", "leaftree", "blockleaftree", "hash"]
     tree_sizes = [100000,10000000]
     zipfians = [0, .99]
-    mix_percents = [[5,0,0,0], [5,25,0,4], [5,25,0,16], [5,0,95,48], [50,0,0,0]]
-    suffixes_all = ["","_nohelp","_indirect_ls","_noshortcut_ls","_ver_ls","_ver_rs","_ver_ws","_ver_ns","_ver_hw", "_ver_nohelp_ls"]
-    suffixes_ro = suffixes_all + ["_ver_ro_ls"]
+    mix_percents = [[5,0,0,0], [50,0,0,0]]
+    suffixes_all = ["","_nohelp"]
 
 if test_only :
     time = .1
     rounds = 1
-    mix_percents = [[25,25,25,16]]
+    mix_percents = [[50]]
     list_sizes = [100]
     tree_sizes = [1000000]
     zipfians = [.99]
@@ -80,8 +74,6 @@ filename = "../../timings/" + hostname + "_" + today + file_suffix
     
 if os.path.exists(filename) :
     os.remove(filename)
-
-
     
 def detectCPUs():
     """
@@ -156,9 +148,7 @@ try :
     os.system("make -j")
     runstring("git rev-parse --short HEAD")
     run_tests(trees,suffixes_all,tree_sizes)
-    run_tests(trees_ro,suffixes_ro,tree_sizes)
     run_tests(lists,suffixes_all,list_sizes)
-    run_tests(lists_ro,suffixes_ro,list_sizes)
             
 except NameError,v :
   x, = v

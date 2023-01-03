@@ -1,11 +1,11 @@
 #define Range_Search 1
-#include <verlib/verlib.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(32) node : verlib::versioned {
-    verlib::versioned_ptr<node> next;
+  struct alignas(32) node {
+    flck::atomic<node*> next;
     K key;
     V value;
     bool is_end;
@@ -22,7 +22,7 @@ struct Set {
 #endif
   };
 
-  verlib::memory_pool<node> node_pool;
+  flck::memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
     node* cur = root;
@@ -40,7 +40,7 @@ struct Set {
   static constexpr int max_delay = 2000;
 
   bool insert(node* root, K k, V v) {
-    return verlib::with_epoch([=] {
+    return flck::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
@@ -58,7 +58,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return verlib::with_epoch([=] {
+    return flck::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
@@ -98,7 +98,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return verlib::with_epoch([&] {return find_(root, k);});
+    return flck::with_epoch([&] {return find_(root, k);});
   }
 
   template<typename AddF>
@@ -108,16 +108,10 @@ struct Set {
       node* nxt_nxt = (nxt->next).load(); // prefetch
       if (nxt->is_end || nxt->key >= start) break;
       nxt = nxt_nxt;
-#ifdef LazyStamp
-      if (verlib::aborted) return;
-#endif
     }
     while (!nxt->is_end && nxt->key <= end) {
       add(nxt->key, nxt->value);
       nxt = nxt->next.load();
-#ifdef LazyStamp
-      if (verlib::aborted) return;
-#endif
     }
   }
 

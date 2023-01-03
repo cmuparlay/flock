@@ -1,15 +1,15 @@
 // doubly linked list
-#include <verlib/verlib.h>
+#include <flock/flock.h>
 #define Range_Search 1
 
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(64) node : verlib::versioned, flck::lock {
+  struct alignas(64) node : flck::lock {
     bool is_end;
     flck::atomic_write_once<bool> removed;
     flck::atomic<node*> prev;
-    verlib::versioned_ptr<node> next;
+    flck::atomic<node*> next;
     K key;
     V value;
     node(K key, V value, node* next, node* prev)
@@ -19,7 +19,7 @@ struct Set {
       : is_end(true), removed(false), next(next), prev(nullptr) {}
   };
 
-  verlib::memory_pool<node> node_pool;
+  flck::memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
     node* nxt = (root->next).load();
@@ -37,7 +37,7 @@ struct Set {
   static constexpr int max_delay=2000;
 
   bool insert(node* root, K k, V v) {
-    return verlib::with_epoch([&] {
+    return flck::with_epoch([&] {
       int delay = init_delay;
       while (true) {
 	node* next = find_location(root, k);
@@ -60,7 +60,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return verlib::with_epoch([&] {
+    return flck::with_epoch([&] {
       int delay = init_delay;
       while (true) {
 	node* loc = find_location(root, k);
@@ -91,7 +91,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return verlib::with_epoch([&] { return find_(root, k);});
+    return flck::with_epoch([&] { return find_(root, k);});
   }
 
   template<typename AddF>

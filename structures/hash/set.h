@@ -4,22 +4,22 @@
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(32) node : ll_head {
+  struct alignas(32) node {
     K key;
     V value;
-    ptr_type<node> next;
+    flck::atomic<node*> next;
     node(K key, V value, node* next) : key(key), value(value), next(next) {};
   };
   
-  struct slot : lock_type {
-    ptr_type<node> head;
-    mutable_val<unsigned int> version_num;
+  struct slot : flck::lock {
+    flck::atomic<node*> head;
+    flck::atomic<unsigned int> version_num;
     slot() : version_num(0), head(nullptr) {}
   };
 
   using Table = parlay::sequence<slot>;
 
-  memory_pool<node> node_pool;
+  flck::memory_pool<node> node_pool;
 
   slot* get_slot(Table& table, K k) {
     //return &table[parlay::hash64_2(k) & (table.size()-1u)];
@@ -27,7 +27,7 @@ struct Set {
   }
 
   auto find_in_slot(slot* s, K k) {
-    ptr_type<node>* cur = &s->head;
+    auto cur = &s->head;
     node* nxt = cur->read();
     while (nxt != nullptr && nxt->key != k) {
       cur = &(nxt->next);
@@ -39,7 +39,7 @@ struct Set {
   std::optional<V> find(Table& table, K k) {
     slot* s = get_slot(table, k);
     __builtin_prefetch (s);
-    return with_epoch([&] () -> std::optional<V> {
+    return flck::with_epoch([&] () -> std::optional<V> {
 	auto [cur, nxt] = find_in_slot(s, k);
 	cur->validate();
 	if (nxt != nullptr) return nxt->value;
@@ -72,7 +72,7 @@ struct Set {
 
   bool insert(Table& table, K k, V v) {
     slot* s = get_slot(table, k);
-    return with_epoch([&] {return insert_at(s, k, v);});
+    return flck::with_epoch([&] {return insert_at(s, k, v);});
   }
 			
   bool remove_at(slot* s, K k) {
@@ -92,7 +92,7 @@ struct Set {
 
   bool remove(Table& table, K k) {
     slot* s = get_slot(table, k);
-    return with_epoch([&] {return remove_at(s, k);});
+    return flck::with_epoch([&] {return remove_at(s, k);});
   }
 			
   Table empty(size_t n) {

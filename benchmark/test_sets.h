@@ -24,70 +24,6 @@ void print_array(bool* a, int N) {
   std::cout << std::endl;
 }
 
-template <typename SetType>
-void test_persistence_concurrent(SetType& os) {
-  int N = 1000;
-  auto tr = os.empty(N);
-
-  auto a = parlay::random_shuffle(parlay::tabulate(N, [&] (size_t i) {return i+1;}));
-  std::atomic<bool> done = false;
-
-  int num_threads = 2;
-
-  parlay::parallel_for(0, num_threads, [&] (size_t tid) {
-    if(tid == num_threads-1) {  // update thread
-      std::cout << "starting to insert" << std::endl;
-      for(int i = 0; i < N; i++) {
-        // std::cout << "inserting " << i << " " << a[i] << std::endl;
-        os.insert(tr, a[i], i+1);
-      }
-      std::cout << "starting to delete" << std::endl;
-      for(int i = N-1; i >= 0; i--)
-        os.remove(tr, a[i]);
-      std::cout << "done updating" << std::endl;
-      done = true;
-    } 
-    else {  // query threads
-      std::cout << "starting to query" << std::endl;
-      int counter = 0;
-      int counter2 = 0;
-      while(!done) {
-        bool seen[N+1];
-        int max_seen;
-        verlib::with_snapshot([&] {
-          max_seen = -1;
-          for(int i = 1; i <= N; i++) seen[i] = false;
-          for(int i = 1; i <= N; i++) {
-            auto val = os.find_(tr, i);
-            if(val.has_value()) {
-              seen[val.value()] = true;
-              max_seen = std::max(max_seen, (int) val.value());
-            }
-          }
-        });
-        std::cout << "max_seen: " << max_seen << std::endl;
-        // print_array(seen, N);
-        for(int i = 1; i <= max_seen; i++)
-          if(!seen[i]) {
-            std::cout << "inconsistent snapshot" << std::endl;
-            break;
-            abort();
-          }
-        counter2++;
-        if(max_seen > 2 && max_seen < N-3) 
-          counter++; // saw an intermediate state
-        // if(counter2 > 10 && counter == 0) break;
-      }
-      if(counter < 3) {
-        std::cout << "not enough iterations by query thread" << std::endl;
-        // abort();
-      }
-    } 
-  }, 1);
-  os.retire(tr);
-// #endif
-}
-
 template <typename SetType, typename Tree, typename Range>
 void insert_balanced(SetType& os, Tree& tr, Range A) {
   if (A.size() == 0) return;
@@ -188,24 +124,8 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     assert_key_exists(os.find(tr, 11).has_value());
     assert(!os.find(tr, 10).has_value());
     assert(!os.find(tr, 3).has_value());
-
-    // #ifdef Multi_Find
-    verlib::with_snapshot([&] {
-      assert_key_exists(os.find_(tr, 7).has_value());
-      assert_key_exists(os.find_(tr, 1).has_value());
-      assert_key_exists(os.find_(tr, 11).has_value());
-      assert(!os.find_(tr, 10).has_value());
-      assert(!os.find_(tr, 3).has_value());
-      });
-    // #endif
-
-    // os.print(tr);
-    // std::cout << "size = " << os.check(tr) << std::endl;
     os.retire(tr);
 
-    // run persistence tests
-    test_persistence_concurrent(os);
-    
   } else {  // main test
     using key_type = unsigned long;
 
@@ -357,33 +277,22 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	      std::vector<K> range_keys{100ul + 2*range_size};
               key_type end = ((b[j] > max_key - range_gap)
                              ? max_key : b[j] + range_gap);
-              range_count += verlib::with_snapshot([&] {
-                long cnt=0;
-		auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
-                os.range_(tr, addf, b[j], end);
-#ifdef LazyStamp
-                if (verlib::aborted) retry_count++;
-#endif
-                return cnt;});
+	      long cnt=0;
+	      auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
+	      os.range_(tr, addf, b[j], end);
+              range_count += cnt;
 #endif
             } else { // multifind
               mfind_count++;
-              keysum += verlib::with_snapshot([&] {
-                long tmp_sum = 0;
-                long loc = j;
-                for (long k = 0; k < range_size; k++) {
-                  auto val = os.find_(tr, b[loc]);
-                  loc += 1;
-                  if (loc >= (i+1)*mp) loc -= mp;
-                  if(val.has_value()) tmp_sum += val.value();
-#ifdef LazyStamp
-                  if (verlib::aborted) {
-                    retry_count++;
-                    return 0l;
-                  }
-#endif
-                }
-                return tmp_sum;});
+	      long tmp_sum = 0;
+	      long loc = j;
+	      for (long k = 0; k < range_size; k++) {
+		auto val = os.find_(tr, b[loc]);
+		loc += 1;
+		if (loc >= (i+1)*mp) loc -= mp;
+		if(val.has_value()) tmp_sum += val.value();
+	      }
+              keysum += tmp_sum;
               j += range_size;
               if (j >= (i+1)*mp) j -= mp;
               cnt += range_size;
@@ -531,6 +440,4 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
       }
     }
   }
-  //if (verbose)
-  //  std::cout << "final timestamp: " << verlib::global_stamp.get_stamp() << std::endl;
 }
