@@ -3,7 +3,7 @@
 #include "flock/flock.h"
 #include "timestamps.h"
 
-namespace vl {
+namespace verlib {
 
 struct ver_link;
 
@@ -191,4 +191,4 @@ public:
 
   V* operator=(V* b) {store(b); return b; }
 };
-} // namespace vl
+} // namespace verlib

@@ -4,8 +4,8 @@
 template <typename K, typename V>
 struct Set {
 
-  struct alignas(32) node : vl::versioned {
-    vl::versioned_ptr<node> next;
+  struct alignas(32) node : verlib::versioned {
+    verlib::versioned_ptr<node> next;
     K key;
     V value;
     bool is_end;
@@ -22,7 +22,7 @@ struct Set {
 #endif
   };
 
-  vl::memory_pool<node> node_pool;
+  verlib::memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
     node* cur = root;
@@ -40,7 +40,7 @@ struct Set {
   static constexpr int max_delay = 2000;
 
   bool insert(node* root, K k, V v) {
-    return vl::with_epoch([=] {
+    return verlib::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
@@ -58,7 +58,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return vl::with_epoch([=] {
+    return verlib::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
@@ -98,7 +98,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return vl::with_epoch([&] {return find_(root, k);});
+    return verlib::with_epoch([&] {return find_(root, k);});
   }
 
   template<typename AddF>
@@ -109,14 +109,14 @@ struct Set {
       if (nxt->is_end || nxt->key >= start) break;
       nxt = nxt_nxt;
 #ifdef LazyStamp
-      if (vl::aborted) return;
+      if (verlib::aborted) return;
 #endif
     }
     while (!nxt->is_end && nxt->key <= end) {
       add(nxt->key, nxt->value);
       nxt = nxt->next.load();
 #ifdef LazyStamp
-      if (vl::aborted) return;
+      if (verlib::aborted) return;
 #endif
     }
   }

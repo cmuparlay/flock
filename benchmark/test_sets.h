@@ -54,7 +54,7 @@ void test_persistence_concurrent(SetType& os) {
       while(!done) {
         bool seen[N+1];
         int max_seen;
-        vl::with_snapshot([&] {
+        verlib::with_snapshot([&] {
           max_seen = -1;
           for(int i = 1; i <= N; i++) seen[i] = false;
           for(int i = 1; i <= N; i++) {
@@ -190,7 +190,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     assert(!os.find(tr, 3).has_value());
 
     // #ifdef Multi_Find
-    vl::with_snapshot([&] {
+    verlib::with_snapshot([&] {
       assert_key_exists(os.find_(tr, 7).has_value());
       assert_key_exists(os.find_(tr, 1).has_value());
       assert_key_exists(os.find_(tr, 11).has_value());
@@ -357,18 +357,18 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
 	      std::vector<K> range_keys{100ul + 2*range_size};
               key_type end = ((b[j] > max_key - range_gap)
                              ? max_key : b[j] + range_gap);
-              range_count += vl::with_snapshot([&] {
+              range_count += verlib::with_snapshot([&] {
                 long cnt=0;
 		auto addf = [&] (K k, V v) {range_keys[cnt++] = k;};
                 os.range_(tr, addf, b[j], end);
 #ifdef LazyStamp
-                if (vl::aborted) retry_count++;
+                if (verlib::aborted) retry_count++;
 #endif
                 return cnt;});
 #endif
             } else { // multifind
               mfind_count++;
-              keysum += vl::with_snapshot([&] {
+              keysum += verlib::with_snapshot([&] {
                 long tmp_sum = 0;
                 long loc = j;
                 for (long k = 0; k < range_size; k++) {
@@ -377,7 +377,7 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
                   if (loc >= (i+1)*mp) loc -= mp;
                   if(val.has_value()) tmp_sum += val.value();
 #ifdef LazyStamp
-                  if (vl::aborted) {
+                  if (verlib::aborted) {
                     retry_count++;
                     return 0l;
                   }
@@ -532,5 +532,5 @@ void test_sets(SetType& os, size_t default_size, commandLine P) {
     }
   }
   //if (verbose)
-  //  std::cout << "final timestamp: " << vl::global_stamp.get_stamp() << std::endl;
+  //  std::cout << "final timestamp: " << verlib::global_stamp.get_stamp() << std::endl;
 }

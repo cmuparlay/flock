@@ -4,7 +4,7 @@
 #include "flock/epoch.h"
 #include <x86intrin.h>
 
-namespace vl {
+namespace verlib {
   using TS = long;
 
 thread_local int read_delay = 1;

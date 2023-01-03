@@ -12,7 +12,7 @@
 #include "flock/flock.h"
 #include "timestamps.h"
 
-namespace vl {
+namespace verlib {
   
 #define bad_ptr ((void*) ((1ul << 48) -1))
 
@@ -133,4 +133,4 @@ public:
   V* operator=(V* b) {store(b); return b; }
 };
 
-} // namespace vl
+} // namespace verlib

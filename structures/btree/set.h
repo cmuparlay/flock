@@ -30,7 +30,7 @@ struct Set {
   struct leaf;
   enum Status : char { isOver, isUnder, OK};
 
-  struct header : vl::versioned {
+  struct header : verlib::versioned {
     bool is_leaf;
     Status status;
     char size;
@@ -47,7 +47,7 @@ struct Set {
   struct alignas(64) node : header {
     flck::atomic_write_once<bool> removed;
     K keys[node_block_size-1];
-    vl::versioned_ptr<node> children[node_block_size];
+    verlib::versioned_ptr<node> children[node_block_size];
     flck::lock lck;
     
     int find(K k, uint i=0) {
@@ -79,7 +79,7 @@ struct Set {
 
   };
 
-  vl::memory_pool<node> node_pool;
+  verlib::memory_pool<node> node_pool;
 
   // helper function to copy into a new node
   template <typename Key, typename Child>
@@ -232,7 +232,7 @@ struct Set {
 	size} {};
   };
 
-  vl::memory_pool<leaf> leaf_pool;
+  verlib::memory_pool<leaf> leaf_pool;
 
   leaf* copy_leaf(leaf* l) {
     int size = l->size;
@@ -516,7 +516,7 @@ struct Set {
   // tries again.
   // returns false and does no update if already in tree
   bool insert(node* root, K k, V v) {
-    return vl::with_epoch([=] {
+    return verlib::with_epoch([=] {
       int delay = init_delay;
       while (true) {
 	auto [p, cidx, l] = find_and_fix(root, k);
@@ -539,7 +539,7 @@ struct Set {
   // changed.  If the try_lock fails it tries again.  Returns false if
   // not found.
   bool remove(node* root, K k) {
-    return vl::with_epoch([=] {
+    return verlib::with_epoch([=] {
       int delay = init_delay;
       while (true) {
         auto [p, cidx, l] = find_and_fix(root, k);
@@ -585,7 +585,7 @@ struct Set {
   // a wait-free version that does not split on way down
   std::optional<V> find_(node* root, K k) {
     node* c = root;
-    vl::versioned_ptr<node>* x;
+    verlib::versioned_ptr<node>* x;
     while (!c->is_leaf) {
       __builtin_prefetch (((char*) c) + 64); 
       __builtin_prefetch (((char*) c) + 128);
@@ -597,7 +597,7 @@ struct Set {
   }
 
   std::optional<V> find(node* root, K k) {
-    return vl::with_epoch([&] {return find_(root, k);});
+    return verlib::with_epoch([&] {return find_(root, k);});
   }
 
   // An empty tree is an empty leaf along with a root pointing tho the

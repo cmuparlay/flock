@@ -23,7 +23,7 @@
 
 # else // Not Versioned
 
-namespace vl {
+namespace verlib {
 
   struct versioned {};
 
@@ -38,7 +38,7 @@ namespace vl {
 
 #endif
 
-namespace vl {
+namespace verlib {
   using flck::with_epoch;
   using flck::memory_pool;
 }
