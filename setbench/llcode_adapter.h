@@ -5,6 +5,7 @@
 #include "random_fnv1a.h"
 #include "adapter.h"
 
+#include <verlib/verlib.h>
 #include <parlay/primitives.h>
 #include <optional>
 
@@ -28,10 +29,19 @@ public:
   }
 
   adapter_t* empty(size_t n) {
-    return new adapter_t(parlay::num_workers(), KEY_NEG_INFTY, KEY_POS_INFTY, KEY_NEG_INFTY, nullptr);
+    return new adapter_t(parlay::num_workers(), KEY_NEG_INFTY, KEY_POS_INFTY, 0, nullptr);
   }
 
   std::optional<V> find(adapter_t* ds, const K key) {
+    init_thread(ds);
+    V val = ds->find(_tid, key);
+    // std::cerr << "llcode_adapter: " << val << std::endl;
+    // std::cerr << "noval: " << ds->getNoValue() << std::endl;
+    if(val == (V) ds->getNoValue()) return {};
+    else return val;
+  } 
+
+  std::optional<V> find_(adapter_t* ds, const K key) {
     init_thread(ds);
     V val = ds->find(_tid, key);
     if(val == (V) ds->getNoValue()) return {};
@@ -70,7 +80,7 @@ public:
   size_t check(adapter_t* ds) {
     init_thread(ds);
     auto tree_stats = ds->createTreeStats(KEY_NEG_INFTY, KEY_POS_INFTY);
-    std::cout << "average height: " << tree_stats->getAverageKeyDepth() << std::endl;
+    // std::cout << "average height: " << tree_stats->getAverageKeyDepth() << std::endl;
     size_t size = tree_stats->getKeys();
     delete tree_stats;
     return size;

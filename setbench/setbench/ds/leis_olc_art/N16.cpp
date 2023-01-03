@@ -61,6 +61,7 @@ namespace ART_OLC {
 
     void N16::remove(uint8_t k) {
         N *const *leafPlace = getChildPos(k);
+        // Keyval* kv = (Keyval*) (*leafPlace);
         assert(leafPlace != nullptr);
         std::size_t pos = leafPlace - children;
         memmove(keys + pos, keys + pos + 1, count - pos - 1);

@@ -20,15 +20,15 @@ struct Rebalance {
   // created and gp (grandparent) is updated to point to the new copy of c.
   // The key k is needed to decide the side of p from gp, and c from p.
   bool fix_priority(node* gp, node* p, node* c, int k) {
-    return gp->try_with_lock([=] {
+    return gp->try_lock([=] {
 	auto ptr = (k < gp->key) ? &(gp->left) : &(gp->right);
 	return (!gp->removed.load() && // gp has not been removed
 		ptr->load() == p &&    // p has not changed
-		p->try_with_lock([=] {
+		p->try_lock([=] {
 		    bool on_left = (k < p->key);
 		    return ((on_left ? (p->left.load() == c) : // c has not changed
 			     (p->right.load() == c)) &&
-			    c->try_with_lock([=] {
+			    c->try_lock([=] {
 				if (on_left) {  // rotate right to bring left child up
 				  node* nc = new_node(p->key, c->right.load(), p->right.load());
 				  (*ptr) = new_node(c->key, c->left.load(), nc);

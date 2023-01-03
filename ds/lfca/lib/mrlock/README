@@ -1,0 +1,5 @@
+This project uses GNU automake. 
+
+To build the executable, run bootstrap.sh, then ./configure and make.
+
+To run the lock tester program, invoke ./src/locktester.

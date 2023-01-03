@@ -25,6 +25,10 @@ public:
     return ds->find(key);
   } 
 
+  std::optional<V> find_(adapter_t* ds, const K key) {
+    return ds->find_(key);
+  } 
+
   bool insert(adapter_t* ds, K key, const V val) {
     return ds->add(key, val);
   }

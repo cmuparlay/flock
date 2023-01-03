@@ -1,33 +1,32 @@
 // A version with only one lock instead of two for remove.
-// Uses clear_lock to clear current owner of a lock without taking the lock.
+// Uses wait_lock to wait on current owner of a lock without taking the lock.
 // Involves a race condition between the writer of a delete flag and the reader.
-// Requires clearing prev incase it is half way through its delete
+// Requires waiting on prev in case it is half way through its delete
 // and has set removed on its next.   This would prevent progress.
 
 // Does not currently work with hashlocks due to cycles (lock a could
-// clear lock b while lock b is clearing lock a).
+// wait for lock b while lock b is waiting for lock a).
 // To make it work need to associate unhashed address with hashed lock
-// so clear_the_lock can ignore the lock if addresses do not match
+// so wait_lock can ignore the lock if addresses do not match
 // (i.e. accidental collision).
 
-#include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-  K key_max = std::numeric_limits<K>::max();
-
-  struct node : ll_head, lock_type {
+  struct alignas(32) node : ll_head {
     ptr_type<node> next;
-    write_once<bool> removed;
     K key;
     V value;
+    bool is_end;
+    atomic_write_once<bool> removed;
+    lock_type lck;
     node(K key, V value, node* next)
-      : key(key), value(value), next(next), removed(false) {};
+      : key(key), value(value), next(next), is_end(false), removed(false) {};
+    node(node* next, bool is_end) // for head and tail
+      : next(next), is_end(is_end), removed(false) {};
   };
 
   memory_pool<node> node_pool;
@@ -38,67 +37,79 @@ struct Set {
     node* nxt = (cur->next).read();
     while (true) {
       node* nxt_nxt = (nxt->next).read(); // prefetch
-      if (nxt->key >= k) break;
+      if (nxt->is_end || nxt->key >= k) break;
+      prev = cur;
       cur = nxt;
       nxt = nxt_nxt;
     }
     return std::make_tuple(prev,cur, nxt);
   }
 
+  static constexpr int init_delay = 200;
+  static constexpr int max_delay = 2000;
+
   bool insert(node* root, K k, V v) {
     return with_epoch([=] {
+      int delay = init_delay;
       while (true) {
 	auto [prev, cur, nxt] = find_location(root, k);
-	if (nxt->key == k) return false; //already there
-	if (use_help && prev != nullptr) prev->clear_the_lock(); // important to ensure lock freedom
-	if (cur->try_with_lock([=] {
-	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
+	if (!nxt->is_end && nxt->key == k) return false; //already there
+	if (prev != nullptr)
+	  prev->lck.wait_lock(); // important to ensure lock freedom
+	if (cur->lck.try_lock([=] {
+	      if (cur->removed.load() || (cur->next).load() != nxt)
+		return false;
 	      auto new_node = node_pool.new_obj(k, v, nxt);
 	      cur->next = new_node; // splice in
 	      return true;
 	    })) return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
 
   bool remove(node* root, K k) {
     return with_epoch([=] {
+      int delay = init_delay;
       while (true) {		 
 	auto [prev, cur, nxt] = find_location(root, k);
-	if (k != nxt->key) return false; // not found
-	if (prev != nullptr) prev->clear_the_lock();
-	nxt->clear_the_lock();
-	if (cur->try_with_lock([=] {
+	if (nxt->is_end || k != nxt->key) return false; // not found
+	if (prev != nullptr) prev->lck.wait_lock();
+	nxt->lck.wait_lock();
+	if (cur->lck.try_lock([=] {
 	      if (cur->removed.load() || (cur->next).load() != nxt
-		  || nxt->is_locked()) return false;
+		  || nxt->lck.is_locked()) return false;
 	      nxt->removed = true;
 	      // important to ensure removed flag is visible
-	      nxt->clear_the_lock();
+	      nxt->lck.wait_lock();
 	      auto a = (nxt->next).load();
 	      cur->next = a; // shortcut
 	      node_pool.retire(nxt);
 	      return true;
 	    })) return true;
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
   
   std::optional<V> find(node* root, K k) {
     return with_epoch([&] () -> std::optional<V> {
 	auto [prev, cur, nxt] = find_location(root, k);
-	if (nxt->key == k) return nxt->value; 
+	if (!nxt->is_end && nxt->key == k) return nxt->value; 
 	else return {};
       });
   }
 
   node* empty() {
-    node* tail = node_pool.new_obj(key_max, 0, nullptr);
-    return node_pool.new_obj(key_min, 0, tail);
+    node* tail = node_pool.new_obj(nullptr, true);
+    return node_pool.new_obj(tail, false);
   }
 
   node* empty(size_t n) { return empty(); }
 
   void print(node* p) {
     node* ptr = (p->next).load();
-    while (ptr->key != key_max) {
+    while (!ptr->is_end) {
       std::cout << ptr->key << ", ";
       ptr = (ptr->next).load();
     }
@@ -106,17 +117,17 @@ struct Set {
   }
 
   void retire(node* p) {
-    if (p == nullptr) return;
-    retire(p->next.load());
+    if (!p->is_end) retire(p->next.load());
     node_pool.retire(p);
   }
   
   long check(node* p) {
-    if (p->key != key_min) std::cout << "bad head" << std::endl;
     node* ptr = (p->next).load();
-    K k = key_min;
-    long i = 0;
-    while (ptr != nullptr && ptr->key != key_max) {
+    if (ptr->is_end) return 0;
+    K k = ptr->key;
+    ptr = (ptr->next).load();
+    long i = 1;
+    while (!ptr->is_end) {
       i++;
       if (ptr->key <= k) {
 	std::cout << "bad key: " << k << ", " << ptr->key << std::endl;
@@ -125,7 +136,6 @@ struct Set {
       k = ptr->key;
       ptr = (ptr->next).load();
     }
-    if (ptr == nullptr) std::cout << "bad tail: " << std::endl;
     return i;
   }
 

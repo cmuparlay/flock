@@ -1,93 +1,93 @@
-#include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-
   // common header for internal nodes and leaves
-  struct header : ll_head {
+  struct header {
     K key;
     bool is_leaf;
-    write_once<bool> removed; // not used for leaves, but fits here
+    bool is_sentinal;
+    flck::atomic_write_once<bool> removed; // not used for leaves, but fits here
     header(K key, bool is_leaf)
-      : key(key), is_leaf(is_leaf), removed(false) {}
+      : key(key), is_leaf(is_leaf), is_sentinal(false), removed(false) {}
+    header(bool is_sentinal) :
+      is_leaf(is_sentinal), is_sentinal(is_sentinal), removed(false) {}
   };
 
   // internal node
-  struct node : header, lock_type {
-    ptr_type<node> left;
-    ptr_type<node> right;
+  struct node : header, flck::lock {
+    flck::atomic<node*> left;
+    flck::atomic<node*> right;
     node(K k, node* left, node* right)
       : header{k,false}, left(left), right(right) {};
+    node(node* left) // for the root, only has a left pointer
+      : header{false}, left(left), right(nullptr) {};
   };
 
   struct leaf : header {
     V value;
     leaf(K k, V v) : header{k,true}, value(v) {};
+    leaf() : header{true} {}; // for the sentinal leaf
   };
 
-  memory_pool<node> node_pool;
-  memory_pool<leaf> leaf_pool;
+  flck::memory_pool<node> node_pool;
+  flck::memory_pool<leaf> leaf_pool;
 
   size_t max_iters = 10000000;
   
   auto find_location(node* root, K k) {
-    int cnt = 0;
     node* gp = nullptr;
     bool gp_left = false;
     node* p = root;
     bool p_left = true;
-    node* l = (p->left).load();
+    node* l = (p->left).read();
     while (!l->is_leaf) {
-      // if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       gp = p;
       gp_left = p_left;
       p = l;
       p_left = (k < p->key);
-      l = p_left ? (p->left).load() : (p->right).load();
+      l = p_left ? (p->left).read() : (p->right).read();
     }
     return std::make_tuple(gp, gp_left, p, p_left, l);
   }
   
   bool insert(node* root, K k, V v, bool upsert=false) {
-    return with_epoch([=] {
-      int cnt = 0;
+    return flck::with_epoch([=] {
       node* prev_leaf = nullptr;
       while (true) {
 	auto [gp, gp_left, p, p_left, l] = find_location(root, k);
-	if ((!upsert && l->key == k) ||
-	    (upsert && prev_leaf != nullptr && prev_leaf->key == k && l != prev_leaf))
+	if (!l->is_sentinal &&
+	    ((!upsert && l->key == k) ||
+	     (upsert && prev_leaf != nullptr && prev_leaf->key == k &&
+	      l != prev_leaf)))
 	  return false;
 	prev_leaf = l;
-	auto r = p->try_with_lock([=] {
+	auto r = p->try_lock([=] {
 	      auto ptr = p_left ? &(p->left) : &(p->right);
 	      auto l_new = ptr->load();
 	      if (p->removed.load() || l_new != l) return false;
 	      node* new_l = (node*) leaf_pool.new_obj(k, v);
 	      if (k == l->key) *ptr = new_l; // update existing key (only if upsert)
-	      else *ptr = ((k > l->key) ?
+	      else *ptr = ((l->is_sentinal || k > l->key) ?
 			   node_pool.new_obj(k, l, new_l) :
 			   node_pool.new_obj(l->key, new_l, l));
 	      return true;});
 	if (r) return (k != l->key);
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
       }});
   }
 
   bool remove(node* root, K k) {
-    return with_epoch([=] {
-       int cnt = 0;
+    return flck::with_epoch([=] {
        node* prev_leaf = nullptr;
        while (true) {
 	 auto [gp, gp_left, p, p_left, l] = find_location(root, k);
-	 if (k != l->key ||(prev_leaf != nullptr && prev_leaf != l))
+	 if (l->is_sentinal || k != l->key ||
+	     (prev_leaf != nullptr && prev_leaf != l))
 	   return false;
 	 prev_leaf = l;
-	 if (gp->try_with_lock([=] {
-	       return p->try_with_lock([=] {
+	 if (gp->try_lock([=] {
+	       return p->try_lock([=] {
 		   auto ptr = gp_left ? &(gp->left) : &(gp->right);
 		   if (gp->removed.load() || ptr->load() != p) return false;
 		   node* ll = (p->left).load();
@@ -100,24 +100,28 @@ struct Set {
 		   leaf_pool.retire((leaf*) l);
 		   return true; });}))
 	   return true;
-	 // if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
        }}); 
   }
 
+  std::optional<V> find_(node* root, K k) {
+    auto ptr = &(root->left);
+    node* l = ptr->read();
+    while (!l->is_leaf) {
+      auto ptr = (k < l->key) ? &(l->left) : &(l->right);
+      l = ptr->read();
+    }
+    ptr->validate();
+    auto ll = (leaf*) l;
+    if (!ll->is_sentinal && ll->key == k) return ll->value; 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	node* l = (root->left).load();
-	while (!l->is_leaf)
-	  l = (k < l->key) ? (l->left).load() : (l->right).load();
-	auto ll = (leaf*) l;
-	if (ll->key == k) return ll->value; 
-	else return {};
-    });
+    return flck::with_epoch([&] { return find_(root, k);});
   }
 
   node* empty() {
-    node* l = (node*) leaf_pool.new_obj(key_min, 0);
-    return node_pool.new_obj(0, l, nullptr);
+      return node_pool.new_obj((node*) leaf_pool.new_obj());
   }
 
   node* empty(size_t n) { return empty(); }
@@ -162,18 +166,20 @@ struct Set {
     using rtup = std::tuple<K, K, long>;
     std::function<rtup(node*)> crec;
     crec = [&] (node* p) {
+	     if (p->is_sentinal) return rtup(p->key, p->key, 0);
 	     if (p->is_leaf) return rtup(p->key, p->key, 1);
 	     K lmin,lmax,rmin,rmax;
 	     long lsum, rsum;
 	     parlay::par_do([&] () { std::tie(lmin,lmax,lsum) = crec((p->left).load());},
 			    [&] () { std::tie(rmin,rmax,rsum) = crec((p->right).load());});
-	     if (lmax >= p->key || rmin < p->key)
+	     if ((lsum !=0 && lmax >= p->key) || rmin < p->key)
 	       std::cout << "out of order key: " << lmax << ", " << p->key << ", " << rmin << std::endl;
-	     return rtup(lmin, rmax, lsum + rsum);
+	     if (lsum == 0) return rtup(p->key, rmax, rsum);
+	     else return rtup(lmin, rmax, lsum + rsum);
 	   };
     auto [minv, maxv, cnt] = crec(p->left.load());
-    if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
-    return cnt-1;
+    //if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
+    return cnt;
   }
 
   void clear() {

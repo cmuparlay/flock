@@ -1,12 +1,13 @@
 #include <parlay/primitives.h>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#include <flock/flock.h>
+#define Range_Search 1
+#define Dense_Keys 1
 
 template <typename K, typename V>
 struct Set {
 
   template <int Size>
-  struct Node : ll_head {
+  struct Node {
     using node = Node<0>;
     struct KV {K key; V value;};
     int cnt;
@@ -16,7 +17,7 @@ struct Set {
 	if (entries[i].key == k) return i;
       return -1;
     }
-    Node(K k, V v) : cnt(1) {
+    Node(K k, V v) : cnt(1) { // could this overload with the other constructor if K is a pointer?
       entries[0] = KV{k,v};
     }
     Node(node* old, K k, V v) {
@@ -37,15 +38,20 @@ struct Set {
   };
   using node = Node<0>;
 
-  struct slot : lock_type {
-    ptr_type<node> ptr;
+#ifdef UseCAS
+  struct slot {
+#else
+  struct slot : flck::lock {
+#endif
+    flck::atomic<node*> ptr;
     slot() : ptr(nullptr) {}
   };
 
   struct Table {
     parlay::sequence<slot> table;
     slot* get_slot(K k) {
-      size_t idx = parlay::hash64(k) & (table.size()-1u);
+      //size_t idx = parlay::hash64(k) & (table.size()-1u);
+      size_t idx = (k * 0x9ddfea08eb382d69ULL) & (table.size()-1u);
       return &table[idx];
     }
     Table(size_t n) {
@@ -55,10 +61,10 @@ struct Set {
     }
   };
   
-  memory_pool<Node<1>> node_pool_1;
-  memory_pool<Node<3>> node_pool_3;
-  memory_pool<Node<7>> node_pool_7;
-  memory_pool<Node<31>> node_pool_31;
+  flck::memory_pool<Node<1>> node_pool_1;
+  flck::memory_pool<Node<3>> node_pool_3;
+  flck::memory_pool<Node<7>> node_pool_7;
+  flck::memory_pool<Node<31>> node_pool_31;
 
   node* insert_to_node(node* old, K k, V v) {
     if (old == nullptr) return (node*) node_pool_1.new_obj(k, v);
@@ -85,17 +91,11 @@ struct Set {
     else abort();
   }
 
-  // should not require stupid gcc attribute, but compiler screws up otherwise
-  __attribute__((always_inline)) std::optional<V> find_at(slot* s, K k) {
-#ifdef Persistent // compiler should do this, sigh
-    node* x = s->ptr.read_fix(s);
-    //s->ptr.validate();
-    //node* x = s->ptr.read();
+  // should not require gcc attribute, but compiler screws up otherwise
+  __attribute__((always_inline))
+  std::optional<V> find_at(slot* s, K k) {
+    node* x = s->ptr.load();
     if (x == nullptr) return {};
-#else 
-    node* x = s->ptr.read();
-    if (x == nullptr) return {};
-#endif
     if (x->entries[0].key == k)
       return x->entries[0].value;
     int i = x->find(k);
@@ -103,48 +103,85 @@ struct Set {
     else return x->entries[i].value;
   }
   
+  std::optional<V> find_(Table& table, K k) {
+    slot* s = table.get_slot(k);
+    return find_at(s, k);
+  }
+
   std::optional<V> find(Table& table, K k) {
     slot* s = table.get_slot(k);
     __builtin_prefetch (s);
-    auto x = with_epoch([&] { return find_at(s, k);});
+    auto x = flck::with_epoch([&] { return find_at(s, k);});
     return x;
   }
-  
+
+  static constexpr int init_delay=200;
+  static constexpr int max_delay=2000;
 
   bool insert_at(slot* s, K k, V v) {
+    int delay = init_delay;
     while (true) {
       node* x = s->ptr.load();
       if (x != nullptr && x->find(k) != -1) return false;
-      if (s->try_with_lock([=] {
+#ifdef UseCAS
+      node* new_node = insert_to_node(x, k, v);
+      if(s->ptr.cas(x, new_node)) {
+        retire_node(x);
+        return true;
+      } else retire_node(new_node); // TODO: could be destruct
+#else  // use try_lock
+      if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = insert_to_node(x, k, v);
 	    retire_node(x);
 	    return true;}))
 	return true;
+#endif
+      for (volatile int i=0; i < delay; i++);
+      delay = std::min(2*delay, max_delay);
     }
   }
 
   bool insert(Table& table, K k, V v) {
     slot* s = table.get_slot(k); 
-    return with_epoch([&] {return insert_at(s, k, v);});
+    return flck::with_epoch([&] {return insert_at(s, k, v);});
   }
   
   bool remove_at(slot* s, K k) {
+    int delay = init_delay;
     while (true) {
       node* x = s->ptr.load();
       if (x == nullptr || x->find(k) == -1) return false;
-      if (s->try_with_lock([=] {
+#ifdef UseCAS
+      node* new_node = remove_from_node(x, k);
+      if(s->ptr.cas(x, new_node)) {
+        retire_node(x);
+        return true;
+      } else retire_node(new_node); // TODO: could be destruct
+#else
+      if (s->try_lock([=] {
 	    if (s->ptr.load() != x) return false;
 	    s->ptr = remove_from_node(x, k);
 	    retire_node(x);
 	    return true;}))
 	return true;
+#endif      
+      for (volatile int i=0; i < delay; i++);
+      delay = std::min(2*delay, max_delay);
     }
   }
 
   bool remove(Table& table, K k) {
     slot* s = table.get_slot(k);
-    return with_epoch([&] {return remove_at(s, k);});
+    return flck::with_epoch([&] {return remove_at(s, k);});
+  }
+
+  template<typename AddF>
+  void range_(Table& table, AddF& add, K start, K end) {
+      for (K k = start; k <= end; k++) {
+	auto x = find_(table, k);
+	if (x.has_value()) add(k, x.value());
+      }
   }
 
   Table empty(size_t n) {return Table(n);}

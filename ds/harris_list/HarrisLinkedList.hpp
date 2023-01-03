@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-#include <flock/lock.h>
+#include <flock/epoch.h>
 
 /**
  * Original Harris Linked list.
@@ -71,7 +71,7 @@ public:
         }
     }
 
-    static mem_pool<Node> node_pool;
+    static flck::internal::mem_pool<Node> node_pool;
 
     static std::string className() { return "HarrisLinkedListSet" ; }
 
@@ -94,7 +94,7 @@ public:
      *
      */
     bool add(T key, V value) {
-        return with_epoch([&] () -> bool {
+      return flck::with_epoch([&] () -> bool {
             Node* new_node = node_pool.new_obj(key, value);
             Node* left_node;
             do {
@@ -117,7 +117,7 @@ public:
      * "High Performance Dynamic Lock-Free Hash Tables and List-Based Sets"
      */
     bool remove(T key) {
-        return with_epoch([&] () -> bool {
+        return flck::with_epoch([&] () -> bool {
             Node* right_node;
             Node* right_node_next;
             Node* left_node;
@@ -144,8 +144,7 @@ public:
      * <p>
      * Progress Condition: Lock-Free
      */
-    std::optional<V> find(T key) {
-        return with_epoch([&] () -> std::optional<V> {
+    std::optional<V> find_(T key) {
             Node* right_node;
             Node* left_node;
             right_node = search (key, left_node);
@@ -153,7 +152,10 @@ public:
                 return {};
             else
                 return right_node->value;
-        });
+    }
+
+    std::optional<V> find(T key) {
+      return flck::with_epoch([&] { return find_(key);});
     }
 
 
@@ -212,4 +214,4 @@ private:
 };
 
 template<typename T, typename V>
-mem_pool<typename HarrisLinkedList<T,V>::Node> HarrisLinkedList<T,V>::node_pool;
+flck::internal::mem_pool<typename HarrisLinkedList<T,V>::Node> HarrisLinkedList<T,V>::node_pool;

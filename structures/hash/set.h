@@ -1,4 +1,4 @@
-#include <flock/lock.h>
+#include <flock/flock.h>
 #include <parlay/primitives.h>
 
 template <typename K, typename V>
@@ -7,20 +7,19 @@ struct Set {
   struct alignas(32) node {
     K key;
     V value;
-    mutable_val<node*> next;
+    flck::atomic<node*> next;
     node(K key, V value, node* next) : key(key), value(value), next(next) {};
   };
   
-  struct slot {
-    mutable_val<node*> head;
-    //lock lck;
-    mutable_val<unsigned int> version_num;
+  struct slot : flck::lock {
+    flck::atomic<node*> head;
+    flck::atomic<unsigned int> version_num;
     slot() : version_num(0), head(nullptr) {}
   };
 
   using Table = parlay::sequence<slot>;
 
-  memory_pool<node> node_pool;
+  flck::memory_pool<node> node_pool;
 
   slot* get_slot(Table& table, K k) {
     //return &table[parlay::hash64_2(k) & (table.size()-1u)];
@@ -28,11 +27,11 @@ struct Set {
   }
 
   auto find_in_slot(slot* s, K k) {
-    mutable_val<node*>* cur = &s->head;
-    node* nxt = cur->load();
+    auto cur = &s->head;
+    node* nxt = cur->read();
     while (nxt != nullptr && nxt->key != k) {
       cur = &(nxt->next);
-      nxt = cur->load();
+      nxt = cur->read();
     }
     return std::make_pair(cur,nxt);
   }
@@ -40,11 +39,20 @@ struct Set {
   std::optional<V> find(Table& table, K k) {
     slot* s = get_slot(table, k);
     __builtin_prefetch (s);
-    return with_epoch([&] () -> std::optional<V> {
+    return flck::with_epoch([&] () -> std::optional<V> {
 	auto [cur, nxt] = find_in_slot(s, k);
+	cur->validate();
 	if (nxt != nullptr) return nxt->value;
 	else return {};
       });
+  }
+
+  std::optional<V> find_(Table& table, K k) {
+    slot* s = get_slot(table, k);
+    auto [cur, nxt] = find_in_slot(s, k);
+    cur->validate();
+    if (nxt != nullptr) return nxt->value;
+    else return {};
   }
 
   bool insert_at(slot* s, K k, V v) {
@@ -52,11 +60,11 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt != nullptr) return false;
-      if (try_lock_loc(s, [=] {
-			    if (s->version_num.load() != vn) return false;
-			    *cur = node_pool.new_obj(k, v, nullptr);
-			    s->version_num = vn+1;
-			    return true;}))
+      if (s->try_lock([=] {
+	    if (s->version_num.load() != vn) return false;
+	    *cur = node_pool.new_obj(k, v, nullptr);
+	    s->version_num = vn+1;
+	    return true;}))
 	return true;
     }
 
@@ -64,7 +72,7 @@ struct Set {
 
   bool insert(Table& table, K k, V v) {
     slot* s = get_slot(table, k);
-    return with_epoch([&] {return insert_at(s, k, v);});
+    return flck::with_epoch([&] {return insert_at(s, k, v);});
   }
 			
   bool remove_at(slot* s, K k) {
@@ -72,19 +80,19 @@ struct Set {
       unsigned int vn = s->version_num.load();
       auto [cur, nxt] = find_in_slot(s, k);
       if (nxt == nullptr) return false;
-      if (try_lock_loc(s, [=] {
-			    if (s->version_num.load() != vn) return false;
-			    *cur = nxt->next.load();
-			    node_pool.retire(nxt);
-			    s->version_num = vn+1;
-			    return true;}))
+      if (s->try_lock([=] {
+	    if (s->version_num.load() != vn) return false;
+	    *cur = nxt->next.load();
+	    node_pool.retire(nxt);
+	    s->version_num = vn+1;
+	    return true;}))
 	return true;
     }
   }
 
   bool remove(Table& table, K k) {
     slot* s = get_slot(table, k);
-    return with_epoch([&] {return remove_at(s, k);});
+    return flck::with_epoch([&] {return remove_at(s, k);});
   }
 			
   Table empty(size_t n) {

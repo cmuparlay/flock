@@ -32,6 +32,14 @@ namespace ART_OLC {
 
     using Prefix = uint8_t[maxStoredPrefixLength];
 
+    struct Keyval {
+        uint64_t key, val;
+        Keyval() {
+            key = 0;
+            val = 321;
+        }
+    };
+
     class N {
     protected:
         N(NTypes type) {
@@ -110,7 +118,7 @@ namespace ART_OLC {
 
         static bool isLeaf(const N *n);
 
-        static N *setLeaf(TID tid);
+        static N *setLeaf(Keyval* kv);
 
         static N *getAnyChild(const N *n);
 
@@ -127,6 +135,8 @@ namespace ART_OLC {
         static uint64_t getChildren(const N *node, uint8_t start, uint8_t end, std::tuple<uint8_t, N *> children[],
                                 uint32_t &childrenCount);
     };
+
+
 
     class N4 : public N {
     public:

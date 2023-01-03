@@ -78,7 +78,7 @@ CATree<RecordManager, K, V>::CATree(int _numThreads, K _minKey, K _maxKey, Order
     switch ( type ) {
         case OrderedSetType::AVL:
             set = new AVLTree<K, V>();
-            cout << "using AVL TREE" << endl;
+            // cout << "using AVL TREE" << endl;
             break;
         // case OrderedSetType::LINKEDLIST:
         //     set = new LinkedList<K, V>();

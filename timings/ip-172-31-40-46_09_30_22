@@ -1,0 +1,1147 @@
+b43ed53
+./list_lock,5%update,n=10,p=63,uniform,185
+./list_lock,5%update,n=10,p=63,uniform,184.9
+./list_lock,5%update,n=10,p=63,uniform,185.6
+./list_lock,5%update,n=10,p=63,zipfian=0.99,186.1
+./list_lock,5%update,n=10,p=63,zipfian=0.99,188
+./list_lock,5%update,n=10,p=63,zipfian=0.99,187.2
+./list_per_lock,5%update,n=10,p=63,uniform,95.66
+./list_per_lock,5%update,n=10,p=63,uniform,96.73
+./list_per_lock,5%update,n=10,p=63,uniform,97.07
+ indirect = 56394928
+./list_per_lock,5%update,n=10,p=63,zipfian=0.99,100.2
+./list_per_lock,5%update,n=10,p=63,zipfian=0.99,101.5
+./list_per_lock,5%update,n=10,p=63,zipfian=0.99,100.9
+ indirect = 51519818
+./list,5%update,n=10,p=63,uniform,165.1
+./list,5%update,n=10,p=63,uniform,166.1
+./list,5%update,n=10,p=63,uniform,166.3
+./list,5%update,n=10,p=63,zipfian=0.99,174.3
+./list,5%update,n=10,p=63,zipfian=0.99,174.6
+./list,5%update,n=10,p=63,zipfian=0.99,174.2
+./list_per,5%update,n=10,p=63,uniform,103.4
+./list_per,5%update,n=10,p=63,uniform,103.9
+./list_per,5%update,n=10,p=63,uniform,103.8
+ indirect = 44472953
+./list_per,5%update,n=10,p=63,zipfian=0.99,108.5
+./list_per,5%update,n=10,p=63,zipfian=0.99,108.4
+./list_per,5%update,n=10,p=63,zipfian=0.99,108.6
+ indirect = 39916053
+./list_lock,50%update,n=10,p=63,uniform,48.18
+./list_lock,50%update,n=10,p=63,uniform,48.56
+./list_lock,50%update,n=10,p=63,uniform,48.67
+./list_lock,50%update,n=10,p=63,zipfian=0.99,48.6
+./list_lock,50%update,n=10,p=63,zipfian=0.99,48.95
+./list_lock,50%update,n=10,p=63,zipfian=0.99,48.78
+./list_per_lock,50%update,n=10,p=63,uniform,33.83
+./list_per_lock,50%update,n=10,p=63,uniform,34.11
+./list_per_lock,50%update,n=10,p=63,uniform,34.2
+ indirect = 49914029
+./list_per_lock,50%update,n=10,p=63,zipfian=0.99,35.78
+./list_per_lock,50%update,n=10,p=63,zipfian=0.99,36.12
+./list_per_lock,50%update,n=10,p=63,zipfian=0.99,36.08
+ indirect = 46233575
+./list,50%update,n=10,p=63,uniform,37.78
+./list,50%update,n=10,p=63,uniform,37.77
+./list,50%update,n=10,p=63,uniform,37.79
+./list,50%update,n=10,p=63,zipfian=0.99,37.51
+./list,50%update,n=10,p=63,zipfian=0.99,37.55
+./list,50%update,n=10,p=63,zipfian=0.99,37.48
+./list_per,50%update,n=10,p=63,uniform,28.36
+./list_per,50%update,n=10,p=63,uniform,28.35
+./list_per,50%update,n=10,p=63,uniform,28.38
+ indirect = 42552203
+./list_per,50%update,n=10,p=63,zipfian=0.99,28.38
+./list_per,50%update,n=10,p=63,zipfian=0.99,28.41
+./list_per,50%update,n=10,p=63,zipfian=0.99,28.39
+ indirect = 33897573
+./list_lock,5%update,n=100,p=63,uniform,159.8
+./list_lock,5%update,n=100,p=63,uniform,161.7
+./list_lock,5%update,n=100,p=63,uniform,162.1
+./list_lock,5%update,n=100,p=63,zipfian=0.99,160.3
+./list_lock,5%update,n=100,p=63,zipfian=0.99,162.2
+./list_lock,5%update,n=100,p=63,zipfian=0.99,162.8
+./list_per_lock,5%update,n=100,p=63,uniform,94.99
+./list_per_lock,5%update,n=100,p=63,uniform,95.99
+./list_per_lock,5%update,n=100,p=63,uniform,96.46
+ indirect = 58141849
+./list_per_lock,5%update,n=100,p=63,zipfian=0.99,94.3
+./list_per_lock,5%update,n=100,p=63,zipfian=0.99,94.78
+./list_per_lock,5%update,n=100,p=63,zipfian=0.99,95.31
+ indirect = 56185195
+./list,5%update,n=100,p=63,uniform,146.1
+./list,5%update,n=100,p=63,uniform,147
+./list,5%update,n=100,p=63,uniform,147
+./list,5%update,n=100,p=63,zipfian=0.99,147.3
+./list,5%update,n=100,p=63,zipfian=0.99,148.5
+./list,5%update,n=100,p=63,zipfian=0.99,149.2
+./list_per,5%update,n=100,p=63,uniform,105
+./list_per,5%update,n=100,p=63,uniform,105
+./list_per,5%update,n=100,p=63,uniform,105.2
+ indirect = 41988772
+./list_per,5%update,n=100,p=63,zipfian=0.99,104.6
+./list_per,5%update,n=100,p=63,zipfian=0.99,105
+./list_per,5%update,n=100,p=63,zipfian=0.99,105
+ indirect = 40982892
+./list_lock,50%update,n=100,p=63,uniform,65.02
+./list_lock,50%update,n=100,p=63,uniform,65.33
+./list_lock,50%update,n=100,p=63,uniform,65.32
+./list_lock,50%update,n=100,p=63,zipfian=0.99,62.47
+./list_lock,50%update,n=100,p=63,zipfian=0.99,62.76
+./list_lock,50%update,n=100,p=63,zipfian=0.99,62.76
+./list_per_lock,50%update,n=100,p=63,uniform,40.6
+./list_per_lock,50%update,n=100,p=63,uniform,40.96
+./list_per_lock,50%update,n=100,p=63,uniform,40.98
+ indirect = 109976159
+./list_per_lock,50%update,n=100,p=63,zipfian=0.99,39.29
+./list_per_lock,50%update,n=100,p=63,zipfian=0.99,39.58
+./list_per_lock,50%update,n=100,p=63,zipfian=0.99,39.59
+ indirect = 100483615
+./list,50%update,n=100,p=63,uniform,54.83
+./list,50%update,n=100,p=63,uniform,54.87
+./list,50%update,n=100,p=63,uniform,54.84
+./list,50%update,n=100,p=63,zipfian=0.99,55.19
+./list,50%update,n=100,p=63,zipfian=0.99,55.2
+./list,50%update,n=100,p=63,zipfian=0.99,55.18
+./list_per,50%update,n=100,p=63,uniform,40.22
+./list_per,50%update,n=100,p=63,uniform,40.22
+./list_per,50%update,n=100,p=63,uniform,40.19
+ indirect = 88130341
+./list_per,50%update,n=100,p=63,zipfian=0.99,39.96
+./list_per,50%update,n=100,p=63,zipfian=0.99,39.97
+./list_per,50%update,n=100,p=63,zipfian=0.99,40
+ indirect = 79029418
+./list_lock,5%update,n=1000,p=63,uniform,24.25
+./list_lock,5%update,n=1000,p=63,uniform,22.97
+./list_lock,5%update,n=1000,p=63,uniform,22.91
+./list_lock,5%update,n=1000,p=63,zipfian=0.99,24.52
+./list_lock,5%update,n=1000,p=63,zipfian=0.99,24.17
+./list_lock,5%update,n=1000,p=63,zipfian=0.99,24.09
+./list_per_lock,5%update,n=1000,p=63,uniform,23.82
+./list_per_lock,5%update,n=1000,p=63,uniform,23.31
+./list_per_lock,5%update,n=1000,p=63,uniform,23.3
+ indirect = 3908929
+./list_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.43
+./list_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.02
+./list_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.03
+ indirect = 3983343
+./list,5%update,n=1000,p=63,uniform,23.97
+./list,5%update,n=1000,p=63,uniform,22.6
+./list,5%update,n=1000,p=63,uniform,22.7
+./list,5%update,n=1000,p=63,zipfian=0.99,23.24
+./list,5%update,n=1000,p=63,zipfian=0.99,22.65
+./list,5%update,n=1000,p=63,zipfian=0.99,22.54
+./list_per,5%update,n=1000,p=63,uniform,23.39
+./list_per,5%update,n=1000,p=63,uniform,22.8
+./list_per,5%update,n=1000,p=63,uniform,22.77
+ indirect = 3353779
+./list_per,5%update,n=1000,p=63,zipfian=0.99,23.21
+./list_per,5%update,n=1000,p=63,zipfian=0.99,22.96
+./list_per,5%update,n=1000,p=63,zipfian=0.99,22.82
+ indirect = 3427924
+./list_lock,50%update,n=1000,p=63,uniform,20.4
+./list_lock,50%update,n=1000,p=63,uniform,19.9
+./list_lock,50%update,n=1000,p=63,uniform,20.31
+./list_lock,50%update,n=1000,p=63,zipfian=0.99,21.76
+./list_lock,50%update,n=1000,p=63,zipfian=0.99,21.7
+./list_lock,50%update,n=1000,p=63,zipfian=0.99,21.7
+./list_per_lock,50%update,n=1000,p=63,uniform,19.68
+./list_per_lock,50%update,n=1000,p=63,uniform,19.79
+./list_per_lock,50%update,n=1000,p=63,uniform,19.57
+ indirect = 28752417
+./list_per_lock,50%update,n=1000,p=63,zipfian=0.99,19.53
+./list_per_lock,50%update,n=1000,p=63,zipfian=0.99,19.44
+./list_per_lock,50%update,n=1000,p=63,zipfian=0.99,19.08
+ indirect = 28006221
+./list,50%update,n=1000,p=63,uniform,19.74
+./list,50%update,n=1000,p=63,uniform,19.17
+./list,50%update,n=1000,p=63,uniform,18.89
+./list,50%update,n=1000,p=63,zipfian=0.99,18.65
+./list,50%update,n=1000,p=63,zipfian=0.99,18.18
+./list,50%update,n=1000,p=63,zipfian=0.99,18.45
+./list_per,50%update,n=1000,p=63,uniform,17.72
+./list_per,50%update,n=1000,p=63,uniform,17.54
+./list_per,50%update,n=1000,p=63,uniform,17.37
+ indirect = 22076878
+./list_per,50%update,n=1000,p=63,zipfian=0.99,17.86
+./list_per,50%update,n=1000,p=63,zipfian=0.99,17.34
+./list_per,50%update,n=1000,p=63,zipfian=0.99,16.78
+ indirect = 21252787
+./list_ro_lock,5%update,n=10,p=63,uniform,148
+./list_ro_lock,5%update,n=10,p=63,uniform,149.1
+./list_ro_lock,5%update,n=10,p=63,uniform,148.7
+./list_ro_lock,5%update,n=10,p=63,zipfian=0.99,159.1
+./list_ro_lock,5%update,n=10,p=63,zipfian=0.99,159.9
+./list_ro_lock,5%update,n=10,p=63,zipfian=0.99,158.4
+./list_ro_per_lock,5%update,n=10,p=63,uniform,137.7
+./list_ro_per_lock,5%update,n=10,p=63,uniform,137.9
+./list_ro_per_lock,5%update,n=10,p=63,uniform,138.3
+./list_ro_per_lock,5%update,n=10,p=63,zipfian=0.99,147.4
+./list_ro_per_lock,5%update,n=10,p=63,zipfian=0.99,148.1
+./list_ro_per_lock,5%update,n=10,p=63,zipfian=0.99,149
+./list_ro,5%update,n=10,p=63,uniform,126.1
+./list_ro,5%update,n=10,p=63,uniform,126.2
+./list_ro,5%update,n=10,p=63,uniform,126.2
+./list_ro,5%update,n=10,p=63,zipfian=0.99,138.5
+./list_ro,5%update,n=10,p=63,zipfian=0.99,139.5
+./list_ro,5%update,n=10,p=63,zipfian=0.99,139.3
+./list_ro_per,5%update,n=10,p=63,uniform,118.2
+./list_ro_per,5%update,n=10,p=63,uniform,118
+./list_ro_per,5%update,n=10,p=63,uniform,118.1
+./list_ro_per,5%update,n=10,p=63,zipfian=0.99,129.9
+./list_ro_per,5%update,n=10,p=63,zipfian=0.99,130.2
+./list_ro_per,5%update,n=10,p=63,zipfian=0.99,130.2
+./list_ro_lock,50%update,n=10,p=63,uniform,30.06
+./list_ro_lock,50%update,n=10,p=63,uniform,30.17
+./list_ro_lock,50%update,n=10,p=63,uniform,30.26
+./list_ro_lock,50%update,n=10,p=63,zipfian=0.99,33.78
+./list_ro_lock,50%update,n=10,p=63,zipfian=0.99,33.98
+./list_ro_lock,50%update,n=10,p=63,zipfian=0.99,34
+./list_ro_per_lock,50%update,n=10,p=63,uniform,27.78
+./list_ro_per_lock,50%update,n=10,p=63,uniform,27.72
+./list_ro_per_lock,50%update,n=10,p=63,uniform,27.76
+./list_ro_per_lock,50%update,n=10,p=63,zipfian=0.99,31.22
+./list_ro_per_lock,50%update,n=10,p=63,zipfian=0.99,31.42
+./list_ro_per_lock,50%update,n=10,p=63,zipfian=0.99,31.42
+./list_ro,50%update,n=10,p=63,uniform,18.92
+./list_ro,50%update,n=10,p=63,uniform,19
+./list_ro,50%update,n=10,p=63,uniform,18.97
+./list_ro,50%update,n=10,p=63,zipfian=0.99,21.14
+./list_ro,50%update,n=10,p=63,zipfian=0.99,21
+./list_ro,50%update,n=10,p=63,zipfian=0.99,20.96
+./list_ro_per,50%update,n=10,p=63,uniform,17.61
+./list_ro_per,50%update,n=10,p=63,uniform,17.65
+./list_ro_per,50%update,n=10,p=63,uniform,17.62
+./list_ro_per,50%update,n=10,p=63,zipfian=0.99,19.77
+./list_ro_per,50%update,n=10,p=63,zipfian=0.99,19.76
+./list_ro_per,50%update,n=10,p=63,zipfian=0.99,19.75
+./list_ro_lock,5%update,n=100,p=63,uniform,140.9
+./list_ro_lock,5%update,n=100,p=63,uniform,141.8
+./list_ro_lock,5%update,n=100,p=63,uniform,141.7
+./list_ro_lock,5%update,n=100,p=63,zipfian=0.99,141.8
+./list_ro_lock,5%update,n=100,p=63,zipfian=0.99,142.5
+./list_ro_lock,5%update,n=100,p=63,zipfian=0.99,142.9
+./list_ro_per_lock,5%update,n=100,p=63,uniform,137.7
+./list_ro_per_lock,5%update,n=100,p=63,uniform,137.9
+./list_ro_per_lock,5%update,n=100,p=63,uniform,137.9
+./list_ro_per_lock,5%update,n=100,p=63,zipfian=0.99,136.8
+./list_ro_per_lock,5%update,n=100,p=63,zipfian=0.99,138.2
+./list_ro_per_lock,5%update,n=100,p=63,zipfian=0.99,138.6
+./list_ro,5%update,n=100,p=63,uniform,132.9
+./list_ro,5%update,n=100,p=63,uniform,133.9
+./list_ro,5%update,n=100,p=63,uniform,133.9
+./list_ro,5%update,n=100,p=63,zipfian=0.99,135.7
+./list_ro,5%update,n=100,p=63,zipfian=0.99,137
+./list_ro,5%update,n=100,p=63,zipfian=0.99,137.1
+./list_ro_per,5%update,n=100,p=63,uniform,131.7
+./list_ro_per,5%update,n=100,p=63,uniform,132
+./list_ro_per,5%update,n=100,p=63,uniform,132.7
+./list_ro_per,5%update,n=100,p=63,zipfian=0.99,134.2
+./list_ro_per,5%update,n=100,p=63,zipfian=0.99,135
+./list_ro_per,5%update,n=100,p=63,zipfian=0.99,135.2
+./list_ro_lock,50%update,n=100,p=63,uniform,50.98
+./list_ro_lock,50%update,n=100,p=63,uniform,50.95
+./list_ro_lock,50%update,n=100,p=63,uniform,50.89
+./list_ro_lock,50%update,n=100,p=63,zipfian=0.99,50.51
+./list_ro_lock,50%update,n=100,p=63,zipfian=0.99,50.61
+./list_ro_lock,50%update,n=100,p=63,zipfian=0.99,50.56
+./list_ro_per_lock,50%update,n=100,p=63,uniform,49.39
+./list_ro_per_lock,50%update,n=100,p=63,uniform,49.27
+./list_ro_per_lock,50%update,n=100,p=63,uniform,49.03
+./list_ro_per_lock,50%update,n=100,p=63,zipfian=0.99,48.79
+./list_ro_per_lock,50%update,n=100,p=63,zipfian=0.99,48.78
+./list_ro_per_lock,50%update,n=100,p=63,zipfian=0.99,48.7
+./list_ro,50%update,n=100,p=63,uniform,43.34
+./list_ro,50%update,n=100,p=63,uniform,43.28
+./list_ro,50%update,n=100,p=63,uniform,43.35
+./list_ro,50%update,n=100,p=63,zipfian=0.99,44.72
+./list_ro,50%update,n=100,p=63,zipfian=0.99,44.86
+./list_ro,50%update,n=100,p=63,zipfian=0.99,44.83
+./list_ro_per,50%update,n=100,p=63,uniform,43.34
+./list_ro_per,50%update,n=100,p=63,uniform,43.42
+./list_ro_per,50%update,n=100,p=63,uniform,43.49
+./list_ro_per,50%update,n=100,p=63,zipfian=0.99,44.36
+./list_ro_per,50%update,n=100,p=63,zipfian=0.99,44.45
+./list_ro_per,50%update,n=100,p=63,zipfian=0.99,44.48
+./list_ro_lock,5%update,n=1000,p=63,uniform,24.42
+./list_ro_lock,5%update,n=1000,p=63,uniform,24.24
+./list_ro_lock,5%update,n=1000,p=63,uniform,24.2
+./list_ro_lock,5%update,n=1000,p=63,zipfian=0.99,24.45
+./list_ro_lock,5%update,n=1000,p=63,zipfian=0.99,24.43
+./list_ro_lock,5%update,n=1000,p=63,zipfian=0.99,24.16
+./list_ro_per_lock,5%update,n=1000,p=63,uniform,23.94
+./list_ro_per_lock,5%update,n=1000,p=63,uniform,23.59
+./list_ro_per_lock,5%update,n=1000,p=63,uniform,23.35
+./list_ro_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.78
+./list_ro_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.65
+./list_ro_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.47
+./list_ro,5%update,n=1000,p=63,uniform,23.86
+./list_ro,5%update,n=1000,p=63,uniform,23.64
+./list_ro,5%update,n=1000,p=63,uniform,23.54
+./list_ro,5%update,n=1000,p=63,zipfian=0.99,23.41
+./list_ro,5%update,n=1000,p=63,zipfian=0.99,23.07
+./list_ro,5%update,n=1000,p=63,zipfian=0.99,22.91
+./list_ro_per,5%update,n=1000,p=63,uniform,23.71
+./list_ro_per,5%update,n=1000,p=63,uniform,23.33
+./list_ro_per,5%update,n=1000,p=63,uniform,23.32
+./list_ro_per,5%update,n=1000,p=63,zipfian=0.99,23.83
+./list_ro_per,5%update,n=1000,p=63,zipfian=0.99,23.65
+./list_ro_per,5%update,n=1000,p=63,zipfian=0.99,23.33
+./list_ro_lock,50%update,n=1000,p=63,uniform,19.74
+./list_ro_lock,50%update,n=1000,p=63,uniform,18.6
+./list_ro_lock,50%update,n=1000,p=63,uniform,17.98
+./list_ro_lock,50%update,n=1000,p=63,zipfian=0.99,19.66
+./list_ro_lock,50%update,n=1000,p=63,zipfian=0.99,18.83
+./list_ro_lock,50%update,n=1000,p=63,zipfian=0.99,18.08
+./list_ro_per_lock,50%update,n=1000,p=63,uniform,19.71
+./list_ro_per_lock,50%update,n=1000,p=63,uniform,19.26
+./list_ro_per_lock,50%update,n=1000,p=63,uniform,18.95
+./list_ro_per_lock,50%update,n=1000,p=63,zipfian=0.99,20.35
+./list_ro_per_lock,50%update,n=1000,p=63,zipfian=0.99,19.94
+./list_ro_per_lock,50%update,n=1000,p=63,zipfian=0.99,19.55
+./list_ro,50%update,n=1000,p=63,uniform,18.77
+./list_ro,50%update,n=1000,p=63,uniform,18.42
+./list_ro,50%update,n=1000,p=63,uniform,18.39
+./list_ro,50%update,n=1000,p=63,zipfian=0.99,18.49
+./list_ro,50%update,n=1000,p=63,zipfian=0.99,17.91
+./list_ro,50%update,n=1000,p=63,zipfian=0.99,17.34
+./list_ro_per,50%update,n=1000,p=63,uniform,18.87
+./list_ro_per,50%update,n=1000,p=63,uniform,18.42
+./list_ro_per,50%update,n=1000,p=63,uniform,18.08
+./list_ro_per,50%update,n=1000,p=63,zipfian=0.99,18.75
+./list_ro_per,50%update,n=1000,p=63,zipfian=0.99,18.67
+./list_ro_per,50%update,n=1000,p=63,zipfian=0.99,18.3
+./dlist_lock,5%update,n=10,p=63,uniform,149.6
+./dlist_lock,5%update,n=10,p=63,uniform,155.3
+./dlist_lock,5%update,n=10,p=63,uniform,156
+./dlist_lock,5%update,n=10,p=63,zipfian=0.99,155.9
+./dlist_lock,5%update,n=10,p=63,zipfian=0.99,158.2
+./dlist_lock,5%update,n=10,p=63,zipfian=0.99,158
+./dlist_per_lock,5%update,n=10,p=63,uniform,97.48
+./dlist_per_lock,5%update,n=10,p=63,uniform,99.15
+./dlist_per_lock,5%update,n=10,p=63,uniform,98.77
+ indirect = 58732098
+./dlist_per_lock,5%update,n=10,p=63,zipfian=0.99,103.9
+./dlist_per_lock,5%update,n=10,p=63,zipfian=0.99,105.1
+./dlist_per_lock,5%update,n=10,p=63,zipfian=0.99,103.5
+ indirect = 55905468
+./dlist,5%update,n=10,p=63,uniform,150.5
+./dlist,5%update,n=10,p=63,uniform,153.3
+./dlist,5%update,n=10,p=63,uniform,152.9
+./dlist,5%update,n=10,p=63,zipfian=0.99,158.9
+./dlist,5%update,n=10,p=63,zipfian=0.99,159.7
+./dlist,5%update,n=10,p=63,zipfian=0.99,159.2
+./dlist_per,5%update,n=10,p=63,uniform,102.4
+./dlist_per,5%update,n=10,p=63,uniform,102.9
+./dlist_per,5%update,n=10,p=63,uniform,103.4
+ indirect = 44515631
+./dlist_per,5%update,n=10,p=63,zipfian=0.99,108.7
+./dlist_per,5%update,n=10,p=63,zipfian=0.99,108.6
+./dlist_per,5%update,n=10,p=63,zipfian=0.99,108.4
+ indirect = 40718432
+./dlist_lock,50%update,n=10,p=63,uniform,42.42
+./dlist_lock,50%update,n=10,p=63,uniform,43.63
+./dlist_lock,50%update,n=10,p=63,uniform,43.62
+./dlist_lock,50%update,n=10,p=63,zipfian=0.99,44.38
+./dlist_lock,50%update,n=10,p=63,zipfian=0.99,45.35
+./dlist_lock,50%update,n=10,p=63,zipfian=0.99,45.18
+./dlist_per_lock,50%update,n=10,p=63,uniform,33.42
+./dlist_per_lock,50%update,n=10,p=63,uniform,33.65
+./dlist_per_lock,50%update,n=10,p=63,uniform,33.69
+ indirect = 48965751
+./dlist_per_lock,50%update,n=10,p=63,zipfian=0.99,35.46
+./dlist_per_lock,50%update,n=10,p=63,zipfian=0.99,35.83
+./dlist_per_lock,50%update,n=10,p=63,zipfian=0.99,35.91
+ indirect = 46195844
+./dlist,50%update,n=10,p=63,uniform,34.26
+./dlist,50%update,n=10,p=63,uniform,34.5
+./dlist,50%update,n=10,p=63,uniform,34.55
+./dlist,50%update,n=10,p=63,zipfian=0.99,34.5
+./dlist,50%update,n=10,p=63,zipfian=0.99,34.79
+./dlist,50%update,n=10,p=63,zipfian=0.99,34.75
+./dlist_per,50%update,n=10,p=63,uniform,26.04
+./dlist_per,50%update,n=10,p=63,uniform,26.09
+./dlist_per,50%update,n=10,p=63,uniform,26.13
+ indirect = 37899750
+./dlist_per,50%update,n=10,p=63,zipfian=0.99,26.61
+./dlist_per,50%update,n=10,p=63,zipfian=0.99,26.65
+./dlist_per,50%update,n=10,p=63,zipfian=0.99,26.55
+ indirect = 31104567
+./dlist_lock,5%update,n=100,p=63,uniform,142.7
+./dlist_lock,5%update,n=100,p=63,uniform,145
+./dlist_lock,5%update,n=100,p=63,uniform,145.5
+./dlist_lock,5%update,n=100,p=63,zipfian=0.99,142.9
+./dlist_lock,5%update,n=100,p=63,zipfian=0.99,144.4
+./dlist_lock,5%update,n=100,p=63,zipfian=0.99,145.5
+./dlist_per_lock,5%update,n=100,p=63,uniform,91.31
+./dlist_per_lock,5%update,n=100,p=63,uniform,92.05
+./dlist_per_lock,5%update,n=100,p=63,uniform,92.25
+ indirect = 58131441
+./dlist_per_lock,5%update,n=100,p=63,zipfian=0.99,90.89
+./dlist_per_lock,5%update,n=100,p=63,zipfian=0.99,91.87
+./dlist_per_lock,5%update,n=100,p=63,zipfian=0.99,92.15
+ indirect = 58717877
+./dlist,5%update,n=100,p=63,uniform,136.9
+./dlist,5%update,n=100,p=63,uniform,138.1
+./dlist,5%update,n=100,p=63,uniform,138.8
+./dlist,5%update,n=100,p=63,zipfian=0.99,139.2
+./dlist,5%update,n=100,p=63,zipfian=0.99,140.5
+./dlist,5%update,n=100,p=63,zipfian=0.99,141
+./dlist_per,5%update,n=100,p=63,uniform,101.1
+./dlist_per,5%update,n=100,p=63,uniform,101.5
+./dlist_per,5%update,n=100,p=63,uniform,101.3
+ indirect = 41399808
+./dlist_per,5%update,n=100,p=63,zipfian=0.99,101.3
+./dlist_per,5%update,n=100,p=63,zipfian=0.99,101.5
+./dlist_per,5%update,n=100,p=63,zipfian=0.99,101.7
+ indirect = 40844091
+./dlist_lock,50%update,n=100,p=63,uniform,53.95
+./dlist_lock,50%update,n=100,p=63,uniform,54.17
+./dlist_lock,50%update,n=100,p=63,uniform,54.14
+./dlist_lock,50%update,n=100,p=63,zipfian=0.99,52.76
+./dlist_lock,50%update,n=100,p=63,zipfian=0.99,52.94
+./dlist_lock,50%update,n=100,p=63,zipfian=0.99,52.92
+./dlist_per_lock,50%update,n=100,p=63,uniform,37.94
+./dlist_per_lock,50%update,n=100,p=63,uniform,38.31
+./dlist_per_lock,50%update,n=100,p=63,uniform,38.32
+ indirect = 94697421
+./dlist_per_lock,50%update,n=100,p=63,zipfian=0.99,37.39
+./dlist_per_lock,50%update,n=100,p=63,zipfian=0.99,37.67
+./dlist_per_lock,50%update,n=100,p=63,zipfian=0.99,37.69
+ indirect = 89751239
+./dlist,50%update,n=100,p=63,uniform,48.38
+./dlist,50%update,n=100,p=63,uniform,48.54
+./dlist,50%update,n=100,p=63,uniform,48.55
+./dlist,50%update,n=100,p=63,zipfian=0.99,49.54
+./dlist,50%update,n=100,p=63,zipfian=0.99,49.71
+./dlist,50%update,n=100,p=63,zipfian=0.99,49.72
+./dlist_per,50%update,n=100,p=63,uniform,37.05
+./dlist_per,50%update,n=100,p=63,uniform,37.01
+./dlist_per,50%update,n=100,p=63,uniform,37
+ indirect = 76844889
+./dlist_per,50%update,n=100,p=63,zipfian=0.99,37.17
+./dlist_per,50%update,n=100,p=63,zipfian=0.99,37.17
+./dlist_per,50%update,n=100,p=63,zipfian=0.99,37.18
+ indirect = 70528719
+./dlist_lock,5%update,n=1000,p=63,uniform,22.58
+./dlist_lock,5%update,n=1000,p=63,uniform,22.17
+./dlist_lock,5%update,n=1000,p=63,uniform,22.14
+./dlist_lock,5%update,n=1000,p=63,zipfian=0.99,22.66
+./dlist_lock,5%update,n=1000,p=63,zipfian=0.99,22.53
+./dlist_lock,5%update,n=1000,p=63,zipfian=0.99,22.54
+./dlist_per_lock,5%update,n=1000,p=63,uniform,22.97
+./dlist_per_lock,5%update,n=1000,p=63,uniform,22.02
+./dlist_per_lock,5%update,n=1000,p=63,uniform,21.97
+ indirect = 3631679
+./dlist_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.46
+./dlist_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.36
+./dlist_per_lock,5%update,n=1000,p=63,zipfian=0.99,23.5
+ indirect = 4126221
+./dlist,5%update,n=1000,p=63,uniform,22.02
+./dlist,5%update,n=1000,p=63,uniform,21.58
+./dlist,5%update,n=1000,p=63,uniform,21.59
+./dlist,5%update,n=1000,p=63,zipfian=0.99,21.96
+./dlist,5%update,n=1000,p=63,zipfian=0.99,21.75
+./dlist,5%update,n=1000,p=63,zipfian=0.99,21.71
+./dlist_per,5%update,n=1000,p=63,uniform,22.81
+./dlist_per,5%update,n=1000,p=63,uniform,21.24
+./dlist_per,5%update,n=1000,p=63,uniform,21.37
+ indirect = 3202898
+./dlist_per,5%update,n=1000,p=63,zipfian=0.99,22.82
+./dlist_per,5%update,n=1000,p=63,zipfian=0.99,22.31
+./dlist_per,5%update,n=1000,p=63,zipfian=0.99,22.22
+ indirect = 3369637
+./dlist_lock,50%update,n=1000,p=63,uniform,19.3
+./dlist_lock,50%update,n=1000,p=63,uniform,19.07
+./dlist_lock,50%update,n=1000,p=63,uniform,18.59
+./dlist_lock,50%update,n=1000,p=63,zipfian=0.99,19.44
+./dlist_lock,50%update,n=1000,p=63,zipfian=0.99,19.22
+./dlist_lock,50%update,n=1000,p=63,zipfian=0.99,18.8
+./dlist_per_lock,50%update,n=1000,p=63,uniform,18.55
+./dlist_per_lock,50%update,n=1000,p=63,uniform,18.26
+./dlist_per_lock,50%update,n=1000,p=63,uniform,18.09
+ indirect = 25468534
+./dlist_per_lock,50%update,n=1000,p=63,zipfian=0.99,18.45
+./dlist_per_lock,50%update,n=1000,p=63,zipfian=0.99,18.2
+./dlist_per_lock,50%update,n=1000,p=63,zipfian=0.99,18.25
+ indirect = 26347851
+./dlist,50%update,n=1000,p=63,uniform,17.79
+./dlist,50%update,n=1000,p=63,uniform,17.73
+./dlist,50%update,n=1000,p=63,uniform,17.54
+./dlist,50%update,n=1000,p=63,zipfian=0.99,17.98
+./dlist,50%update,n=1000,p=63,zipfian=0.99,17.92
+./dlist,50%update,n=1000,p=63,zipfian=0.99,17.63
+./dlist_per,50%update,n=1000,p=63,uniform,17.44
+./dlist_per,50%update,n=1000,p=63,uniform,17.27
+./dlist_per,50%update,n=1000,p=63,uniform,17.12
+ indirect = 21907450
+./dlist_per,50%update,n=1000,p=63,zipfian=0.99,17.49
+./dlist_per,50%update,n=1000,p=63,zipfian=0.99,17.4
+./dlist_per,50%update,n=1000,p=63,zipfian=0.99,17.09
+ indirect = 21337942
+./leaftree_lock,5%update,n=1000,p=63,uniform,381.1
+./leaftree_lock,5%update,n=1000,p=63,uniform,373.4
+./leaftree_lock,5%update,n=1000,p=63,uniform,363.4
+./leaftree_lock,5%update,n=1000,p=63,zipfian=0.99,386.8
+./leaftree_lock,5%update,n=1000,p=63,zipfian=0.99,363
+./leaftree_lock,5%update,n=1000,p=63,zipfian=0.99,373.3
+./leaftree_per_lock,5%update,n=1000,p=63,uniform,333.5
+./leaftree_per_lock,5%update,n=1000,p=63,uniform,327.1
+./leaftree_per_lock,5%update,n=1000,p=63,uniform,334.8
+ indirect = 11356325
+./leaftree_per_lock,5%update,n=1000,p=63,zipfian=0.99,318.3
+./leaftree_per_lock,5%update,n=1000,p=63,zipfian=0.99,328.4
+./leaftree_per_lock,5%update,n=1000,p=63,zipfian=0.99,326.7
+ indirect = 26846078
+./leaftree,5%update,n=1000,p=63,uniform,382.9
+./leaftree,5%update,n=1000,p=63,uniform,345.8
+./leaftree,5%update,n=1000,p=63,uniform,341.7
+./leaftree,5%update,n=1000,p=63,zipfian=0.99,390.2
+./leaftree,5%update,n=1000,p=63,zipfian=0.99,349
+./leaftree,5%update,n=1000,p=63,zipfian=0.99,352.2
+./leaftree_per,5%update,n=1000,p=63,uniform,329
+./leaftree_per,5%update,n=1000,p=63,uniform,306.5
+./leaftree_per,5%update,n=1000,p=63,uniform,310
+ indirect = 11090364
+./leaftree_per,5%update,n=1000,p=63,zipfian=0.99,328.9
+./leaftree_per,5%update,n=1000,p=63,zipfian=0.99,317.5
+./leaftree_per,5%update,n=1000,p=63,zipfian=0.99,317.8
+ indirect = 25017554
+./leaftree_lock,50%update,n=1000,p=63,uniform,200.4
+./leaftree_lock,50%update,n=1000,p=63,uniform,201.4
+./leaftree_lock,50%update,n=1000,p=63,uniform,200.1
+./leaftree_lock,50%update,n=1000,p=63,zipfian=0.99,160.3
+./leaftree_lock,50%update,n=1000,p=63,zipfian=0.99,160.7
+./leaftree_lock,50%update,n=1000,p=63,zipfian=0.99,159.8
+./leaftree_per_lock,50%update,n=1000,p=63,uniform,172.1
+./leaftree_per_lock,50%update,n=1000,p=63,uniform,171.7
+./leaftree_per_lock,50%update,n=1000,p=63,uniform,170.9
+ indirect = 73617926
+./leaftree_per_lock,50%update,n=1000,p=63,zipfian=0.99,136.2
+./leaftree_per_lock,50%update,n=1000,p=63,zipfian=0.99,140
+./leaftree_per_lock,50%update,n=1000,p=63,zipfian=0.99,138.8
+ indirect = 82548551
+./leaftree,50%update,n=1000,p=63,uniform,170.6
+./leaftree,50%update,n=1000,p=63,uniform,164.5
+./leaftree,50%update,n=1000,p=63,uniform,164.1
+./leaftree,50%update,n=1000,p=63,zipfian=0.99,146.7
+./leaftree,50%update,n=1000,p=63,zipfian=0.99,142.8
+./leaftree,50%update,n=1000,p=63,zipfian=0.99,143.5
+./leaftree_per,50%update,n=1000,p=63,uniform,135.2
+./leaftree_per,50%update,n=1000,p=63,uniform,130.2
+./leaftree_per,50%update,n=1000,p=63,uniform,130.1
+ indirect = 57518718
+./leaftree_per,50%update,n=1000,p=63,zipfian=0.99,116
+./leaftree_per,50%update,n=1000,p=63,zipfian=0.99,113.9
+./leaftree_per,50%update,n=1000,p=63,zipfian=0.99,114
+ indirect = 65765772
+./leaftree_lock,5%update,n=100000,p=63,uniform,175
+./leaftree_lock,5%update,n=100000,p=63,uniform,157.9
+./leaftree_lock,5%update,n=100000,p=63,uniform,152.5
+./leaftree_lock,5%update,n=100000,p=63,zipfian=0.99,210.9
+./leaftree_lock,5%update,n=100000,p=63,zipfian=0.99,188.1
+./leaftree_lock,5%update,n=100000,p=63,zipfian=0.99,180.5
+./leaftree_per_lock,5%update,n=100000,p=63,uniform,160.6
+./leaftree_per_lock,5%update,n=100000,p=63,uniform,149.5
+./leaftree_per_lock,5%update,n=100000,p=63,uniform,143.7
+ indirect = 6578766
+./leaftree_per_lock,5%update,n=100000,p=63,zipfian=0.99,193.6
+./leaftree_per_lock,5%update,n=100000,p=63,zipfian=0.99,183.9
+./leaftree_per_lock,5%update,n=100000,p=63,zipfian=0.99,172.9
+ indirect = 13584870
+./leaftree,5%update,n=100000,p=63,uniform,179.9
+./leaftree,5%update,n=100000,p=63,uniform,158.5
+./leaftree,5%update,n=100000,p=63,uniform,151.9
+./leaftree,5%update,n=100000,p=63,zipfian=0.99,212.9
+./leaftree,5%update,n=100000,p=63,zipfian=0.99,186.8
+./leaftree,5%update,n=100000,p=63,zipfian=0.99,177.6
+./leaftree_per,5%update,n=100000,p=63,uniform,159.7
+./leaftree_per,5%update,n=100000,p=63,uniform,146.2
+./leaftree_per,5%update,n=100000,p=63,uniform,141.1
+ indirect = 6484843
+./leaftree_per,5%update,n=100000,p=63,zipfian=0.99,198.3
+./leaftree_per,5%update,n=100000,p=63,zipfian=0.99,178.2
+./leaftree_per,5%update,n=100000,p=63,zipfian=0.99,174.9
+ indirect = 14107297
+./leaftree_lock,50%update,n=100000,p=63,uniform,142.2
+./leaftree_lock,50%update,n=100000,p=63,uniform,128.3
+./leaftree_lock,50%update,n=100000,p=63,uniform,123
+./leaftree_lock,50%update,n=100000,p=63,zipfian=0.99,146.8
+./leaftree_lock,50%update,n=100000,p=63,zipfian=0.99,136.7
+./leaftree_lock,50%update,n=100000,p=63,zipfian=0.99,133.7
+./leaftree_per_lock,50%update,n=100000,p=63,uniform,126.7
+./leaftree_per_lock,50%update,n=100000,p=63,uniform,119.8
+./leaftree_per_lock,50%update,n=100000,p=63,uniform,115.4
+ indirect = 51213375
+./leaftree_per_lock,50%update,n=100000,p=63,zipfian=0.99,127.2
+./leaftree_per_lock,50%update,n=100000,p=63,zipfian=0.99,123.5
+./leaftree_per_lock,50%update,n=100000,p=63,zipfian=0.99,120.8
+ indirect = 80958079
+./leaftree,50%update,n=100000,p=63,uniform,124.2
+./leaftree,50%update,n=100000,p=63,uniform,111.6
+./leaftree,50%update,n=100000,p=63,uniform,108
+./leaftree,50%update,n=100000,p=63,zipfian=0.99,134.2
+./leaftree,50%update,n=100000,p=63,zipfian=0.99,120.5
+./leaftree,50%update,n=100000,p=63,zipfian=0.99,117.6
+./leaftree_per,50%update,n=100000,p=63,uniform,106
+./leaftree_per,50%update,n=100000,p=63,uniform,97.87
+./leaftree_per,50%update,n=100000,p=63,uniform,95.91
+ indirect = 42461488
+./leaftree_per,50%update,n=100000,p=63,zipfian=0.99,111.5
+./leaftree_per,50%update,n=100000,p=63,zipfian=0.99,104
+./leaftree_per,50%update,n=100000,p=63,zipfian=0.99,102.2
+ indirect = 67979571
+./leaftree_lock,5%update,n=10000000,p=63,uniform,41.9
+./leaftree_lock,5%update,n=10000000,p=63,uniform,36.77
+./leaftree_lock,5%update,n=10000000,p=63,uniform,34.34
+./leaftree_lock,5%update,n=10000000,p=63,zipfian=0.99,65.85
+./leaftree_lock,5%update,n=10000000,p=63,zipfian=0.99,57.46
+./leaftree_lock,5%update,n=10000000,p=63,zipfian=0.99,54.63
+./leaftree_per_lock,5%update,n=10000000,p=63,uniform,38.91
+./leaftree_per_lock,5%update,n=10000000,p=63,uniform,34.77
+./leaftree_per_lock,5%update,n=10000000,p=63,uniform,32.94
+ indirect = 19034681
+./leaftree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,61.25
+./leaftree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,54.35
+./leaftree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,51.58
+ indirect = 20768923
+./leaftree,5%update,n=10000000,p=63,uniform,41.27
+./leaftree,5%update,n=10000000,p=63,uniform,35.86
+./leaftree,5%update,n=10000000,p=63,uniform,33.68
+./leaftree,5%update,n=10000000,p=63,zipfian=0.99,64.47
+./leaftree,5%update,n=10000000,p=63,zipfian=0.99,54.7
+./leaftree,5%update,n=10000000,p=63,zipfian=0.99,51.76
+./leaftree_per,5%update,n=10000000,p=63,uniform,38.57
+./leaftree_per,5%update,n=10000000,p=63,uniform,34.22
+./leaftree_per,5%update,n=10000000,p=63,uniform,32.47
+ indirect = 18878198
+./leaftree_per,5%update,n=10000000,p=63,zipfian=0.99,61.28
+./leaftree_per,5%update,n=10000000,p=63,zipfian=0.99,54.43
+./leaftree_per,5%update,n=10000000,p=63,zipfian=0.99,50.02
+ indirect = 20631475
+./leaftree_lock,50%update,n=10000000,p=63,uniform,41.14
+./leaftree_lock,50%update,n=10000000,p=63,uniform,35.99
+./leaftree_lock,50%update,n=10000000,p=63,uniform,33.77
+./leaftree_lock,50%update,n=10000000,p=63,zipfian=0.99,62
+./leaftree_lock,50%update,n=10000000,p=63,zipfian=0.99,54.81
+./leaftree_lock,50%update,n=10000000,p=63,zipfian=0.99,50.98
+./leaftree_per_lock,50%update,n=10000000,p=63,uniform,37.13
+./leaftree_per_lock,50%update,n=10000000,p=63,uniform,33.65
+./leaftree_per_lock,50%update,n=10000000,p=63,uniform,31.88
+ indirect = 32142126
+./leaftree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,56.8
+./leaftree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,50.64
+./leaftree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,48.31
+ indirect = 49965384
+./leaftree,50%update,n=10000000,p=63,uniform,39.02
+./leaftree,50%update,n=10000000,p=63,uniform,34.45
+./leaftree,50%update,n=10000000,p=63,uniform,32.1
+./leaftree,50%update,n=10000000,p=63,zipfian=0.99,57.66
+./leaftree,50%update,n=10000000,p=63,zipfian=0.99,50.23
+./leaftree,50%update,n=10000000,p=63,zipfian=0.99,48.49
+./leaftree_per,50%update,n=10000000,p=63,uniform,35.15
+./leaftree_per,50%update,n=10000000,p=63,uniform,31.69
+./leaftree_per,50%update,n=10000000,p=63,uniform,29.95
+ indirect = 31223873
+./leaftree_per,50%update,n=10000000,p=63,zipfian=0.99,51.77
+./leaftree_per,50%update,n=10000000,p=63,zipfian=0.99,46.81
+./leaftree_per,50%update,n=10000000,p=63,zipfian=0.99,43.96
+ indirect = 47084579
+./btree_lock,5%update,n=1000,p=63,uniform,415.1
+./btree_lock,5%update,n=1000,p=63,uniform,401.3
+./btree_lock,5%update,n=1000,p=63,uniform,399.1
+./btree_lock,5%update,n=1000,p=63,zipfian=0.99,396.7
+./btree_lock,5%update,n=1000,p=63,zipfian=0.99,394.7
+./btree_lock,5%update,n=1000,p=63,zipfian=0.99,399.7
+./btree_per_lock,5%update,n=1000,p=63,uniform,390.4
+./btree_per_lock,5%update,n=1000,p=63,uniform,378.2
+./btree_per_lock,5%update,n=1000,p=63,uniform,382.1
+./btree_per_lock,5%update,n=1000,p=63,zipfian=0.99,380.2
+./btree_per_lock,5%update,n=1000,p=63,zipfian=0.99,388.9
+./btree_per_lock,5%update,n=1000,p=63,zipfian=0.99,385.2
+./btree,5%update,n=1000,p=63,uniform,388.9
+./btree,5%update,n=1000,p=63,uniform,379.5
+./btree,5%update,n=1000,p=63,uniform,389
+./btree,5%update,n=1000,p=63,zipfian=0.99,373.4
+./btree,5%update,n=1000,p=63,zipfian=0.99,379.9
+./btree,5%update,n=1000,p=63,zipfian=0.99,369.8
+./btree_per,5%update,n=1000,p=63,uniform,367.9
+./btree_per,5%update,n=1000,p=63,uniform,358.9
+./btree_per,5%update,n=1000,p=63,uniform,358.7
+./btree_per,5%update,n=1000,p=63,zipfian=0.99,347.6
+./btree_per,5%update,n=1000,p=63,zipfian=0.99,353.9
+./btree_per,5%update,n=1000,p=63,zipfian=0.99,355.4
+./btree_lock,50%update,n=1000,p=63,uniform,81.64
+./btree_lock,50%update,n=1000,p=63,uniform,86.17
+./btree_lock,50%update,n=1000,p=63,uniform,86.4
+./btree_lock,50%update,n=1000,p=63,zipfian=0.99,92.92
+./btree_lock,50%update,n=1000,p=63,zipfian=0.99,97.5
+./btree_lock,50%update,n=1000,p=63,zipfian=0.99,97.79
+./btree_per_lock,50%update,n=1000,p=63,uniform,95.71
+./btree_per_lock,50%update,n=1000,p=63,uniform,98.03
+./btree_per_lock,50%update,n=1000,p=63,uniform,93.64
+./btree_per_lock,50%update,n=1000,p=63,zipfian=0.99,99.2
+./btree_per_lock,50%update,n=1000,p=63,zipfian=0.99,105.1
+./btree_per_lock,50%update,n=1000,p=63,zipfian=0.99,104.8
+./btree,50%update,n=1000,p=63,uniform,47.16
+./btree,50%update,n=1000,p=63,uniform,45.81
+./btree,50%update,n=1000,p=63,uniform,43.89
+./btree,50%update,n=1000,p=63,zipfian=0.99,58.92
+./btree,50%update,n=1000,p=63,zipfian=0.99,66.96
+./btree,50%update,n=1000,p=63,zipfian=0.99,55.53
+./btree_per,50%update,n=1000,p=63,uniform,47.12
+./btree_per,50%update,n=1000,p=63,uniform,49.05
+./btree_per,50%update,n=1000,p=63,uniform,43.23
+./btree_per,50%update,n=1000,p=63,zipfian=0.99,61.49
+./btree_per,50%update,n=1000,p=63,zipfian=0.99,58.47
+./btree_per,50%update,n=1000,p=63,zipfian=0.99,55.59
+./btree_lock,5%update,n=100000,p=63,uniform,330.9
+./btree_lock,5%update,n=100000,p=63,uniform,322.5
+./btree_lock,5%update,n=100000,p=63,uniform,323.9
+./btree_lock,5%update,n=100000,p=63,zipfian=0.99,361.1
+./btree_lock,5%update,n=100000,p=63,zipfian=0.99,365.5
+./btree_lock,5%update,n=100000,p=63,zipfian=0.99,361.3
+./btree_per_lock,5%update,n=100000,p=63,uniform,295.7
+./btree_per_lock,5%update,n=100000,p=63,uniform,296.6
+./btree_per_lock,5%update,n=100000,p=63,uniform,287.8
+./btree_per_lock,5%update,n=100000,p=63,zipfian=0.99,323
+./btree_per_lock,5%update,n=100000,p=63,zipfian=0.99,329.1
+./btree_per_lock,5%update,n=100000,p=63,zipfian=0.99,330.6
+./btree,5%update,n=100000,p=63,uniform,295.9
+./btree,5%update,n=100000,p=63,uniform,293.4
+./btree,5%update,n=100000,p=63,uniform,295.5
+./btree,5%update,n=100000,p=63,zipfian=0.99,347.5
+./btree,5%update,n=100000,p=63,zipfian=0.99,339
+./btree,5%update,n=100000,p=63,zipfian=0.99,344.1
+./btree_per,5%update,n=100000,p=63,uniform,284.9
+./btree_per,5%update,n=100000,p=63,uniform,282.3
+./btree_per,5%update,n=100000,p=63,uniform,283.9
+./btree_per,5%update,n=100000,p=63,zipfian=0.99,321.3
+./btree_per,5%update,n=100000,p=63,zipfian=0.99,314.1
+./btree_per,5%update,n=100000,p=63,zipfian=0.99,329.2
+./btree_lock,50%update,n=100000,p=63,uniform,204.1
+./btree_lock,50%update,n=100000,p=63,uniform,199.9
+./btree_lock,50%update,n=100000,p=63,uniform,199.6
+./btree_lock,50%update,n=100000,p=63,zipfian=0.99,189.9
+./btree_lock,50%update,n=100000,p=63,zipfian=0.99,189.7
+./btree_lock,50%update,n=100000,p=63,zipfian=0.99,189.6
+./btree_per_lock,50%update,n=100000,p=63,uniform,191.7
+./btree_per_lock,50%update,n=100000,p=63,uniform,188.7
+./btree_per_lock,50%update,n=100000,p=63,uniform,188.2
+./btree_per_lock,50%update,n=100000,p=63,zipfian=0.99,179.4
+./btree_per_lock,50%update,n=100000,p=63,zipfian=0.99,179.2
+./btree_per_lock,50%update,n=100000,p=63,zipfian=0.99,179.1
+./btree,50%update,n=100000,p=63,uniform,166.4
+./btree,50%update,n=100000,p=63,uniform,166.9
+./btree,50%update,n=100000,p=63,uniform,165.1
+./btree,50%update,n=100000,p=63,zipfian=0.99,167.1
+./btree,50%update,n=100000,p=63,zipfian=0.99,165.9
+./btree,50%update,n=100000,p=63,zipfian=0.99,166.7
+./btree_per,50%update,n=100000,p=63,uniform,165.3
+./btree_per,50%update,n=100000,p=63,uniform,162.8
+./btree_per,50%update,n=100000,p=63,uniform,162.7
+./btree_per,50%update,n=100000,p=63,zipfian=0.99,161.8
+./btree_per,50%update,n=100000,p=63,zipfian=0.99,165.2
+./btree_per,50%update,n=100000,p=63,zipfian=0.99,163.6
+./btree_lock,5%update,n=10000000,p=63,uniform,148.1
+./btree_lock,5%update,n=10000000,p=63,uniform,147.1
+./btree_lock,5%update,n=10000000,p=63,uniform,146.8
+./btree_lock,5%update,n=10000000,p=63,zipfian=0.99,199.6
+./btree_lock,5%update,n=10000000,p=63,zipfian=0.99,199.9
+./btree_lock,5%update,n=10000000,p=63,zipfian=0.99,199.3
+./btree_per_lock,5%update,n=10000000,p=63,uniform,137.3
+./btree_per_lock,5%update,n=10000000,p=63,uniform,135.9
+./btree_per_lock,5%update,n=10000000,p=63,uniform,136.6
+./btree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,183.3
+./btree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,183.3
+./btree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,183.5
+./btree,5%update,n=10000000,p=63,uniform,145.3
+./btree,5%update,n=10000000,p=63,uniform,143.7
+./btree,5%update,n=10000000,p=63,uniform,144.2
+./btree,5%update,n=10000000,p=63,zipfian=0.99,193.1
+./btree,5%update,n=10000000,p=63,zipfian=0.99,191.8
+./btree,5%update,n=10000000,p=63,zipfian=0.99,191.3
+./btree_per,5%update,n=10000000,p=63,uniform,134.6
+./btree_per,5%update,n=10000000,p=63,uniform,133.8
+./btree_per,5%update,n=10000000,p=63,uniform,133.7
+./btree_per,5%update,n=10000000,p=63,zipfian=0.99,180.2
+./btree_per,5%update,n=10000000,p=63,zipfian=0.99,178
+./btree_per,5%update,n=10000000,p=63,zipfian=0.99,178.5
+./btree_lock,50%update,n=10000000,p=63,uniform,125.4
+./btree_lock,50%update,n=10000000,p=63,uniform,124.1
+./btree_lock,50%update,n=10000000,p=63,uniform,124.6
+./btree_lock,50%update,n=10000000,p=63,zipfian=0.99,147.7
+./btree_lock,50%update,n=10000000,p=63,zipfian=0.99,147.5
+./btree_lock,50%update,n=10000000,p=63,zipfian=0.99,146.6
+./btree_per_lock,50%update,n=10000000,p=63,uniform,116.3
+./btree_per_lock,50%update,n=10000000,p=63,uniform,115.5
+./btree_per_lock,50%update,n=10000000,p=63,uniform,115.3
+./btree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,137.7
+./btree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,136.8
+./btree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,137.3
+./btree,50%update,n=10000000,p=63,uniform,114.6
+./btree,50%update,n=10000000,p=63,uniform,112.4
+./btree,50%update,n=10000000,p=63,uniform,112.8
+./btree,50%update,n=10000000,p=63,zipfian=0.99,131.8
+./btree,50%update,n=10000000,p=63,zipfian=0.99,131.7
+./btree,50%update,n=10000000,p=63,zipfian=0.99,131.4
+./btree_per,50%update,n=10000000,p=63,uniform,106.6
+./btree_per,50%update,n=10000000,p=63,uniform,104.4
+./btree_per,50%update,n=10000000,p=63,uniform,104.5
+./btree_per,50%update,n=10000000,p=63,zipfian=0.99,125
+./btree_per,50%update,n=10000000,p=63,zipfian=0.99,124.3
+./btree_per,50%update,n=10000000,p=63,zipfian=0.99,124.4
+warning out of samples, finished in 0.241273 seconds
+./hash_block_lock,5%update,n=1000,p=63,uniform,1714
+warning out of samples, finished in 0.2413 seconds
+./hash_block_lock,5%update,n=1000,p=63,uniform,1709
+warning out of samples, finished in 0.2411 seconds
+./hash_block_lock,5%update,n=1000,p=63,uniform,1713
+./hash_block_lock,5%update,n=1000,p=63,zipfian=0.99,981.1
+./hash_block_lock,5%update,n=1000,p=63,zipfian=0.99,981.9
+./hash_block_lock,5%update,n=1000,p=63,zipfian=0.99,982.2
+warning out of samples, finished in 0.233445 seconds
+./hash_block_per_lock,5%update,n=1000,p=63,uniform,1406
+warning out of samples, finished in 0.2276 seconds
+./hash_block_per_lock,5%update,n=1000,p=63,uniform,1442
+warning out of samples, finished in 0.2276 seconds
+./hash_block_per_lock,5%update,n=1000,p=63,uniform,1442
+ indirect = 12156792
+./hash_block_per_lock,5%update,n=1000,p=63,zipfian=0.99,701.8
+./hash_block_per_lock,5%update,n=1000,p=63,zipfian=0.99,703
+./hash_block_per_lock,5%update,n=1000,p=63,zipfian=0.99,704.2
+ indirect = 33013129
+warning out of samples, finished in 0.245001 seconds
+./hash_block,5%update,n=1000,p=63,uniform,1466
+warning out of samples, finished in 0.2436 seconds
+./hash_block,5%update,n=1000,p=63,uniform,1469
+warning out of samples, finished in 0.2439 seconds
+./hash_block,5%update,n=1000,p=63,uniform,1469
+./hash_block,5%update,n=1000,p=63,zipfian=0.99,975.1
+./hash_block,5%update,n=1000,p=63,zipfian=0.99,973.4
+./hash_block,5%update,n=1000,p=63,zipfian=0.99,974
+./hash_block_per,5%update,n=1000,p=63,uniform,1201
+./hash_block_per,5%update,n=1000,p=63,uniform,1204
+./hash_block_per,5%update,n=1000,p=63,uniform,1187
+ indirect = 16393347
+./hash_block_per,5%update,n=1000,p=63,zipfian=0.99,678.4
+./hash_block_per,5%update,n=1000,p=63,zipfian=0.99,679.8
+./hash_block_per,5%update,n=1000,p=63,zipfian=0.99,680.1
+ indirect = 29640775
+./hash_block_lock,50%update,n=1000,p=63,uniform,567.2
+./hash_block_lock,50%update,n=1000,p=63,uniform,568.6
+./hash_block_lock,50%update,n=1000,p=63,uniform,568.5
+./hash_block_lock,50%update,n=1000,p=63,zipfian=0.99,242.7
+./hash_block_lock,50%update,n=1000,p=63,zipfian=0.99,243.3
+./hash_block_lock,50%update,n=1000,p=63,zipfian=0.99,243.3
+./hash_block_per_lock,50%update,n=1000,p=63,uniform,446.6
+./hash_block_per_lock,50%update,n=1000,p=63,uniform,447.7
+./hash_block_per_lock,50%update,n=1000,p=63,uniform,448.2
+ indirect = 148213365
+./hash_block_per_lock,50%update,n=1000,p=63,zipfian=0.99,213.8
+./hash_block_per_lock,50%update,n=1000,p=63,zipfian=0.99,214.6
+./hash_block_per_lock,50%update,n=1000,p=63,zipfian=0.99,215.1
+ indirect = 161609812
+./hash_block,50%update,n=1000,p=63,uniform,411.8
+./hash_block,50%update,n=1000,p=63,uniform,397.7
+./hash_block,50%update,n=1000,p=63,uniform,398.1
+./hash_block,50%update,n=1000,p=63,zipfian=0.99,228.4
+./hash_block,50%update,n=1000,p=63,zipfian=0.99,228.6
+./hash_block,50%update,n=1000,p=63,zipfian=0.99,228.7
+./hash_block_per,50%update,n=1000,p=63,uniform,314.3
+./hash_block_per,50%update,n=1000,p=63,uniform,306.3
+./hash_block_per,50%update,n=1000,p=63,uniform,306.6
+ indirect = 153199021
+./hash_block_per,50%update,n=1000,p=63,zipfian=0.99,167.1
+./hash_block_per,50%update,n=1000,p=63,zipfian=0.99,167.4
+./hash_block_per,50%update,n=1000,p=63,zipfian=0.99,167.6
+ indirect = 119225168
+warning out of samples, finished in 0.218049 seconds
+./hash_block_lock,5%update,n=100000,p=63,uniform,1692
+warning out of samples, finished in 0.2176 seconds
+./hash_block_lock,5%update,n=100000,p=63,uniform,1693
+warning out of samples, finished in 0.2178 seconds
+./hash_block_lock,5%update,n=100000,p=63,uniform,1694
+./hash_block_lock,5%update,n=100000,p=63,zipfian=0.99,1159
+./hash_block_lock,5%update,n=100000,p=63,zipfian=0.99,1152
+./hash_block_lock,5%update,n=100000,p=63,zipfian=0.99,1155
+warning out of samples, finished in 0.232968 seconds
+./hash_block_per_lock,5%update,n=100000,p=63,uniform,1425
+warning out of samples, finished in 0.2248 seconds
+./hash_block_per_lock,5%update,n=100000,p=63,uniform,1461
+warning out of samples, finished in 0.2238 seconds
+./hash_block_per_lock,5%update,n=100000,p=63,uniform,1458
+ indirect = 8676322
+./hash_block_per_lock,5%update,n=100000,p=63,zipfian=0.99,1010
+./hash_block_per_lock,5%update,n=100000,p=63,zipfian=0.99,1018
+./hash_block_per_lock,5%update,n=100000,p=63,zipfian=0.99,1020
+ indirect = 15433322
+warning out of samples, finished in 0.241831 seconds
+./hash_block,5%update,n=100000,p=63,uniform,1435
+warning out of samples, finished in 0.2416 seconds
+./hash_block,5%update,n=100000,p=63,uniform,1432
+warning out of samples, finished in 0.2422 seconds
+./hash_block,5%update,n=100000,p=63,uniform,1434
+./hash_block,5%update,n=100000,p=63,zipfian=0.99,1192
+./hash_block,5%update,n=100000,p=63,zipfian=0.99,1185
+./hash_block,5%update,n=100000,p=63,zipfian=0.99,1181
+./hash_block_per,5%update,n=100000,p=63,uniform,1244
+./hash_block_per,5%update,n=100000,p=63,uniform,1266
+./hash_block_per,5%update,n=100000,p=63,uniform,1228
+ indirect = 9143968
+./hash_block_per,5%update,n=100000,p=63,zipfian=0.99,964.3
+./hash_block_per,5%update,n=100000,p=63,zipfian=0.99,975.2
+./hash_block_per,5%update,n=100000,p=63,zipfian=0.99,974.9
+ indirect = 14752769
+./hash_block_lock,50%update,n=100000,p=63,uniform,546.4
+./hash_block_lock,50%update,n=100000,p=63,uniform,549.6
+./hash_block_lock,50%update,n=100000,p=63,uniform,548.7
+./hash_block_lock,50%update,n=100000,p=63,zipfian=0.99,313.3
+./hash_block_lock,50%update,n=100000,p=63,zipfian=0.99,313.4
+./hash_block_lock,50%update,n=100000,p=63,zipfian=0.99,312.9
+./hash_block_per_lock,50%update,n=100000,p=63,uniform,444.9
+./hash_block_per_lock,50%update,n=100000,p=63,uniform,447.7
+./hash_block_per_lock,50%update,n=100000,p=63,uniform,448.2
+ indirect = 99050345
+./hash_block_per_lock,50%update,n=100000,p=63,zipfian=0.99,278.3
+./hash_block_per_lock,50%update,n=100000,p=63,zipfian=0.99,279.6
+./hash_block_per_lock,50%update,n=100000,p=63,zipfian=0.99,279.3
+ indirect = 128087124
+./hash_block,50%update,n=100000,p=63,uniform,385.5
+./hash_block,50%update,n=100000,p=63,uniform,373.6
+./hash_block,50%update,n=100000,p=63,uniform,373.6
+./hash_block,50%update,n=100000,p=63,zipfian=0.99,289.1
+./hash_block,50%update,n=100000,p=63,zipfian=0.99,289.3
+./hash_block,50%update,n=100000,p=63,zipfian=0.99,289.2
+./hash_block_per,50%update,n=100000,p=63,uniform,299.5
+./hash_block_per,50%update,n=100000,p=63,uniform,293.4
+./hash_block_per,50%update,n=100000,p=63,uniform,293.3
+ indirect = 109674498
+./hash_block_per,50%update,n=100000,p=63,zipfian=0.99,218.2
+./hash_block_per,50%update,n=100000,p=63,zipfian=0.99,219
+./hash_block_per,50%update,n=100000,p=63,zipfian=0.99,219
+ indirect = 107489275
+./hash_block_lock,5%update,n=10000000,p=63,uniform,672.1
+./hash_block_lock,5%update,n=10000000,p=63,uniform,671.8
+./hash_block_lock,5%update,n=10000000,p=63,uniform,671.8
+./hash_block_lock,5%update,n=10000000,p=63,zipfian=0.99,949.2
+./hash_block_lock,5%update,n=10000000,p=63,zipfian=0.99,950.8
+./hash_block_lock,5%update,n=10000000,p=63,zipfian=0.99,951.1
+./hash_block_per_lock,5%update,n=10000000,p=63,uniform,644.6
+./hash_block_per_lock,5%update,n=10000000,p=63,uniform,650.3
+./hash_block_per_lock,5%update,n=10000000,p=63,uniform,649.4
+ indirect = 31729427
+./hash_block_per_lock,5%update,n=10000000,p=63,zipfian=0.99,866.5
+./hash_block_per_lock,5%update,n=10000000,p=63,zipfian=0.99,875.9
+./hash_block_per_lock,5%update,n=10000000,p=63,zipfian=0.99,875.8
+ indirect = 32249568
+./hash_block,5%update,n=10000000,p=63,uniform,638.9
+./hash_block,5%update,n=10000000,p=63,uniform,638.6
+./hash_block,5%update,n=10000000,p=63,uniform,638.4
+./hash_block,5%update,n=10000000,p=63,zipfian=0.99,904.3
+./hash_block,5%update,n=10000000,p=63,zipfian=0.99,904
+./hash_block,5%update,n=10000000,p=63,zipfian=0.99,901.8
+./hash_block_per,5%update,n=10000000,p=63,uniform,604.9
+./hash_block_per,5%update,n=10000000,p=63,uniform,609.3
+./hash_block_per,5%update,n=10000000,p=63,uniform,609.1
+ indirect = 31481357
+./hash_block_per,5%update,n=10000000,p=63,zipfian=0.99,810.2
+./hash_block_per,5%update,n=10000000,p=63,zipfian=0.99,817.9
+./hash_block_per,5%update,n=10000000,p=63,zipfian=0.99,818.6
+ indirect = 31492362
+./hash_block_lock,50%update,n=10000000,p=63,uniform,338.9
+./hash_block_lock,50%update,n=10000000,p=63,uniform,338.8
+./hash_block_lock,50%update,n=10000000,p=63,uniform,339.1
+./hash_block_lock,50%update,n=10000000,p=63,zipfian=0.99,334.9
+./hash_block_lock,50%update,n=10000000,p=63,zipfian=0.99,334.9
+./hash_block_lock,50%update,n=10000000,p=63,zipfian=0.99,334.6
+./hash_block_per_lock,50%update,n=10000000,p=63,uniform,298.9
+./hash_block_per_lock,50%update,n=10000000,p=63,uniform,300.3
+./hash_block_per_lock,50%update,n=10000000,p=63,uniform,300.3
+ indirect = 118632241
+./hash_block_per_lock,50%update,n=10000000,p=63,zipfian=0.99,288.4
+./hash_block_per_lock,50%update,n=10000000,p=63,zipfian=0.99,289.4
+./hash_block_per_lock,50%update,n=10000000,p=63,zipfian=0.99,289.5
+ indirect = 129167045
+./hash_block,50%update,n=10000000,p=63,uniform,286.7
+./hash_block,50%update,n=10000000,p=63,uniform,286
+./hash_block,50%update,n=10000000,p=63,uniform,285.4
+./hash_block,50%update,n=10000000,p=63,zipfian=0.99,307.7
+./hash_block,50%update,n=10000000,p=63,zipfian=0.99,306.9
+./hash_block,50%update,n=10000000,p=63,zipfian=0.99,306.4
+./hash_block_per,50%update,n=10000000,p=63,uniform,236.2
+./hash_block_per,50%update,n=10000000,p=63,uniform,234.2
+./hash_block_per,50%update,n=10000000,p=63,uniform,234.2
+ indirect = 113745420
+./hash_block_per,50%update,n=10000000,p=63,zipfian=0.99,238.1
+./hash_block_per,50%update,n=10000000,p=63,zipfian=0.99,238.1
+./hash_block_per,50%update,n=10000000,p=63,zipfian=0.99,237.8
+ indirect = 124814143
+./arttree_lock,5%update,n=1000,p=63,uniform,703.5
+./arttree_lock,5%update,n=1000,p=63,uniform,683
+./arttree_lock,5%update,n=1000,p=63,uniform,728.9
+./arttree_lock,5%update,n=1000,p=63,zipfian=0.99,608
+./arttree_lock,5%update,n=1000,p=63,zipfian=0.99,642.1
+./arttree_lock,5%update,n=1000,p=63,zipfian=0.99,635.4
+./arttree_per_lock,5%update,n=1000,p=63,uniform,590.8
+./arttree_per_lock,5%update,n=1000,p=63,uniform,560.5
+./arttree_per_lock,5%update,n=1000,p=63,uniform,562.8
+ indirect = 16977474
+./arttree_per_lock,5%update,n=1000,p=63,zipfian=0.99,439.6
+./arttree_per_lock,5%update,n=1000,p=63,zipfian=0.99,453.5
+./arttree_per_lock,5%update,n=1000,p=63,zipfian=0.99,449.1
+ indirect = 35075671
+./arttree,5%update,n=1000,p=63,uniform,658.9
+./arttree,5%update,n=1000,p=63,uniform,638.6
+./arttree,5%update,n=1000,p=63,uniform,637.8
+./arttree,5%update,n=1000,p=63,zipfian=0.99,585.3
+./arttree,5%update,n=1000,p=63,zipfian=0.99,583
+./arttree,5%update,n=1000,p=63,zipfian=0.99,579.2
+./arttree_per,5%update,n=1000,p=63,uniform,534
+./arttree_per,5%update,n=1000,p=63,uniform,526
+./arttree_per,5%update,n=1000,p=63,uniform,522.4
+ indirect = 17128616
+./arttree_per,5%update,n=1000,p=63,zipfian=0.99,431.1
+./arttree_per,5%update,n=1000,p=63,zipfian=0.99,436.4
+./arttree_per,5%update,n=1000,p=63,zipfian=0.99,426.7
+ indirect = 33495617
+./arttree_lock,50%update,n=1000,p=63,uniform,296.5
+./arttree_lock,50%update,n=1000,p=63,uniform,301
+./arttree_lock,50%update,n=1000,p=63,uniform,307.4
+./arttree_lock,50%update,n=1000,p=63,zipfian=0.99,185.7
+./arttree_lock,50%update,n=1000,p=63,zipfian=0.99,189.3
+./arttree_lock,50%update,n=1000,p=63,zipfian=0.99,190.5
+./arttree_per_lock,50%update,n=1000,p=63,uniform,245
+./arttree_per_lock,50%update,n=1000,p=63,uniform,245.9
+./arttree_per_lock,50%update,n=1000,p=63,uniform,247.3
+ indirect = 180221524
+./arttree_per_lock,50%update,n=1000,p=63,zipfian=0.99,162.4
+./arttree_per_lock,50%update,n=1000,p=63,zipfian=0.99,164
+./arttree_per_lock,50%update,n=1000,p=63,zipfian=0.99,161.5
+ indirect = 130674080
+./arttree,50%update,n=1000,p=63,uniform,261.4
+./arttree,50%update,n=1000,p=63,uniform,255.6
+./arttree,50%update,n=1000,p=63,uniform,254.2
+./arttree,50%update,n=1000,p=63,zipfian=0.99,182.1
+./arttree,50%update,n=1000,p=63,zipfian=0.99,181.2
+./arttree,50%update,n=1000,p=63,zipfian=0.99,179.8
+./arttree_per,50%update,n=1000,p=63,uniform,199.3
+./arttree_per,50%update,n=1000,p=63,uniform,196.8
+./arttree_per,50%update,n=1000,p=63,uniform,197.4
+ indirect = 151329844
+./arttree_per,50%update,n=1000,p=63,zipfian=0.99,146.5
+./arttree_per,50%update,n=1000,p=63,zipfian=0.99,147.5
+./arttree_per,50%update,n=1000,p=63,zipfian=0.99,147.8
+ indirect = 114669807
+./arttree_lock,5%update,n=100000,p=63,uniform,530.2
+./arttree_lock,5%update,n=100000,p=63,uniform,524.2
+./arttree_lock,5%update,n=100000,p=63,uniform,517.5
+./arttree_lock,5%update,n=100000,p=63,zipfian=0.99,606.6
+./arttree_lock,5%update,n=100000,p=63,zipfian=0.99,601.6
+./arttree_lock,5%update,n=100000,p=63,zipfian=0.99,599.2
+./arttree_per_lock,5%update,n=100000,p=63,uniform,449.9
+./arttree_per_lock,5%update,n=100000,p=63,uniform,438
+./arttree_per_lock,5%update,n=100000,p=63,uniform,437.2
+ indirect = 15578346
+./arttree_per_lock,5%update,n=100000,p=63,zipfian=0.99,458.1
+./arttree_per_lock,5%update,n=100000,p=63,zipfian=0.99,457.2
+./arttree_per_lock,5%update,n=100000,p=63,zipfian=0.99,457.6
+ indirect = 23825743
+./arttree,5%update,n=100000,p=63,uniform,481.4
+./arttree,5%update,n=100000,p=63,uniform,462.5
+./arttree,5%update,n=100000,p=63,uniform,466.3
+./arttree,5%update,n=100000,p=63,zipfian=0.99,549.4
+./arttree,5%update,n=100000,p=63,zipfian=0.99,537.7
+./arttree,5%update,n=100000,p=63,zipfian=0.99,541.6
+./arttree_per,5%update,n=100000,p=63,uniform,417.6
+./arttree_per,5%update,n=100000,p=63,uniform,405.3
+./arttree_per,5%update,n=100000,p=63,uniform,406.9
+ indirect = 15438553
+./arttree_per,5%update,n=100000,p=63,zipfian=0.99,436.5
+./arttree_per,5%update,n=100000,p=63,zipfian=0.99,436.6
+./arttree_per,5%update,n=100000,p=63,zipfian=0.99,429.8
+ indirect = 24217196
+./arttree_lock,50%update,n=100000,p=63,uniform,363.4
+./arttree_lock,50%update,n=100000,p=63,uniform,355.2
+./arttree_lock,50%update,n=100000,p=63,uniform,354.5
+./arttree_lock,50%update,n=100000,p=63,zipfian=0.99,276.9
+./arttree_lock,50%update,n=100000,p=63,zipfian=0.99,276.6
+./arttree_lock,50%update,n=100000,p=63,zipfian=0.99,272.6
+./arttree_per_lock,50%update,n=100000,p=63,uniform,285.2
+./arttree_per_lock,50%update,n=100000,p=63,uniform,279.2
+./arttree_per_lock,50%update,n=100000,p=63,uniform,279.6
+ indirect = 158929342
+./arttree_per_lock,50%update,n=100000,p=63,zipfian=0.99,211.3
+./arttree_per_lock,50%update,n=100000,p=63,zipfian=0.99,212.4
+./arttree_per_lock,50%update,n=100000,p=63,zipfian=0.99,212.5
+ indirect = 170429694
+./arttree,50%update,n=100000,p=63,uniform,262.1
+./arttree,50%update,n=100000,p=63,uniform,256.3
+./arttree,50%update,n=100000,p=63,uniform,256.3
+./arttree,50%update,n=100000,p=63,zipfian=0.99,239
+./arttree,50%update,n=100000,p=63,zipfian=0.99,237.1
+./arttree,50%update,n=100000,p=63,zipfian=0.99,236
+./arttree_per,50%update,n=100000,p=63,uniform,211
+./arttree_per,50%update,n=100000,p=63,uniform,208.3
+./arttree_per,50%update,n=100000,p=63,uniform,207.5
+ indirect = 157004459
+./arttree_per,50%update,n=100000,p=63,zipfian=0.99,184.6
+./arttree_per,50%update,n=100000,p=63,zipfian=0.99,182.4
+./arttree_per,50%update,n=100000,p=63,zipfian=0.99,183
+ indirect = 143074076
+./arttree_lock,5%update,n=10000000,p=63,uniform,182.3
+./arttree_lock,5%update,n=10000000,p=63,uniform,180.6
+./arttree_lock,5%update,n=10000000,p=63,uniform,180.6
+./arttree_lock,5%update,n=10000000,p=63,zipfian=0.99,292.3
+./arttree_lock,5%update,n=10000000,p=63,zipfian=0.99,286
+./arttree_lock,5%update,n=10000000,p=63,zipfian=0.99,285.5
+./arttree_per_lock,5%update,n=10000000,p=63,uniform,171
+./arttree_per_lock,5%update,n=10000000,p=63,uniform,170
+./arttree_per_lock,5%update,n=10000000,p=63,uniform,169.9
+ indirect = 42768742
+./arttree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,263.4
+./arttree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,258.7
+./arttree_per_lock,5%update,n=10000000,p=63,zipfian=0.99,257.4
+ indirect = 45892987
+./arttree,5%update,n=10000000,p=63,uniform,176.7
+./arttree,5%update,n=10000000,p=63,uniform,175.2
+./arttree,5%update,n=10000000,p=63,uniform,175.1
+./arttree,5%update,n=10000000,p=63,zipfian=0.99,277.9
+./arttree,5%update,n=10000000,p=63,zipfian=0.99,273.6
+./arttree,5%update,n=10000000,p=63,zipfian=0.99,270.8
+./arttree_per,5%update,n=10000000,p=63,uniform,167.6
+./arttree_per,5%update,n=10000000,p=63,uniform,165.8
+./arttree_per,5%update,n=10000000,p=63,uniform,166.4
+ indirect = 42488990
+./arttree_per,5%update,n=10000000,p=63,zipfian=0.99,255.6
+./arttree_per,5%update,n=10000000,p=63,zipfian=0.99,250.1
+./arttree_per,5%update,n=10000000,p=63,zipfian=0.99,250.4
+ indirect = 47044224
+./arttree_lock,50%update,n=10000000,p=63,uniform,157.1
+./arttree_lock,50%update,n=10000000,p=63,uniform,155.8
+./arttree_lock,50%update,n=10000000,p=63,uniform,155.9
+./arttree_lock,50%update,n=10000000,p=63,zipfian=0.99,218.1
+./arttree_lock,50%update,n=10000000,p=63,zipfian=0.99,215
+./arttree_lock,50%update,n=10000000,p=63,zipfian=0.99,215.4
+./arttree_per_lock,50%update,n=10000000,p=63,uniform,141.7
+./arttree_per_lock,50%update,n=10000000,p=63,uniform,140.9
+./arttree_per_lock,50%update,n=10000000,p=63,uniform,141.1
+ indirect = 135922847
+./arttree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,181.4
+./arttree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,180.1
+./arttree_per_lock,50%update,n=10000000,p=63,zipfian=0.99,180.1
+ indirect = 168172387
+./arttree,50%update,n=10000000,p=63,uniform,139.4
+./arttree,50%update,n=10000000,p=63,uniform,138.9
+./arttree,50%update,n=10000000,p=63,uniform,138.8
+./arttree,50%update,n=10000000,p=63,zipfian=0.99,189.9
+./arttree,50%update,n=10000000,p=63,zipfian=0.99,188.1
+./arttree,50%update,n=10000000,p=63,zipfian=0.99,186.9
+./arttree_per,50%update,n=10000000,p=63,uniform,126.2
+./arttree_per,50%update,n=10000000,p=63,uniform,125.3
+./arttree_per,50%update,n=10000000,p=63,uniform,125.3
+ indirect = 124185008
+./arttree_per,50%update,n=10000000,p=63,zipfian=0.99,157.3
+./arttree_per,50%update,n=10000000,p=63,zipfian=0.99,156.1
+./arttree_per,50%update,n=10000000,p=63,zipfian=0.99,156.3
+ indirect = 147720934

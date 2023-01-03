@@ -13,21 +13,12 @@
  * GNU General Public License for more details.
  */
 
+using K = unsigned long;
+using V = unsigned long;
+
 #include <iostream>
 #include <limits>
 #include <cassert>
-
-
-using K = long;
-using V = long;
-
-struct pool_t {
-public:
-  void stats() {}
-  void clear() {}
-};
-
-pool_t descriptor_pool, log_array_pool;
 
 #include "llcode_adapter.h"
 #include "../benchmark/test_sets.h"
@@ -35,7 +26,7 @@ pool_t descriptor_pool, log_array_pool;
 
 
 int main(int argc, char* argv[]) {
-  commandLine P(argc,argv,"[-l] [-n <size>] [-r <rounds>]");
+  commandLine P(argc,argv,"[-n <size>] [-r <rounds>] [-p <procs>] [-z <zipfian_param>] [-u <update percent>] [-insert_find_delete] [-no_help] [-strict_lock]");
   ordered_set<K,V,allocator_parlay<K>> tree;
   size_t default_size = 100000000;
   test_sets(tree, default_size, P);

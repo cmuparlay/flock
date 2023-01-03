@@ -1,98 +1,130 @@
-#include <limits>
-#include <flock/lock_type.h>
-#include <flock/ptr_type.h>
+#define Range_Search 1
+#include <flock/flock.h>
 
 template <typename K, typename V>
 struct Set {
 
-  K key_min = std::numeric_limits<K>::min();
-  K key_max = std::numeric_limits<K>::max();
-
-  struct alignas(64) node : ll_head, lock_type {
-    ptr_type<node> next;
-    write_once<bool> removed;
+  struct alignas(32) node {
+    flck::atomic<node*> next;
     K key;
     V value;
+    bool is_end;
+    flck::atomic_write_once<bool> removed;
+    flck::lock lck;
     node(K key, V value, node* next)
-      : key(key), value(value), next(next), removed(false) {};
+      : key(key), value(value), next(next), is_end(false), removed(false) {};
+    node(node* next, bool is_end) // for head and tail
+      : next(next), is_end(is_end), removed(false) {};
+#ifdef Recorded_Once
+    node(node* n) // copy from pointer
+      : key(n->key), value(n->value), next(n->next.load()),
+      is_end(n->is_end), removed(false) {}
+#endif
   };
 
-  memory_pool<node> node_pool;
-
-  size_t max_iters = 10000000;
+  flck::memory_pool<node> node_pool;
 
   auto find_location(node* root, K k) {
     node* cur = root;
-    node* nxt = (cur->next).read_();
-    //node* nxt = (cur->next).read_fix(cur);
+    node* nxt = (cur->next).load();
     while (true) {
-      //node* nxt_nxt = (nxt->next).read_fix(nxt); // prefetch
-      node* nxt_nxt = (nxt->next).read_(); // prefetch
-      if (nxt->key >= k) break;
+      node* nxt_nxt = (nxt->next).load(); // prefetch
+      if (nxt->is_end || nxt->key >= k) break;
       cur = nxt;
       nxt = nxt_nxt;
     }
     return std::make_pair(cur, nxt);
   }
 
+  static constexpr int init_delay = 200;
+  static constexpr int max_delay = 2000;
+
   bool insert(node* root, K k, V v) {
-    return with_epoch([=] {
-      int cnt = 0;
+    return flck::with_epoch([=] {
+      int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
-	if (nxt->key == k) return false; //already there
-	if (cur->try_with_lock([=] {
+	if (!nxt->is_end && nxt->key == k) return false; //already there
+	if (cur->lck.try_lock([=] {
 	      if (!cur->removed.load() && (cur->next).load() == nxt) {
-		auto new_node = node_pool.new_obj(k, v, nxt);
+		node* new_node = node_pool.new_obj(k, v, nxt);
 		cur->next = new_node; // splice in
 		return true;
 	      } else return false;}))
 	  return true;
-	// try again if unsuccessful
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }});
   }
 
   bool remove(node* root, K k) {
-    return with_epoch([=] {
-      int cnt = 0;
+    return flck::with_epoch([=] {
+      int delay = init_delay;
       while (true) {
 	auto [cur, nxt] = find_location(root, k);
-	if (k != nxt->key) return false; // not found
-        if (cur->try_with_lock([=] {
-	      if (cur->removed.load() || (cur->next).load() != nxt) return false;
-	      return nxt->try_with_lock([=] {
-		  node* nxtnxt = (nxt->next).load();
-		  nxt->removed = true;
-		  cur->next = nxtnxt; // shortcut
-		  node_pool.retire(nxt); 
-		  return true;
-		});}))
+	if (nxt->is_end || k != nxt->key) return false; // not found
+        if (cur->lck.try_lock([=] {
+          if (cur->removed.load() || (cur->next).load() != nxt) return false;
+	  return nxt->lck.try_lock([=] {
+	    node* nxtnxt = (nxt->next).load();
+#ifdef Recorded_Once
+	    // if recoreded once then need to copy nxtnxt and point to it
+	    return nxtnxt->lck.try_lock([=] {
+	      nxt->removed = true;
+	      nxtnxt->removed = true;
+	      cur->next = node_pool.new_obj(nxtnxt); // copy nxt->next
+	      node_pool.retire(nxt);
+	      node_pool.retire(nxtnxt); 
+	      return true;});
+#else
+	    nxt->removed = true;
+	    cur->next = nxtnxt; // shortcut
+	    node_pool.retire(nxt);
+	    return true;
+#endif
+	    });}))
 	  return true;
-	// if (cnt++ > max_iters) {std::cout << "too many iters" << std::endl; abort();}
+	for (volatile int i=0; i < delay; i++);
+	delay = std::min(2*delay, max_delay);
       }
     });
   }
 
+  std::optional<V> find_(node* root, K k) {
+    auto [cur, nxt] = find_location(root, k);
+    //(cur->next).validate();
+    if (!nxt->is_end && nxt->key == k) return nxt->value; 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-	auto [cur, nxt] = find_location(root, k);
-	if (nxt->key == k) return nxt->value; 
-	else return {};
-      });
+    return flck::with_epoch([&] {return find_(root, k);});
+  }
+
+  template<typename AddF>
+  void range_(node* root, AddF& add, K start, K end) {
+    node* nxt = (root->next).load();
+    while (true) {
+      node* nxt_nxt = (nxt->next).load(); // prefetch
+      if (nxt->is_end || nxt->key >= start) break;
+      nxt = nxt_nxt;
+    }
+    while (!nxt->is_end && nxt->key <= end) {
+      add(nxt->key, nxt->value);
+      nxt = nxt->next.load();
+    }
   }
 
   node* empty() {
-    node* tail = node_pool.new_obj(key_max, 0, nullptr);
-    tail->next = tail;
-    return node_pool.new_obj(key_min, 0, tail);
+    node* tail = node_pool.new_obj(nullptr, true);
+    return node_pool.new_obj(tail, false);
   }
 
   node* empty(size_t n) { return empty(); }
 
   void print(node* p) {
     node* ptr = (p->next).load();
-    while (ptr->key != key_max) {
+    while (!ptr->is_end) {
       std::cout << ptr->key << ", ";
       ptr = (ptr->next).load();
     }
@@ -100,17 +132,17 @@ struct Set {
   }
 
   void retire(node* p) {
-    node* nxt = p->next.load();
-    if (nxt != p) retire(nxt);
+    if (!p->is_end) retire(p->next.load());
     node_pool.retire(p);
   }
   
   long check(node* p) {
-    if (p->key != key_min) std::cout << "bad head" << std::endl;
     node* ptr = (p->next).load();
-    K k = key_min;
-    long i = 0;
-    while (ptr->key != key_max) {
+    if (ptr->is_end) return 0;
+    K k = ptr->key;
+    ptr = (ptr->next).load();
+    long i = 1;
+    while (!ptr->is_end) {
       i++;
       if (ptr->key <= k) {
 	std::cout << "bad key: " << k << ", " << ptr->key << std::endl;
@@ -119,7 +151,6 @@ struct Set {
       k = ptr->key;
       ptr = (ptr->next).load();
     }
-    if (ptr == nullptr) std::cout << "bad tail: " << std::endl;
     return i;
   }
 

@@ -10,6 +10,9 @@
 #include "N.cpp"
 #include "Key.h"
 
+#include <parlay/random.h>
+#include <parlay/primitives.h>
+
 namespace ART_OLC {
 
     template <class RecordManager>
@@ -25,6 +28,31 @@ namespace ART_OLC {
         TID checkKey(const TID tid, const Key &k) const;
 
         LoadKeyFunction loadKey;
+
+        void retire(const TID threadID, N* node) {
+            switch (node->getType()) {
+                case NTypes::N4: {
+                    auto n = (N4*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N16: {
+                    auto n = (N16*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N48: {
+                    auto n = (N48*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+                case NTypes::N256: {
+                    auto n = (N256*)node;
+                    recmgr->retire(threadID, n);
+                    break;
+                }
+            }
+        }
 
     public:
         enum class CheckPrefixResult : uint8_t {
@@ -83,10 +111,27 @@ namespace ART_OLC {
 
         N* alloc(const int threadID, NTypes type);
 
+        static void shuffle(size_t n);
+
         N* const getRoot() {
             return root;
         }
     };
+
+    template<typename _T>
+    static void shuffleHelper(size_t n) {
+      auto ptrs = parlay::tabulate(n, [&] (size_t i) {return parlay::type_allocator<_T>::alloc();});
+      ptrs = parlay::random_shuffle(ptrs);
+      parlay::parallel_for(0, n, [&] (size_t i) {parlay::type_allocator<_T>::free(ptrs[i]);});
+    }
+
+    template <class RecordManager>
+    void Tree<RecordManager>::shuffle(size_t n) {
+        shuffleHelper<N256>(n/100);
+        shuffleHelper<N48>(n/10);
+        shuffleHelper<N16>(n/5);
+        shuffleHelper<N4>(n);
+    }
 
     template <class RecordManager>
     Tree<RecordManager>::Tree(const int numThreads, LoadKeyFunction loadKey) : recmgr(new RecordManager(numThreads)), loadKey(loadKey) {
@@ -200,7 +245,9 @@ namespace ART_OLC {
                         if (needRestart) goto restart;
 
                         TID tid = N::getLeaf(node);
+                        // std::cout << tid << std::endl;
                         if (level < k.getKeyLen() - 1 || optimisticPrefixMatch) {
+                            // std::cout << "checkKey " << tid << std::endl;
                             return checkKey(tid, k);
                         }
                         return tid;
@@ -270,7 +317,9 @@ namespace ART_OLC {
                     newNode->setPrefix(node->getPrefix(), nextLevel - level);
 
                     // 2)  add node and (tid, *k) as children
-                    newNode->insert(k[nextLevel], N::setLeaf(tid)); // Anubhav: Looks like k has to be malloc'd
+                    Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                    kv->key = tid;
+                    newNode->insert(k[nextLevel], N::setLeaf(kv)); // Anubhav: Looks like k has to be malloc'd
                     newNode->insert(nonMatchingKey, node);
 
                     // 3) upgradeToWriteLockOrRestart, update parentNode to point to the new node, unlock
@@ -294,7 +343,9 @@ namespace ART_OLC {
             if (needRestart) goto restart;
 
             if (nextNode == nullptr) {
-                N::insertAndUnlock(threadID, recmgr, node, v, parentNode, parentVersion, parentKey, nodeKey, N::setLeaf(tid), needRestart);
+                Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                kv->key = tid;
+                N::insertAndUnlock(threadID, recmgr, node, v, parentNode, parentVersion, parentKey, nodeKey, N::setLeaf(kv), needRestart);
                 if (needRestart) goto restart;
                 return true;
             }
@@ -324,7 +375,9 @@ namespace ART_OLC {
 
                 N4* n4 = recmgr->template allocate<N4>(threadID);
                 n4->setPrefix(&k[level], prefixLength);
-                n4->insert(k[level + prefixLength], N::setLeaf(tid));
+                Keyval* kv = recmgr->template allocate<Keyval>(tid);
+                kv->key = tid;
+                n4->insert(k[level + prefixLength], N::setLeaf(kv));
                 n4->insert(key[level + prefixLength], nextNode);
                 N::change(node, k[level - 1], n4);
                 node->writeUnlock();
@@ -378,6 +431,7 @@ namespace ART_OLC {
                         if (N::getLeaf(nextNode) != tid) {
                             return false;
                         }
+                        Keyval* kv = getKeyval(nextNode);
                         assert(parentNode == nullptr || node->getCount() != 1);
                         if (node->getCount() == 2 && parentNode != nullptr) {
                             parentNode->upgradeToWriteLockOrRestart(parentVersion, needRestart);
@@ -398,7 +452,8 @@ namespace ART_OLC {
 
                                 parentNode->writeUnlock();
                                 node->writeUnlockObsolete();
-                                recmgr->retire(threadID, node);
+                                retire(threadID, node);
+                                // recmgr->retire(threadID, node);
                             } else {
                                 secondNodeN->writeLockOrRestart(needRestart);
                                 if (needRestart) {
@@ -415,12 +470,14 @@ namespace ART_OLC {
                                 secondNodeN->writeUnlock();
 
                                 node->writeUnlockObsolete();
-                                recmgr->retire(threadID, node);
+                                retire(threadID, node);
+                                // recmgr->retire(threadID, node);
                             }
                         } else {
                             N::removeAndUnlock(threadID, recmgr, node, v, k[level], parentNode, parentVersion, parentKey, needRestart);
                             if (needRestart) goto restart;
                         }
+                        recmgr->retire(threadID, kv);
                         return true;
                     }
                     level++;

@@ -1,0 +1,28 @@
+numactl -i all ./arttree -n 10000000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./arttree -n 10000000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./arttree -n 10000000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./arttree -n 10000000 -u 50 -r 1 -t 1 -z .99
+numactl -i all ./arttree -n 100000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./arttree -n 100000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./arttree -n 100000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./arttree -n 100000 -u 50 -r 1 -t 1 -z .99
+echo ""
+numactl -i all ./arttree_nohelp -n 10000000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./arttree_nohelp -n 10000000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./arttree_nohelp -n 10000000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./arttree_nohelp -n 10000000 -u 50 -r 1 -t 1 -z .99
+numactl -i all ./arttree_nohelp -n 100000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./arttree_nohelp -n 100000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./arttree_nohelp -n 100000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./arttree_nohelp -n 100000 -u 50 -r 1 -t 1 -z .99
+cd ../setbench
+echo ""
+numactl -i all ./leis_olc_art -n 10000000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 10000000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./leis_olc_art -n 10000000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 10000000 -u 50 -r 1 -t 1 -z .99
+numactl -i all ./leis_olc_art -n 100000 -u 5 -r 1 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 100000 -u 5 -r 1 -t 1 -z .99
+numactl -i all ./leis_olc_art -n 100000 -u 50 -r 1 -t 1 -z 0
+numactl -i all ./leis_olc_art -n 100000 -u 50 -r 1 -t 1 -z .99
+cd ../benchmark

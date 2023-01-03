@@ -18,9 +18,8 @@ using namespace std;
 #include "Tree.h"
 #include "N.h"
 
-#define RECORD_MANAGER_T record_manager<Reclaim, Alloc, Pool, ART_OLC::N4, ART_OLC::N16, ART_OLC::N48, ART_OLC::N256>
+#define RECORD_MANAGER_T record_manager<Reclaim, Alloc, Pool, ART_OLC::N4, ART_OLC::N16, ART_OLC::N48, ART_OLC::N256, ART_OLC::Keyval>
 #define DATA_STRUCTURE_T ART_OLC::Tree<RECORD_MANAGER_T>
-
 
 void loadKey(TID tid, Key &key) {
     // Store the key of the tuple into the key vector
@@ -82,16 +81,26 @@ public:
     V find(const int threadID, const K& key) {
         Key treeKey;
         loadKey(key, treeKey);
-        return (V)ds->lookup(threadID, treeKey);
+        auto val = ds->lookup(threadID, treeKey);
+        // std::cerr << val << std::endl;
+        if(val == 0) return NO_VALUE;
+        else return (V) val;
     }
 
     bool contains(const int threadID, const K& key) {
-        return find(threadID, key) != NO_VALUE;
+        return find(threadID, key) != 0;
     }
 
     int rangeQuery(const int threadID, const K& lo, const K& hi, K * const resultKeys, V * const resultValues) {
         setbench_error("not implemented");
     }
+
+    static void shuffle(size_t n) {
+      ART_OLC::Tree<RECORD_MANAGER_T>::shuffle(n);
+    }
+    // static void shuffle(size_t n) {}
+
+    static void reserve(size_t n) {}
 
     void printSummary() {
 //        ds->printDebuggingDetails();
