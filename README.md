@@ -63,15 +63,18 @@ A `try_lock`  can be nested to acquire multiple locks, as in:
 
 ```
 flck::lock lck1, lck2;
-flck::atomic<int> a;
+flck::atomic<bool> a = false;
 
-lck1->try_lock([=] {
+bool ok = lck1->try_lock([=] {
    return lck2->try_lock([=] {
-      a = 1;
+      a = true;
       return true;
    });
 });
+
+assert(ok == a);
 ```
+Note that `ok` will be true iff both try locks succeed.
 
 Memory for objects allocated or freed in a lock must be managed
 through the flock epoch-based memory manager.   It supplies the structure:
@@ -102,16 +105,24 @@ flck::memory_pool<link> links;
 
 bool add_after(link l, int val) {
   return with_epoch([=] {
-    l->try_lock([=] {
+    return l->try_lock([=] {
       l->next = links.alloc(l->next, val);
+      return true;
     });
   });
 }
 ```
 
+In addition to the `flck::atomic<T>` structure flock provides the `flck::atomic_write_once` structure.   It has the same interface, but its value can only be written once after initialization.  This can improve performance in some cases.
+
+By default `try_lock` are lock free due to the helping mechanism.
+They can also be used as blocking try locks by setting the compiler
+flag `NoHelp`.
+
 ## Making and Directory Structure
 
-Flock uses cmake.   The directory structure is as follows:
+Flock is a header only library and uses cmake by default (although one
+can use any building tool).  The directory structure is as follows:
 
 ```
 - flock
@@ -119,7 +130,7 @@ Flock uses cmake.   The directory structure is as follows:
   - include
     - flock
       - flock.h    // this needs to be included 
-      ...
+      ...          // various .h files used internally by flock
   - structures         // the flock data structures
     - arttree
       - set.h
@@ -147,3 +158,85 @@ make -j
 ```
 
 The `-DDOWNLOAD_PARLAY` is not needed if you have `parlaylib` installed.
+
+## Example
+
+Here is a full example of an implementation of doubly linked list.  It
+also appears in `structures/dlist/set.h`.
+
+```
+  struct node : flck::lock {
+    bool is_end;
+    flck::atomic_write_once<bool> removed;
+    flck::atomic<node*> prev;
+    flck::atomic<node*> next;
+    K key;
+    V value;
+    node(K key, V value, node* next, node* prev)
+      : key(key), value(value), is_end(false), removed(false),
+      next(next), prev(prev) {};
+  };
+
+  flck::memory_pool<node> nodes;
+
+  auto find_location(node* root, K k) {
+    node* nxt = (root->next).load();
+    while (true) {
+      node* nxt_nxt = (nxt->next).load(); 
+      if (nxt->is_end || nxt->key >= k) break;
+      nxt = nxt_nxt;
+    }
+    return nxt;
+  }
+
+  std::optional<V> find(node* root, K k) {
+    return flck::with_epoch([=] { 
+      node* loc = find_location(root, k);
+      if (!loc->is_end && loc->key == k) return loc->value; 
+      else return {};
+    });
+  }
+
+  bool insert(node* root, K k, V v) {
+    return flck::with_epoch([&] {
+      while (true) {
+        node* next = find_location(root, k);
+        if (!next->is_end && next->key == k) return false;
+        node* prev = (next->prev).load();
+        if ((prev->is_end || prev->key < k) && 
+            prev->try_lock([=] {
+              if (!prev->removed.load() &&
+	          (prev->next).load() == next) {
+                auto new_node = nodes.new_obj(k, v, next, prev);
+                prev->next = new_node;
+                next->prev = new_node;
+                return true;
+              } else return false;}))
+          return true;
+      }
+    });
+  }
+
+  bool remove(node* root, K k) {
+    return flck::with_epoch([&] {
+      while (true) {
+        node* loc = find_location(root, k);
+        if (loc->is_end || loc->key != k) return false;
+        node* prev = (loc->prev).load();
+        if (prev->try_lock([=] {
+              if (prev->removed.load() ||
+                  (prev->next).load() != loc)
+                return false;
+              return loc->try_lock([=] {
+                  node* next = (loc->next).load();
+                  loc->removed = true;
+                  prev->next = next;
+                  next->prev = prev;
+                  nodes.retire(loc);
+                  return true;
+                });}))
+          return true;
+      }
+    });
+  }
+```
