@@ -83,12 +83,12 @@ through the flock epoch-based memory manager.   It supplies the structure:
 template <typename T>
 struct flck::memory_pool<T> {
   template <typename ... Args>
-  T* alloc(Args... args);   // allocate
+  T* new_obj(Args... args);   // allocate
   void retire(T* ptr);      // free
 }
 ```
 
-The `alloc` method will allocate a new object of type `T` passing
+The `new_obj` method will allocate a new object of type `T` passing
 `args` to its constructor.  The `retire` will reclaim the memory,
 although this might be delayed due to the epoch based collection.
 Also all concurrent operations should be wrapped in
@@ -106,7 +106,7 @@ flck::memory_pool<link> links;
 bool add_after(link l, int val) {
   return with_epoch([=] {
     return l->try_lock([=] {
-      l->next = links.alloc(l->next, val);
+      l->next = links.new_obj(l->next, val);
       return true;
     });
   });
