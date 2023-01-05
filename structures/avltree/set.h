@@ -20,12 +20,12 @@ struct Set {
   struct node {
     K key;
     bool is_leaf;
-    write_once<bool> removed;
-    mutable_val<node*> left;
-    mutable_val<node*> right;
-    mutable_val<int32_t> lefth; // TODO: see if you can get away with storing 1 height
-    mutable_val<int32_t> righth;
-    lock lck;   
+    flck::atomic_write_once<bool> removed;
+    flck::atomic<node*> left;
+    flck::atomic<node*> right;
+    flck::atomic<int32_t> lefth; // TODO: see if you can get away with storing 1 height
+    flck::atomic<int32_t> righth;
+    flck::lock lck;   
     node(K k, node* left, node* right, int32_t lefth, int32_t righth)
       : key(k), is_leaf(false), left(left), right(right), lefth(lefth), righth(righth), removed(false) {};
   };
@@ -44,8 +44,8 @@ struct Set {
     return 1 + std::max(n->lefth.load(), n->righth.load());
   }
 
-  memory_pool<node> node_pool;
-  memory_pool<leaf> leaf_pool;
+  flck::memory_pool<node> node_pool;
+  flck::memory_pool<leaf> leaf_pool;
 
   size_t max_iters = 10000000;
   
@@ -257,7 +257,7 @@ struct Set {
 
   bool insert(node* root, K k, V v) {
     // std::cout << "insert " << k << std::endl;
-    return with_epoch([=] {
+    return flck::with_epoch([=] {
       int cnt = 0;
       while (true) {
         auto [gp, gp_left, p, p_left, l] = find_location(root, k);
@@ -287,7 +287,7 @@ struct Set {
   }
 
   bool remove(node* root, K k) {
-    return with_epoch([=] {
+    return flck::with_epoch([=] {
        int cnt = 0;
        while (true) {
    auto [gp, gp_left, p, p_left, l] = find_location(root, k);
@@ -314,15 +314,17 @@ struct Set {
        }}); 
   }
 
+  std::optional<V> find_(node* root, K k) {
+    node* l = (root->left).load();
+    while (!l->is_leaf)
+      l = (k < l->key) ? (l->left).load() : (l->right).load();
+    auto ll = (leaf*) l;
+    if (ll->key == k) return ll->value; 
+    else return {};
+  }
+
   std::optional<V> find(node* root, K k) {
-    return with_epoch([&] () -> std::optional<V> {
-        node* l = (root->left).load();
-        while (!l->is_leaf)
-          l = (k < l->key) ? (l->left).load() : (l->right).load();
-        auto ll = (leaf*) l;
-        if (ll->key == k) return ll->value; 
-        else return {};
-    });
+    return flck::with_epoch([&] {return find_(root, k);});
   }
 
   node* empty() {
@@ -398,7 +400,7 @@ struct Set {
        return rtup(lmin, rmax, lsum + rsum);
      };
     auto [minv, maxv, cnt] = crec(p->left.load());
-    if (verbose) std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
+    //std::cout << "average height = " << ((double) total_height(p) / cnt) << std::endl;
     return cnt-1;
   }
 
