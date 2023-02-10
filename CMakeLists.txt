@@ -29,11 +29,6 @@ target_include_directories(flock INTERFACE ${FLOCK_INCLUDE_DIR})
 target_compile_features(flock INTERFACE cxx_std_17)
 target_compile_options(flock INTERFACE -mcx16 -march=native -g)
 
-add_library(verlib INTERFACE)
-target_include_directories(verlib INTERFACE ${FLOCK_INCLUDE_DIR})
-target_compile_features(verlib INTERFACE cxx_std_17)
-target_compile_options(verlib INTERFACE -mcx16 -march=native -g)
-
 # Find threading library
 find_package(Threads REQUIRED)
 
@@ -58,13 +53,11 @@ if(DOWNLOAD_PARLAY)
     add_subdirectory(${parlaylib_SOURCE_DIR} EXCLUDE_FROM_ALL)
   endif()
   target_link_libraries(flock INTERFACE parlay)
-  target_link_libraries(verlib INTERFACE parlay)
 else()
   find_package(Parlay)
   if(Parlay_FOUND)
     message(STATUS "Parlay configuration found at " ${Parlay_DIR})
     target_link_libraries(flock INTERFACE Parlay::parlay)
-    target_link_libraries(verlib INTERFACE Parlay::parlay)
   else()
     message(FATAL_ERROR "ParlayLib is required but could not be found. Either install it, or set the option -DDOWNLOAD_PARLAY=True to download a local copy of Parlay to use")
   endif()
@@ -77,7 +70,6 @@ if(NOT JEMALLOC_LIB)
 else()
   message("-- Found jemalloc: ${JEMALLOC_LIB}")
   target_link_libraries(flock INTERFACE optimized ${JEMALLOC_LIB})
-  target_link_libraries(verlib INTERFACE optimized ${JEMALLOC_LIB})    
 endif()
 
 # -------------------------------------------------------------------
