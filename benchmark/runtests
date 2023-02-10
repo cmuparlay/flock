@@ -81,7 +81,7 @@ def detectCPUs():
      """
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-       if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+       if "SC_NPROCESSORS_ONLN" in os.sysconf_names :
            # Linux & Unix:
            ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
            if isinstance(ncpus, int) and ncpus > 0:
@@ -149,7 +149,6 @@ try :
     runstring("git rev-parse --short HEAD")
     run_tests(trees,suffixes_all,tree_sizes)
     run_tests(lists,suffixes_all,list_sizes)
-            
-except NameError,v :
-  x, = v
-  print "TEST TERMINATED ABNORMALLY:\n"+x
+
+except(NameError) :
+  print("TEST TERMINATED ABNORMALLY:\n")

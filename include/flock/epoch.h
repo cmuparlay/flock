@@ -146,6 +146,7 @@ public:
   }
 
   mem_pool(const mem_pool&) = delete;
+  ~mem_pool() { clear(); }
 
   // noop since epoch announce is used for the whole operation
   void acquire(T* p) { }
