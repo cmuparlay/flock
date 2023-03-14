@@ -11,6 +11,7 @@
 #include <atomic>
 #include<chrono>
 #include<thread>
+#include<optional>
 
 namespace flck {
   namespace internal {
