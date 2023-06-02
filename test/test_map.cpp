@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <chrono>
 
 #include <parlay/primitives.h>
 #include <parlay/random.h>
