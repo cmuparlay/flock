@@ -1,3 +1,3 @@
-set(SOURCES test_sets.cpp)
-add_executable(test_sets ${SOURCES})
-target_link_libraries(test_sets PRIVATE parlay)
+set(SOURCES test_map.cpp)
+add_executable(test_map ${SOURCES})
+target_link_libraries(test_map PRIVATE parlay)
