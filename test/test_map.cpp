@@ -119,8 +119,9 @@ int main(int argc, char* argv[]) {
     size_t queries = parlay::reduce(query_counts);
     size_t queries_success = parlay::reduce(query_success_counts);
     double qratio = (double) queries_success / queries;
+    //std::cout << "query success ratio = " << qratio << std::endl;
     if (qratio < .4 || qratio > .6)
-      std::cout << "warning: query success ratio = " << qratio;
+      std::cout << "warning: query success ratio = " << qratio << std::endl;
 
     size_t final_cnt = map.size();
     long updates = parlay::reduce(addeds);
