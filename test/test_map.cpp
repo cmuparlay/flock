@@ -14,7 +14,6 @@ using V = unsigned long;
 #include "flock_unordered_map.h"
 using map_type = unordered_map<K,V>;
 
-
 int main(int argc, char* argv[]) {
   commandLine P(argc,argv,"[-n <size>] [-r <rounds>] [-p <procs>] [-z <zipfian_param>] [-u <update percent>]");
 
@@ -61,15 +60,23 @@ int main(int argc, char* argv[]) {
     parlay::parallel_for(0, n, [&] (size_t i) {
 	map.insert(a[i], 123); }, 10, true);
 
-    if (map.size() != n)
-      std::cout << "Error: keys not properly inserted, or size is incorrect" << std::endl;
+    // do some random inserts/removes to get to steady state
+    parlay::parallel_for(0, 8*n, [&] (size_t i) {
+        auto k = a[parlay::hash64(i + i) % (2*n)];
+    	if(i%2==0) map.insert(k, 123); 
+    	else map.remove(k); }, 10, true);
 
+    long initial_size = map.size();
+
+    // keep track of some statistics, one entry per thread
     parlay::sequence<size_t> totals(p);
     parlay::sequence<long> addeds(p);
     parlay::sequence<long> query_counts(p);
     parlay::sequence<long> query_success_counts(p);
     size_t mp = m/p;
     auto start = std::chrono::system_clock::now();
+
+    // start up p threads, each doing a sequence of operations
     parlay::parallel_for(0, p, [&] (size_t i) {
       int cnt = 0;
       size_t j = i*mp;
@@ -91,6 +98,7 @@ int main(int argc, char* argv[]) {
 	    return;
 	  }
 	}
+	// do one of find, insert, or remove
 	if (op_types[j] == Find) {
 	  query_count++;
 	  query_success_count += map.find(b[j]).has_value();
@@ -99,6 +107,7 @@ int main(int argc, char* argv[]) {
 	} else if (op_types[j] == Remove) {
 	  if (map.remove(b[j])) added--;
 	}
+	// wrap around if ran out of samples
 	if (++j >= (i+1)*mp) j = i*mp;
 	cnt++;
 	total++;
@@ -125,12 +134,12 @@ int main(int argc, char* argv[]) {
 
     size_t final_cnt = map.size();
     long updates = parlay::reduce(addeds);
-    if (n + updates != final_cnt) {
+    //std::cout << initial_size << ", " << final_cnt << std::endl;
+    if (initial_size + updates != final_cnt) {
       std::cout << "bad size: intial size = " << n
 		<< ", added " << updates
 		<< ", final size = " << final_cnt 
 		<< std::endl;
     }
-    parlay::parallel_for(0, 2*n, [&] (size_t i) { map.remove(a[i]); });
   }
 }

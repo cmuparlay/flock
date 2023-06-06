@@ -1,8 +1,14 @@
-// A concurrent unordered_map using a hash table
-// Supports: insert, remove, find, size
+// MIT license (https://opensource.org/license/mit/)
+// Initial Author: Guy Blelloch
+
+// A lock free concurrent unordered_map using a hash table
+// Supports: fast atomic insert, upsert, remove, and  find
+// along with a non-atomic, and slow, size
 // Each bucket points to a structure (Node) containing an array of entries
-// Nodes come in varying sizes.
-// On update the node is copied
+// Nodes come in varying sizes and on update the node is copied.
+// Allows arbitrary growing, but only efficient if not much larger
+// than the original given size (i.e. number of buckets is fixes, but
+// number of entries per bucket can grow).
 
 #include <atomic>
 #include <optional>
@@ -23,12 +29,14 @@ private:
     return -1;
   }
 
+  // copy entries and insert k,v at end
   template <typename Range, typename RangeIn>
   static void insert(Range& out, const RangeIn& entries, long cnt, const K& k, const V& v) {
     for (int i=0; i < cnt; i++) out[i] = entries[i];
     out[cnt] = KV{k,v};
   }
 
+  // copy entries and update entry with key k to have value v
   template <typename Range, typename RangeIn>
   static void update(Range& out, const RangeIn& entries, long cnt, const K& k, const V& v) {
     int i = 0;
@@ -46,6 +54,7 @@ private:
     }
   }
 
+  // copy entries and remove entry with key k
   template <typename Range, typename RangeIn>
   static void remove(Range& out, const RangeIn& entries, long cnt, const K& k) {
     int i = 0;
@@ -60,7 +69,7 @@ private:
     }
   }
 
-  // what each slot in table points to
+  // what each slot in table points to (if not bignode)
   template <int Size>
   struct Node {
     using node = Node<0>;
@@ -101,7 +110,7 @@ private:
   using node = Node<0>;
 
   // If a node overflows (cnt > 31), then it becomes a big node and its content
-  // is stored indirectly in a parlay sequences.
+  // is stored indirectly in a parlay sequence.
   struct BigNode {
     using entries_type = parlay::sequence<KV>;
     int cnt;
@@ -122,20 +131,22 @@ private:
       remove(entries, ((BigNode*) old)->entries, cnt+1, k); }
   };
 
-struct slot {
+  struct slot {
     std::atomic<node*> ptr;
     slot() : ptr(nullptr) {}
   };
 
   struct Table {
     parlay::sequence<slot> table;
+    size_t size;
     slot* get_slot(const K& k) {
-      size_t idx = Hash{}(k)  & (table.size()-1u);
+      size_t idx = Hash{}(k)  & (size-1u);
       return &table[idx];
     }
     Table(size_t n) {
-      size_t size = (1ul << parlay::log2_up(n));
-      table = parlay::sequence<slot>(2*size);
+      int bits = 1 + parlay::log2_up(n);
+      size = 1ul << bits;
+      table = parlay::sequence<slot>(size);
     }
   };
 
@@ -194,12 +205,6 @@ struct slot {
     else big_node_pool.destruct((BigNode*) old);
   }
 
-  static std::optional<V> find_at(node* x, const K& k) {
-    if (KeyEqual{}(x->entries[0].key, k))
-      return x->entries[0].value;
-    return x->find_value(k);
-  }
-
   static bool cas(std::atomic<node*>& src, node* old, node* newv) {
     return (src.load() == old) && src.compare_exchange_strong(old, newv);
   }
@@ -212,7 +217,6 @@ struct slot {
       if (upsert) new_node = update_node(x, k, v);
       else return false;
     else new_node = insert_to_node(x, k, v);
-    //if (s->ptr.compare_exchange_strong(x, new_node)) {
     if (cas(s->ptr, x, new_node)) {
       retire_node(x);
       return true;
@@ -227,7 +231,6 @@ struct slot {
         return false;
 
       node* new_node = remove_from_node(x, k);
-      //if(s->ptr.compare_exchange_strong(x, new_node)) {
       if (cas(s->ptr, x, new_node)) {
         retire_node(x);
         return true;
@@ -250,7 +253,8 @@ public:
     return flck::with_epoch([&] {
       node* x = s->ptr.load();
       if (x == nullptr) return std::optional<V>();
-      return find_at(x, k);});
+      return std::optional<V>(x->find_value(k));
+    });
   }
 
   bool insert(const K& k, const V& v) {
