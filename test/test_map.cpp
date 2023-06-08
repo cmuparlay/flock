@@ -70,7 +70,7 @@ double test_loop(commandLine& C,
 
     // initialize the map with n distinct elements
     parlay::parallel_for(0, n, [&] (size_t i) {
-	 map.insert(a[i], 123); }, 10, true);
+       map.insert(a[i], 123); }, (p==1) ? n : 10, true);
 
     long initial_size = map.size();
 
