@@ -1,23 +1,27 @@
 set(SOURCES test_map.cpp)
 
-function(add_benchmark NAME LINKS)
+function(add_benchmark NAME LINKS OPTIONS)
   add_executable(${NAME} ${SOURCES})
   target_link_libraries(${NAME} PRIVATE parlay ${LINKS})
+  target_link_libraries(${NAME} PRIVATE ${JEMALLOC_LIB})
+  target_compile_features(${NAME} PRIVATE cxx_std_17)
+  target_compile_options(${NAME} PRIVATE ${OPTIONS})
   target_include_directories(${NAME} PRIVATE structures/${NAME})
 endfunction()
 
-add_benchmark(flock_hash "")
-add_benchmark(flock_grow "")
-add_benchmark(std "")
-add_benchmark(std_sharded "")
-add_benchmark(libcuckoo "")
+add_benchmark(flock_hash "" "")
+add_benchmark(flock_grow "" "")
+add_benchmark(std "" "")
+add_benchmark(std_sharded "" "")
+add_benchmark(libcuckoo "" "")
+add_benchmark(growt "" "-mcx16")
 
 add_subdirectory(abseil-cpp)
-add_benchmark(abseil absl::flat_hash_map)
-add_benchmark(abseil_sharded absl::flat_hash_map)
+add_benchmark(abseil absl::flat_hash_map "")
+add_benchmark(abseil_sharded absl::flat_hash_map "")
 
 find_package(TBB)
-add_benchmark(tbb TBB::tbb)
+add_benchmark(tbb TBB::tbb "")
 
 
 

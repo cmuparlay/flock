@@ -36,8 +36,9 @@ double test_loop(commandLine& C,
   long m = 10 * n + 1000 * p;
 
   // generate 2*n unique numbers in random order
+  // get rid of top bit since growt seems to fail if used (must use it itself)
   auto x = parlay::delayed_tabulate(1.2* 2 * n,[&] (size_t i) {
-	       return (K) parlay::hash64(i);}); 
+		 return (K) (parlay::hash64(i) >> 1) ;}); 
   auto y = parlay::random_shuffle(parlay::remove_duplicates(x));
   auto a = parlay::tabulate(2 * n, [&] (size_t i) {return y[i];});
   //a = parlay::random_shuffle(parlay::tabulate(2 * n, [] (K i) { return i;}));
@@ -69,8 +70,7 @@ double test_loop(commandLine& C,
 
     // initialize the map with n distinct elements
     parlay::parallel_for(0, n, [&] (size_t i) {
-				 //map.check();
-	map.insert(a[i], 123); }, 10, true);
+	 map.insert(a[i], 123); }, 10, true);
 
     long initial_size = map.size();
 
@@ -190,5 +190,5 @@ int main(int argc, char* argv[]) {
 	results.push_back(test_loop(P, n, p, rounds, zipfian_param, update_percent, trial_time, verbose));
 	std::cout << std::endl;
     }
-  std::cout << "geometric mean of ops/sec = " << geometric_mean(results) << std::endl;
+  std::cout << "geometric mean of mops = " << geometric_mean(results) << std::endl;
 }

@@ -1,0 +1,42 @@
+* Tasks
+
+** TODO use allocators in circular buffer
+   [2021-11-17 Mi 11:14]
+   [[file:~/IMP/utils/data_structures/circular_buffer.hpp::template%20<class%20T>]]
+
+** TODO implement the concurrent arraylist idea, that I had for Markus Iser
+basic idea:
+- append only container
+- only accessable via iterating through it
+- singly linked list of blocks
+- each position is stored in one 64bit value
+  - upper 48bits = pointer to current block
+  - lower 16bits = offset within the current block
+
+** TODO implement the delayed reclamation with nonstandard destructors
+   [2020-10-06 Tue 18:53]
+   [[file:~/IMP/utils/memory_reclamation/delayed_reclamation.hpp::inline%20guard_type%20guard(pointer_type%20ptr);]]
+
+** TODO implement the remove in queue
+   [2020-03-20 Fr 22:14]
+   [[file:~/IMP/utils/data_structures/concurrent_singly_linked_list.hpp][file:~/IMP/utils/data_structures/concurrent_singly_linked_list.hpp]]
+
+** TODO implement an automatic chooser for elements that have or do not have a lockless implementation
+   [2019-12-20 Fri 18:03]
+   [[file:~/IMP/utils/data_structures/many_producer_single_consumer_bucket.hpp::std::pair<std::atomic<T>*,%20std::atomic<T>*>%20pull_all()]]
+
+** TODO implement a special iterator that automatically waits for the element to be inserted
+   [2019-12-20 Fri 18:02]
+   [[file:~/IMP/utils/data_structures/many_producer_single_consumer_bucket.hpp::std::pair<std::atomic<T>*,%20std::atomic<T>*>%20pull_all()]]
+
+** TODO use an allocator for both buffers
+   [2019-12-20 Fri 18:01]
+   [[file:~/IMP/utils/data_structures/many_producer_single_consumer_bucket.hpp::class%20many_producer_single_consumer_buffer]]
+
+** TODO finish writing the test
+   [2019-12-20 Fri 17:59]
+   [[file:~/IMP/utils/tests/src/test_circular_buffer.cpp::{]]
+
+** TODO use an allocator to allocate the buffer
+   [2019-12-20 Fri 17:52]
+   [[file:~/IMP/utils/data_structures/circular_buffer.hpp::_buffer%20=%20new%20T%5Btcap%5D;]]

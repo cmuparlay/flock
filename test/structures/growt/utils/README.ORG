@@ -1,0 +1,67 @@
+* Basic Questions
+** what is this?
+This is a collection of functional tools, that I have implemented
+either for my personal projects or for work related stuff [[https://algo2.iti.kit.edu/2496.php][my work
+page]]).  Since all of these functions were used in multiple projects, I
+have started to collect them here.  This makes it easier for me to
+keep all of them synchronized.
+
+** how do you use this?
+All implementations are header only (and reasonably small => they
+don't impact compile times too badly).  Using them is as easy, as
+including them into your projects and finding the corresponding
+function names.
+
+I usually add this repository as a submodule to any of my project
+repositories.
+
+** who is this for?
+I implemented all of these functions for my own use within a wide
+variety of personal and work related projects.  If you find anything
+useful to you, feel free to use it.
+
+* Contents
+**** thread_coordination
+These functions are at the heart of many of my concurrent benchmarks.
+The benchmark execution is synchronized using one main thread.  This
+main thread usually measures the time of synchronously called
+functions.  Within these functions, I usually use dynamic load
+balancing, by assigning blocks of tasks to one thread.
+
+**** command_line_parser
+Can read integer and string inputs "<parameter name> <parameter>"
+using functions like int_arg('parameter_name') => returns <parameter>.
+
+**** output
+Some functionality to prettify the terminal outputs of my programs,
+i.e. colors and stuff. It also contains some functionality to easily
+switch the output to a file, or to disable the output altogether.
+
+**** debug
+Some functions, that are either activated or deactivated at compile
+time.  Mostly debug outputs, and some counters. That have little to no
+overhead in a release built.
+
+**** zipf_keygen
+Many data structures, behave differently under skewed workloads.  One
+of the most common workloads is a zipf distribution.  It is especially
+interesting, because it can be found in many naturally occuring
+circumstances (words in a language, population of cities, ...).
+
+This generator works, by precomputing the cumulative distribution
+function.  Afterwards we search the bucket hit by a uniformly
+distributed random variable by linear search if its in the first 100
+elements, and binary search otherwise.
+
+**** mark_pointer
+For many concurrent algorithms (especially lock-free ones) it is
+important, to be able to read some data together with a pointer
+(atomically).  This can be achieved, by manipulating some unused bits
+within the pointer.
+
+**** default_hash
+I implement a lot of hash based data-structures.  This file chooses
+a hash function based on a compile time parameter.
+
+**** pin_thread
+self-explanatory
