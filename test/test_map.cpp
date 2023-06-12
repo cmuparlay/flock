@@ -69,9 +69,12 @@ double test_loop(commandLine& C,
     map_type map(n);
 
     // initialize the map with n distinct elements
+    auto start_insert = std::chrono::system_clock::now();
     parlay::parallel_for(0, n, [&] (size_t i) {
        map.insert(a[i], 123); }, (p==1) ? n : 10, true);
-
+    std::chrono::duration<double> insert_time = std::chrono::system_clock::now() - start_insert;
+    double imops = n / insert_time.count() / 1e6;
+	  
     long initial_size = map.size();
 
     // keep track of some statistics, one entry per thread
@@ -123,20 +126,20 @@ double test_loop(commandLine& C,
 	cnt++;
 	total++;
       }
-    }, 1);
+    }, 1, true);
     auto current = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = current - start;
 
     size_t num_ops = parlay::reduce(totals);
     double mops = num_ops / (duration.count() * 1e6);
     results.push_back(mops);
-    std::cout << std::setprecision(4)
-              << C.commandName() << ","
+    std::cout << C.commandName() << ","
               << update_percent << "%update,"
               << "n=" << n << ","
               << "p=" << p << ","
               << "z=" << zipfian_param << ","
-              << "mops=" << mops << std::endl;
+	      << "insert_mops=" << (int) imops << ","
+              << "mops=" << (int) mops << std::endl;
 
     size_t queries = parlay::reduce(query_counts);
     size_t updates = num_ops - queries;
@@ -176,7 +179,7 @@ int main(int argc, char* argv[]) {
   double trial_time = P.getOptionDoubleValue("-t", 1.0);
   bool verbose = P.getOption("-verbose");
 
-  std::vector<long> sizes {1000, 100000, 10000000};
+  std::vector<long> sizes {100000, 10000000};
   std::vector<int> percents{5, 50};
   std::vector<double> zipfians{0, .99};
   if (n != 0) sizes = std::vector<long>{n};

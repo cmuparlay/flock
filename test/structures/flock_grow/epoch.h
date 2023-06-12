@@ -294,7 +294,7 @@ public:
       clear_list(pools[i].current);
       pools[i].old = pools[i].current = nullptr;
     }
-    Allocator::finish();
+    //Allocator::finish();
   }
 };
 

@@ -1,39 +1,21 @@
-// A growable concurrent unordered_map using a hash table
+// A extensible concurrent unordered_map using a hash table
 // Supports: insert, remove, find, size
 // Each bucket points to a structure (Node) containing an array of entries
 // Nodes come in varying sizes.
 // On update the node is copied
 // If the size of any bucket reaches some level, then the table grows by some factor
-// Lock-free despite use of "lock" since only uses try_lock and never loops on a try_lock
-// A delayed thread, however, can slow down the data structure when growing
-// since it can delay resizing
-
-// WARNING: NOT FULLY DEBUGGED YET
 
 #include <atomic>
 #include <optional>
-#include <mutex>
 #include "epoch.h"
-
-struct lock {
-private:
-  static const int bucket_bits = 16;
-  static const size_t mask = ((1ul) << bucket_bits) - 1;
-  static std::vector<std::mutex> locks;
-  static std::mutex* get_lock(long i) {
-    return &locks[parlay::hash64_2(i) & mask];}
-public:
-  static bool try_lock(long i) {return get_lock(i)->try_lock();}
-  static void unlock(long i) { get_lock(i)->unlock(); }
-};
-
-std::vector<std::mutex> lock::locks{1ul << bucket_bits};
 
 template <typename K,
 	  typename V,
 	  class Hash = std::hash<K>,
 	  class KeyEqual = std::equal_to<K>>
 struct unordered_map {
+
+private:
   static constexpr int exp_factor = 16;
   static constexpr int block_size = 64;
   static constexpr int overflow_size = 8;
@@ -112,6 +94,7 @@ struct unordered_map {
       }
     }
 
+    Node() {} 
     Node(node* old, const K& k, const V& v) {
       cnt = (old == nullptr) ? 1 : old->cnt + 1;
       insert(entries, old->entries, cnt-1, k, v);
@@ -152,6 +135,7 @@ struct unordered_map {
   };
 
   using slot = std::atomic<node*>;
+  enum status : char {Empty, Working, Done};
   
   struct prim_table {
     std::atomic<prim_table*> next;
@@ -159,7 +143,7 @@ struct unordered_map {
     long bits;
     size_t size;
     parlay::sequence<slot> buckets;
-    parlay::sequence<std::atomic<bool>> block_status;
+    parlay::sequence<std::atomic<status>> block_status;
     slot* get_slot(const K& k) {
       return &buckets[get_index(k)];
     }
@@ -167,93 +151,98 @@ struct unordered_map {
       return (Hash{}(k) >> (40 - bits))  & (size-1u);
     }
     prim_table(long n) : next(nullptr), count(0) {
-      bits = std::max<long>(6, 1 + parlay::log2_up(n)); 
+      bits = std::max<long>(6, 1 + parlay::log2_up(256)); 
       size = 1ul << bits; // needs to be at least block_size
       buckets = parlay::sequence<slot>(size);
     }
     prim_table(prim_table* t)
       : next(nullptr), count(0), bits(t->bits + 4), size(t->size*exp_factor),
 	buckets(parlay::sequence<std::atomic<node*>>::uninitialized(size)),
-	block_status(parlay::tabulate<std::atomic<bool>>(t->size/block_size, [&] (long i) {return false;}, size)) {}
+	block_status(parlay::sequence<std::atomic<status>>(t->size/block_size)) {
+      std::fill(block_status.begin(), block_status.end(), Empty);
+    }
   };
+  
   static flck::memory_pool<prim_table> prim_table_pool;
-  prim_table* hash_table;
-  unordered_map(size_t n) : hash_table(prim_table_pool.new_obj(n)) {}
+  std::atomic<prim_table*> hash_table;
 
   static node* tag_table(prim_table* x) {return (node*) (((size_t) x) | 1);}
   static prim_table* untag_table(node* x) {return (prim_table*) (((size_t) x) & ~1ul);}
   static bool is_tagged(node* x) {return ((size_t) x) & 1;}
 
   void expand_table() {
-    prim_table* ht = hash_table;
+    prim_table* ht = hash_table.load();
     if (ht->next == nullptr) {
       long n = ht->buckets.size();
       prim_table* new_table = prim_table_pool.new_obj(ht);
       prim_table* old = nullptr;
       if (!ht->next.compare_exchange_strong(old, new_table))
 	prim_table_pool.retire(new_table);
-      else std::cout << "expand to: " << n * exp_factor << std::endl;
+      //else std::cout << "expand to: " << n * exp_factor << std::endl;
     }
   }
 
-  void insert(prim_table* t, KV& key_value) {
+  void copy(prim_table* t, KV& key_value) {
     size_t idx = t->get_index(key_value.key);
     node* x = t->buckets[idx].load();
-    //std::cout << idx << ", " << key_value.key << std::endl;
-    if (is_tagged(x)) std::cout << "ouch: " << x << std::endl;
     assert(!is_tagged(x));
     t->buckets[idx] = insert_to_node(x , key_value.key, key_value.value);
+    destruct_node(x);
   }
 
-  void remove(prim_table* t, KV& key_value) {
-    size_t idx = t->get_index(key_value.key);
-    node* x = t->buckets[idx].load();
-    if (is_tagged(x)) std::cout << "ouch2: " << x << std::endl;
-    assert(!is_tagged(x));
-    t->buckets[idx] = remove_from_node(x, key_value.key);
-  }
-
+  // If copying is enabled (i.e. next is not null), and if the the hash bucket
+  // given by hashid is not already copied, tries to copy block_size buckets, including
+  // that of hashid, to the next larger hash_table.
   void copy_if_needed(long hashid) {
-    prim_table* t = hash_table;
+    prim_table* t = hash_table.load();
     prim_table* next = t->next.load();
     if (next != nullptr) {
       long block_num = hashid & (next->block_status.size() -1);
-      //std::cout << block_num << " :: " << next->block_status.size() << std::endl;
-      if (!next->block_status[block_num]) {
-	if (!lock::try_lock(block_num)) {
-	  while (!next->block_status[block_num]);
-	  return;
-	}
-	else {
-	  long start = block_num * block_size;
-	  for (int i = start; i < start + block_size; i++) {
-	    long exp_start = i * exp_factor;
-	    for (int j = exp_start; j < exp_start + exp_factor; j++)
+      status st = next->block_status[block_num];
+      status old = Empty;
+      if (st == Done) return;
+      else if (st == Empty &&
+	       next->block_status[block_num].compare_exchange_strong(old, Working)) {
+	long start = block_num * block_size;
+	// copy block_size buckets
+	for (int i = start; i < start + block_size; i++) {
+	  long exp_start = i * exp_factor;
+	  // Clear exp_factor buckets in the next table to put them in.
+	  for (int j = exp_start; j < exp_start + exp_factor; j++)
+	    next->buckets[j] = nullptr;
+	  while (true) {
+	    node* bucket = t->buckets[i].load();
+	    assert(!is_tagged(bucket));
+	    int cnt = (bucket == nullptr) ? 0 : bucket->cnt;
+	    for (int j=0; j < cnt; j++) 
+	      copy(next, bucket->get_entry(j));
+	    bool succeeded = t->buckets[i].compare_exchange_strong(bucket,tag_table(next));
+	    if (succeeded) {
+	      retire_node(bucket);
+	      break;
+	    }
+	    // If the cas failed then someone updated bucket in the meantime so need to retry.
+	    // Before retrying need to clear out already added buckets..
+	    for (int j = exp_start; j < exp_start + exp_factor; j++) {
+	      auto x = next->buckets[j].load();
 	      next->buckets[j] = nullptr;
-	    while (true) {
-	      node* bucket = t->buckets[i].load();
-	      assert(!is_tagged(bucket));
-	      int cnt = (bucket == nullptr) ? 0 : bucket->cnt;
-	      // this will scatter unless use high end for hash bits
-	      for (int j=0; j < cnt; j++) {
-		if (i != t->get_index(bucket->get_entry(j).key))
-		  std::cout << "In wrong bucket: in " << i << " belongs in " << t->get_index(bucket->get_entry(j).key) << ", " << cnt << std::endl;
-		insert(next, bucket->get_entry(j));
-	      }
-	      bool succeeded = t->buckets[i].compare_exchange_strong(bucket,tag_table(next));
-	      if (succeeded) break;
-	      for (int j=0; j < cnt; j++)
-		remove(next, bucket->get_entry(j));
-	    } 
+	      destruct_node(x);
+	    }
 	  }
-	  next->block_status[block_num] = true;
-	  lock::unlock(block_num);
-	  
-	  if (++next->count == next->block_status.size()) {
-	    std::cout << "end expansion" << std::endl;
-	    hash_table = next;
-	    //prim_table_pool.retire(t);
-	  }
+	  assert(next->next.load() == nullptr);
+	}
+	assert(next->block_status[block_num] == Working);
+	next->block_status[block_num] = Done;
+	// if all blocks have been copied then can set hash_table to next
+	// and retire the old table
+	if (++next->count == next->block_status.size()) {
+	  hash_table = next;
+	  prim_table_pool.retire(t);
+	}
+      } else {
+	// If working then wait until Done
+	while (next->block_status[block_num] == Working) {
+	  for (volatile int i=0; i < 100; i++);
 	}
       }
     }
@@ -296,7 +285,6 @@ struct unordered_map {
   }
 
   static void retire_node(node* old) {
-    return;  /// need to fix
     if (old == nullptr);
     else if (old->cnt == 1) node_pool_1.retire((Node1*) old);
     else if (old->cnt <= 3) node_pool_3.retire((Node3*) old);
@@ -316,28 +304,21 @@ struct unordered_map {
 
   std::optional<V> find_at(prim_table* t, slot* s, const K& k) {
     node* x = s->load();
-    if (is_tagged(x)) return find_internal(t->next,  k);
+    if (is_tagged(x)) {
+      prim_table* nxt = t->next.load();
+      find_at(nxt, nxt->get_slot(k), k);
+    }
     if (x == nullptr) return std::optional<V>();
-    KV& kv = x->get_entry(0);
-    if (KeyEqual{}(kv.key, k)) return kv.value;
+    //KV& kv = x->get_entry(0);
+    //if (KeyEqual{}(kv.key, k)) return kv.value;
     return x->find_value(k);
   }
-
-  std::optional<V> find_internal(prim_table* t, const K& k) {
-    return find_at(t, t->get_slot(k), k);
-  }
 		   
-  std::optional<V> find(const K& k) {
-    slot* s = hash_table->get_slot(k);
-    __builtin_prefetch (s);
-    return flck::with_epoch([&] {return find_at(hash_table, s, k);});
-  }
-
-  std::optional<bool> try_insert_at(prim_table* t, long i, const K& k, const V& v, bool upsert) {
-    node* x = t->buckets[i].load();
+  std::optional<bool> try_insert_at(prim_table* t, slot* s, const K& k, const V& v, bool upsert) {
+    node* x = s->load();
     if (is_tagged(x)) {
-      prim_table* nxt = t->next;
-      return try_insert_at(nxt, nxt->get_index(k), k, v, upsert);
+      prim_table* nxt = t->next.load();
+      return try_insert_at(nxt, nxt->get_slot(k), k, v, upsert);
     }
     node* new_node;
     bool found = x != nullptr && x->find(k) != -1;
@@ -345,43 +326,26 @@ struct unordered_map {
       if (upsert) new_node = update_node(x, k, v);
       else return false;
     else new_node = insert_to_node(x, k, v);
-    if (t->buckets[i].compare_exchange_strong(x, new_node)) {
+    if (s->compare_exchange_strong(x, new_node)) {
       retire_node(x);
       return true;
     } 
     destruct_node(new_node); 
     return {}; // failed
   }
-
-  bool insert(const K& k, const V& v) {
-    prim_table* ht = hash_table;
-    long idx = ht->get_index(k);
-    __builtin_prefetch (&hash_table[idx]);
-    return flck::with_epoch([&] {
-      return flck::try_loop([&] {
-	  copy_if_needed(idx);
-          return try_insert_at(ht, idx, k, v, false);});});
-  }
-
-  bool upsert(const K& k, const V& v) {
-    slot* s = hash_table->get_slot(k);
-    __builtin_prefetch (s);
-    return flck::with_epoch([&] {
-      return flck::try_loop([&] {return try_insert_at(hash_table, s, k, v, true);});});
-  }
-
-  static std::optional<bool> try_remove_at(prim_table* t, long i, const K& k) {
-    node* x = t->buckets[i].load();
+  
+  static std::optional<bool> try_remove_at(prim_table* t, slot* s, const K& k) {
+    node* x = s->load();
     if (is_tagged(x)) {
       prim_table* nxt = t->next;
-      return try_remove_at(nxt, nxt->get_index(k), k);
+      return try_remove_at(nxt, nxt->get_slot(k), k);
     }
     if (x == nullptr || x->find(k) == -1)
       return false;
 
     assert(x != nullptr && x->find(k) != -1);
     node* new_node = remove_from_node(x, k);
-    if(t->buckets[i].compare_exchange_strong(x, new_node)) {
+    if(s->compare_exchange_strong(x, new_node)) {
       retire_node(x);
       return true;
     } 
@@ -389,44 +353,62 @@ struct unordered_map {
     return {};
   }
 
-  bool remove(const K& k) {
-    prim_table* ht = hash_table;
-    long idx = ht->get_index(k);
-    __builtin_prefetch (&hash_table[idx]);
-    return flck::with_epoch([&] {
-      return flck::try_loop([&] {
-          return try_remove_at(ht, idx, k);});});
-  }
+public:
+
+  unordered_map(size_t n) : hash_table(prim_table_pool.new_obj(n)) {}
 
   ~unordered_map() {
-    auto& table = hash_table->buckets;
-    parlay::parallel_for (0, table.size(), [&] (size_t i) {
-      retire_node(table[i].load());});
+    auto& buckets = hash_table.load()->buckets;
+    parlay::parallel_for (0, buckets.size(), [&] (size_t i) {
+      retire_node(buckets[i].load());});
+    prim_table_pool.retire(hash_table.load());
   }
 
-  void check() {
-    prim_table* ht = hash_table;
-    for (int i = 0; i < ht->size; i++) {
-      node* x = ht->buckets[i].load();
-      if (is_tagged(x));
-      else if (x == nullptr);
-      else {
-	for (int j=0; j < x->cnt; j++)
-	  if (ht->get_index(x->get_entry(j).key) != i) {
-	    std::cout << "mismatch: entry hash = " << ht->get_index(x->get_entry(j).key) << " bucket = " << i << " cnt = " << x->cnt << ", " << ht->size << ", " << x->get_entry(j).key << std::endl;
-	    std::abort();
-	  }
-      }
-    }
+  std::optional<V> find(const K& k) {
+    prim_table* ht = hash_table.load();
+    slot* s = ht->get_slot(k);
+    __builtin_prefetch (s);
+    return flck::with_epoch([=] {return find_at(ht, s, k);});
   }
-    
-      
+
+  bool insert(const K& k, const V& v) {
+    prim_table* ht = hash_table.load();
+    long idx = ht->get_index(k);
+    slot* s = &ht->buckets[idx];
+    __builtin_prefetch (s);
+    return flck::with_epoch([=] {
+      return flck::try_loop([=] {
+	  copy_if_needed(idx);
+          return try_insert_at(ht, s, k, v, false);});});
+  }
+
+  bool upsert(const K& k, const V& v) {
+    prim_table* ht = hash_table.load();
+    long idx = ht->get_index(k);
+    slot* s = &ht->buckets[idx];
+    __builtin_prefetch (s);
+    return flck::with_epoch([=] {
+      return flck::try_loop([=] {
+	  copy_if_needed(idx);
+          return try_insert_at(ht, s, k, v, true);});});
+  }
+
+  bool remove(const K& k) {
+    prim_table* ht = hash_table.load();
+    slot* s = ht->get_slot(k);
+    __builtin_prefetch (s);
+    return flck::with_epoch([=] {
+      return flck::try_loop([=] {
+          return try_remove_at(ht, s, k);});});
+  }
+
   long size() {
-    if (hash_table->next != nullptr)
-      for (int i=0; i < hash_table->size; i++)
+    prim_table* ht = hash_table.load();
+    if (ht->next != nullptr)
+      for (int i=0; i < ht->size; i++)
 	copy_if_needed(i);
-    auto& table = hash_table->buckets;
-    auto s = parlay::tabulate(hash_table->size, [&] (size_t i) {
+    auto& table = ht->buckets;
+    auto s = parlay::tabulate(ht->size, [&] (size_t i) {
 	      node* x = table[i].load();
 	      if (x == nullptr) return 0;
 	      else return x->cnt;});

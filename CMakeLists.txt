@@ -7,6 +7,7 @@ if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type specified. Defaulted to RELEASE.")
   message(STATUS "To specify a build type, add -DCMAKE_BUILD_TYPE=<DEBUG/RELEASE/RELWITHDEBINFO/MINSIZEREL>")
 endif(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fno-omit-frame-pointer")
 
 message(STATUS "--------------- General configuration -------------")
 message(STATUS "CMake Generator:                ${CMAKE_GENERATOR}")
