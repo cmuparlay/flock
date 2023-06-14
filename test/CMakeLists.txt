@@ -11,7 +11,6 @@ endfunction()
 
 add_benchmark(flock_hash "" "")
 add_benchmark(flock_grow "" "")
-add_benchmark(flock_test "" "")
 add_benchmark(std "" "")
 add_benchmark(std_sharded "" "")
 add_benchmark(libcuckoo "" "")
