@@ -13,6 +13,8 @@
 #include <atomic>
 #include <optional>
 #include "epoch.h"
+#include "lock.h"
+//#define USE_CAS 1
 
 template <typename K,
 	  typename V,
@@ -37,16 +39,16 @@ private:
   }
 
   // copy entries and update entry with key k to have value v
-  template <typename Range, typename RangeIn>
-  static void update(Range& out, const RangeIn& entries, long cnt, const K& k, const V& v) {
+  template <typename Range, typename RangeIn, typename F>
+  static void update(Range& out, const RangeIn& entries, long cnt, const K& k, const F& f) {
     int i = 0;
-    while (!KeyEqual{}(k, entries[i].key)) {
+    while (!KeyEqual{}(k, entries[i].key) && i < cnt) {
       assert(i < cnt);
       out[i] = entries[i];
       i++;
     }
     out[i].key = entries[i].key;
-    out[i].value = v;
+    out[i].value = f(entries[i].value);
     i++;
     while (i < cnt) {
       out[i] = entries[i];
@@ -97,9 +99,10 @@ private:
       insert(entries, old->entries, cnt-1, k, v);
     }
 
-    Node(node* old, const K& k, const V& v, bool x) : cnt(old->cnt) {
+    template <typename F>
+    Node(node* old, const K& k, const F& f) : cnt(old->cnt) {
       assert(old != nullptr);
-      update(entries, old->entries, cnt, k, v);
+      update(entries, old->entries, cnt, k, f);
     }
 
     Node(node* old, const K& k) : cnt(old->cnt - 1) {
@@ -122,19 +125,17 @@ private:
       else insert(entries, ((BigNode*) old)->entries, old->cnt, k, v);
     }
 
-    BigNode(node* old, const K& k, const V& v, bool x) : cnt(old->cnt) {
+        template <typename F>
+    BigNode(node* old, const K& k, const F& f) : cnt(old->cnt) {
       entries = entries_type(cnt);
-      update(entries, ((BigNode*) old)->entries, cnt, k, v);  }
+      update(entries, ((BigNode*) old)->entries, cnt, k, f);  }
 
     BigNode(node* old, const K& k) : cnt(old->cnt - 1) {
       entries = entries_type(cnt);
       remove(entries, ((BigNode*) old)->entries, cnt+1, k); }
   };
 
-  struct slot {
-    std::atomic<node*> ptr;
-    slot() : ptr(nullptr) {}
-  };
+  using slot = std::atomic<node*>;
 
   struct Table {
     parlay::sequence<slot> table;
@@ -170,12 +171,13 @@ private:
     else return (node*) big_node_pool.new_obj(old, k, v);
   }
 
-  static node* update_node(node* old, const K& k, const V& v) {
-    if (old == nullptr) return (node*) node_pool_1.new_obj(old, k, v, true);
-    if (old->cnt < 3) return (node*) node_pool_3.new_obj(old, k, v, true);
-    else if (old->cnt < 7) return (node*) node_pool_7.new_obj(old, k, v, true);
-    else if (old->cnt < 31) return (node*) node_pool_31.new_obj(old, k, v, true);
-    else return (node*) big_node_pool.new_obj(old, k, v, true);
+  template <typename F>
+  static node* update_node(node* old, const K& k, const F& f) {
+    if (old == nullptr) return (node*) node_pool_1.new_obj(old, k, f);
+    if (old->cnt < 3) return (node*) node_pool_3.new_obj(old, k, f);
+    else if (old->cnt < 7) return (node*) node_pool_7.new_obj(old, k, f);
+    else if (old->cnt < 31) return (node*) node_pool_31.new_obj(old, k, f);
+    else return (node*) big_node_pool.new_obj(old, k, f);
   }
 
   static node* remove_from_node(node* old, const K& k) {
@@ -205,38 +207,54 @@ private:
     else big_node_pool.destruct((BigNode*) old);
   }
 
-  static bool cas(std::atomic<node*>& src, node* old, node* newv) {
-    return (src.load() == old) && src.compare_exchange_strong(old, newv);
-  }
-		  
-  static std::optional<bool> try_insert_at(slot* s, const K& k, const V& v, bool upsert) {
-    node* x = s->ptr.load();
-    node* new_node;
-    bool found = x != nullptr && x->find(k) != -1;
-    if (found)
-      if (upsert) new_node = update_node(x, k, v);
-      else return false;
-    else new_node = insert_to_node(x, k, v);
-    if (cas(s->ptr, x, new_node)) {
-      retire_node(x);
-      return true;
+  // try to install a new node in slot s
+  static std::optional<bool> try_update(slot* s, node* old_node, node* new_node, bool ret_val) {
+#ifdef USE_CAS
+    if (s->load() == old_node &&
+	s->compare_exchange_strong(old_node, new_node)) {
+#else  // use try_lock
+    if (locks.try_lock((long) s, [=] {
+	    if (s->load() != old_node) return false;
+	    *s = new_node;
+	    return true;})) {
+#endif
+      retire_node(old_node);
+      return ret_val;
     } 
-    destruct_node(new_node); 
-    return {}; // failed
+    destruct_node(new_node);
+    return {};
+  }
+
+  static std::optional<bool> try_insert_at(slot* s, const K& k, const V& v) {
+    node* old_node = s->load();
+    if (old_node != nullptr && old_node->find(k) != -1) return false;
+    return try_update(s, old_node, insert_to_node(old_node, k, v), true);
+  }
+
+  template <typename F>
+  static std::optional<bool> try_upsert_at(slot* s, const K& k, F& f) {
+    node* old_node = s->load();
+    bool found = old_node != nullptr && old_node->find(k) != -1;
+    if (!found)
+      try_update(s, old_node, insert_to_node(old_node, k, f(std::optional<V>())), true);
+    else
+#ifdef USE_CAS
+    return try_update(s, old_node, update_node(old_node, k, f), false);
+#else  // use try_lock
+    if (locks.try_lock((long) s, [=] {
+        if (s->load() != old_node) return false;
+	*s = update_node(old_node, k, f); // f applied within lock
+	return true;})) {
+      retire_node(old_node);
+      return false;
+    } else return {};
+#endif
   }
 
   static std::optional<bool> try_remove_at(slot* s, const K& k) {
-      node* x = s->ptr.load();
-      if (x == nullptr || x->find(k) == -1)
-        return false;
-
-      node* new_node = remove_from_node(x, k);
-      if (cas(s->ptr, x, new_node)) {
-        retire_node(x);
-        return true;
-      } 
-      destruct_node(new_node);
-      return {};
+      node* old_node = s->load();
+      if (old_node == nullptr || old_node->find(k) == -1) return false;
+      return try_update(s, old_node, remove_from_node(old_node, k), true);
   }
 
 public:
@@ -244,14 +262,14 @@ public:
   ~unordered_map() {
     auto& table = hash_table.table;
     parlay::parallel_for (0, table.size(), [&] (size_t i) {
-      retire_node(table[i].ptr.load());});
+      retire_node(table[i].load());});
   }
   
   std::optional<V> find(const K& k) {
     slot* s = hash_table.get_slot(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
-      node* x = s->ptr.load();
+      node* x = s->load();
       if (x == nullptr) return std::optional<V>();
       return std::optional<V>(x->find_value(k));
     });
@@ -261,14 +279,15 @@ public:
     slot* s = hash_table.get_slot(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
-      return flck::try_loop([&] {return try_insert_at(s, k, v, false);});});
+      return flck::try_loop([&] {return try_insert_at(s, k, v);});});
   }
 
-  bool upsert(const K& k, const V& v) {
+  template <typename F>
+  bool upsert(const K& k, const F& f) {
     slot* s = hash_table.get_slot(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
-      return flck::try_loop([&] {return try_insert_at(s, k, v, true);});});
+      return flck::try_loop([&] {return try_update_at(s, k, f);});});
   }
 
   bool remove(const K& k) {
@@ -281,7 +300,7 @@ public:
   long size() {
     auto& table = hash_table.table;
     auto s = parlay::tabulate(table.size(), [&] (size_t i) {
-	      node* x = table[i].ptr.load();
+	      node* x = table[i].load();
 	      if (x == nullptr) return 0;
 	      else return x->cnt;});
     return parlay::reduce(s);
