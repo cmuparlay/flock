@@ -8,6 +8,8 @@
 #include <atomic>
 #include <optional>
 #include "epoch.h"
+#include "lock.h"
+//#define USE_CAS 1
 
 template <typename K,
 	  typename V,
@@ -16,7 +18,7 @@ template <typename K,
 struct unordered_map {
 
 private:
-  static constexpr int log_exp_factor = 4;
+  static constexpr int log_exp_factor = 3;
   static constexpr int exp_factor = 1 << log_exp_factor;
   static constexpr int block_size = 64;
   static constexpr int overflow_size = 8;
@@ -177,10 +179,11 @@ private:
       return &buckets[get_index(k)]; }
 
     // initial table version, n indicating initial size
+    // currently n is ignored for testing purposes (to make sure growing works)
     table_version(long n)
       : next(nullptr),
 	finished_block_count(0),
-	bits(1 + parlay::log2_up(std::max<long>(block_size, n))),
+	bits(1 + parlay::log2_up(std::max<long>(block_size, 1))), // init
 	size(1ul << bits), 
 	buckets(parlay::sequence<bucket>(size)) {}
 
@@ -211,27 +214,75 @@ private:
 
   // called when table should be expanded (i.e. when some bucket is too large)
   // allocates a new table version and links the old one to it
-  void expand_table() {
-    table_version* ht = current_table_version.load();
+  static void expand_table(table_version* ht) {
+    //table_version* ht = current_table_version.load();
     if (ht->next == nullptr) {
       long n = ht->buckets.size();
-      table_version* new_table = table_version_pool.new_obj(ht);
-      table_version* old = nullptr;
-      if (!ht->next.compare_exchange_strong(old, new_table))
-	table_version_pool.retire(new_table);
-      //else std::cout << "expand to: " << n * exp_factor << std::endl;
+      // if fail on lock, someone else is working on it, so skip
+      locks.try_lock((long) ht, [&] {
+	 if (ht->next == nullptr) {
+	   ht->next = table_version_pool.new_obj(ht);
+	   //std::cout << "expand to: " << n * exp_factor << std::endl;
+	 }
+	 return true;});
     }
   }
 
   // copies key_value into a new table
   // note this is not thread safe...i.e. only this thread should be
   // updating the bucket corresponding to the key.
-  void copy(table_version* t, KV& key_value) {
+  void copy_element(table_version* t, KV& key_value) {
     size_t idx = t->get_index(key_value.key);
     node* x = t->buckets[idx].load();
     assert(!is_forwarded(x));
-    t->buckets[idx] = insert_to_node(x , key_value.key, key_value.value);
+    t->buckets[idx] = insert_to_node(t, x , key_value.key, key_value.value);
     destruct_node(x);
+  }
+
+  void copy_bucket_cas(table_version* t, table_version* next, long i) {
+    long exp_start = i * exp_factor;
+    // Clear exp_factor buckets in the next table to put them in.
+    for (int j = exp_start; j < exp_start + exp_factor; j++)
+      next->buckets[j] = nullptr;
+    // copy bucket to exp_factor new buckets in next table
+    while (true) {
+      node* bucket = t->buckets[i].load();
+      assert(!is_forwarded(bucket));
+      int cnt = (bucket == nullptr) ? 0 : bucket->cnt;
+      // copy each element
+      for (int j=0; j < cnt; j++) 
+	copy_element(next, bucket->get_entry(j));
+      bool succeeded = t->buckets[i].compare_exchange_strong(bucket,forwarded_node());
+      if (succeeded) {
+	retire_node(bucket);
+	break;
+      }
+      // If the cas failed then someone updated bucket in the meantime so need to retry.
+      // Before retrying need to clear out already added buckets..
+      for (int j = exp_start; j < exp_start + exp_factor; j++) {
+	auto x = next->buckets[j].load();
+	next->buckets[j] = nullptr;
+	destruct_node(x);
+      }
+    }
+  }
+
+  void copy_bucket_lock(table_version* t, table_version* next, long i) {
+    long exp_start = i * exp_factor;
+    bucket* bck = &(t->buckets[i]);
+    while (!locks.try_lock((long) bck, [=] {
+      // Clear exp_factor buckets in the next table to put them in.
+      for (int j = exp_start; j < exp_start + exp_factor; j++)
+        next->buckets[j] = nullptr;
+      node* bucket = t->buckets[i].load();
+      assert(!is_forwarded(bucket));
+      int cnt = (bucket == nullptr) ? 0 : bucket->cnt;
+      // copy each element
+      for (int j=0; j < cnt; j++) 
+	copy_element(next, bucket->get_entry(j));
+      t->buckets[i] = forwarded_node();
+      return true;}))
+      for (volatile int i=0; i < 200; i++);
   }
 
   // If copying is enabled (i.e. next is not null), and if the the hash bucket
@@ -250,31 +301,11 @@ private:
 	long start = block_num * block_size;
 	// copy block_size buckets
 	for (int i = start; i < start + block_size; i++) {
-	  long exp_start = i * exp_factor;
-	  // Clear exp_factor buckets in the next table to put them in.
-	  for (int j = exp_start; j < exp_start + exp_factor; j++)
-	    next->buckets[j] = nullptr;
-	  // copy bucket to exp_factor new buckets in next table
-	  while (true) {
-	    node* bucket = t->buckets[i].load();
-	    assert(!is_forwarded(bucket));
-	    int cnt = (bucket == nullptr) ? 0 : bucket->cnt;
-	    // copy each element
-	    for (int j=0; j < cnt; j++) 
-	      copy(next, bucket->get_entry(j));
-	    bool succeeded = t->buckets[i].compare_exchange_strong(bucket,forwarded_node());
-	    if (succeeded) {
-	      retire_node(bucket);
-	      break;
-	    }
-	    // If the cas failed then someone updated bucket in the meantime so need to retry.
-	    // Before retrying need to clear out already added buckets..
-	    for (int j = exp_start; j < exp_start + exp_factor; j++) {
-	      auto x = next->buckets[j].load();
-	      next->buckets[j] = nullptr;
-	      destruct_node(x);
-	    }
-	  }
+#ifdef USE_CAS
+	  copy_bucket_cas(t, next, i);
+#else
+	  copy_bucket_lock(t, next, i);
+#endif
 	  assert(next->next.load() == nullptr);
 	}
 	assert(next->block_status[block_num] == Working);
@@ -304,11 +335,11 @@ private:
   static flck::memory_pool<Node31> node_pool_31;
   static flck::memory_pool<BigNode> big_node_pool;
 
-  node* insert_to_node(node* old, const K& k, const V& v) {
+  static node* insert_to_node(table_version* t, node* old, const K& k, const V& v) {
     if (old == nullptr) return (node*) node_pool_1.new_obj(old, k, v);
     if (old->cnt < 3) return (node*) node_pool_3.new_obj(old, k, v);
     if (old->cnt < 7) return (node*) node_pool_7.new_obj(old, k, v);
-    if (old->cnt > overflow_size) expand_table();
+    if (old->cnt > overflow_size) expand_table(t);
     if (old->cnt < 31) return (node*) node_pool_31.new_obj(old, k, v);
     return (node*) big_node_pool.new_obj(old, k, v);
   }
@@ -352,51 +383,74 @@ private:
     node* x = s->load();
     if (is_forwarded(x)) {
       table_version* nxt = t->next.load();
-      find_at(nxt, nxt->get_bucket(k), k);
+      return find_at(nxt, nxt->get_bucket(k), k);
     }
     if (x == nullptr) return std::optional<V>();
-    //KV& kv = x->get_entry(0);
-    //if (KeyEqual{}(kv.key, k)) return kv.value;
+    KV& kv = x->get_entry(0);
+    if (KeyEqual{}(kv.key, k)) return kv.value;
     return x->find(k);
   }
-		   
-  std::optional<bool> try_insert_at(table_version* t, bucket* s, const K& k, const V& v, bool upsert) {
-    node* x = s->load();
-    if (is_forwarded(x)) {
-      table_version* nxt = t->next.load();
-      return try_insert_at(nxt, nxt->get_bucket(k), k, v, upsert);
-    }
-    node* new_node;
-    bool found = x != nullptr && x->find_index(k) != -1;
-    if (found)
-      if (upsert) new_node = update_node(x, k, v);
-      else return false;
-    else new_node = insert_to_node(x, k, v);
-    if (s->compare_exchange_strong(x, new_node)) {
-      retire_node(x);
-      return true;
-    } 
-    destruct_node(new_node); 
-    return {}; // failed
-  }
-  
-  static std::optional<bool> try_remove_at(table_version* t, bucket* s, const K& k) {
-    node* x = s->load();
-    if (is_forwarded(x)) {
-      table_version* nxt = t->next;
-      return try_remove_at(nxt, nxt->get_bucket(k), k);
-    }
-    if (x == nullptr || x->find_index(k) == -1)
-      return false;
 
-    assert(x != nullptr && x->find_index(k) != -1);
-    node* new_node = remove_from_node(x, k);
-    if(s->compare_exchange_strong(x, new_node)) {
-      retire_node(x);
-      return true;
+    // try to install a new node in slot s
+  static std::optional<bool> try_update(bucket* s, node* old_node, node* new_node, bool ret_val) {
+#ifdef USE_CAS
+    if (s->load() == old_node &&
+	s->compare_exchange_strong(old_node, new_node))
+#else  // use try_lock
+    if (locks.try_lock((long) s, [=] {
+	    if (s->load() != old_node) return false;
+	    *s = new_node;
+	    return true;})) 
+#endif
+      {
+      retire_node(old_node);
+      return ret_val;
     } 
     destruct_node(new_node);
     return {};
+  }
+
+  static void get_active_bucket(table_version* &t, bucket* &s, const K& k, node* &old_node) {
+    while (is_forwarded(old_node)) {
+      t = t->next.load();
+      s = t->get_bucket(k);
+      old_node = s->load();
+    }
+  }
+  
+  static std::optional<bool> try_insert_at(table_version* t, bucket* s, const K& k, const V& v) {
+    node* old_node = s->load();
+    get_active_bucket(t, s, k, old_node);
+    if (old_node != nullptr && old_node->find_index(k) != -1) return false;
+    return try_update(s, old_node, insert_to_node(t, old_node, k, v), true);
+  }
+
+  template <typename F>
+  static std::optional<bool> try_upsert_at(table_version* t, bucket* s, const K& k, F& f) {
+    node* old_node = s->load();
+    get_active_bucket(t, s, k, old_node);
+    bool found = old_node != nullptr && old_node->find_index(k) != -1;
+    if (!found)
+      try_update(s, old_node, insert_to_node(t, old_node, k, f(std::optional<V>())), true);
+    else
+#ifdef USE_CAS
+    return try_update(s, old_node, update_node(old_node, k, f), false);
+#else  // use try_lock
+    if (locks.try_lock((long) s, [=] {
+        if (s->load() != old_node) return false;
+	*s = update_node(old_node, k, f); // f applied within lock
+	return true;})) {
+      retire_node(old_node);
+      return false;
+    } else return {};
+#endif
+  }
+
+  static std::optional<bool> try_remove_at(table_version* t, bucket* s, const K& k) {
+    node* old_node = s->load();
+    get_active_bucket(t, s, k, old_node);
+    if (old_node == nullptr || old_node->find_index(k) == -1) return false;
+    return try_update(s, old_node, remove_from_node(old_node, k), true);
   }
 
 public:
@@ -425,7 +479,7 @@ public:
     return flck::with_epoch([=] {
       return flck::try_loop([=] {
 	  copy_if_needed(idx);
-          return try_insert_at(ht, s, k, v, false);});});
+          return try_insert_at(ht, s, k, v);});});
   }
 
   bool upsert(const K& k, const V& v) {
@@ -436,7 +490,7 @@ public:
     return flck::with_epoch([=] {
       return flck::try_loop([=] {
 	  copy_if_needed(idx);
-          return try_insert_at(ht, s, k, v, true);});});
+          return try_update_at(ht, s, k, v);});});
   }
 
   bool remove(const K& k) {
@@ -450,9 +504,11 @@ public:
 
   long size() {
     table_version* ht = current_table_version.load();
-    if (ht->next != nullptr)
+    while (ht->next != nullptr) {
       for (int i=0; i < ht->size; i++)
 	copy_if_needed(i);
+      ht = current_table_version.load();
+    }
     auto& table = ht->buckets;
     auto s = parlay::tabulate(ht->size, [&] (size_t i) {
 	      node* x = table[i].load();

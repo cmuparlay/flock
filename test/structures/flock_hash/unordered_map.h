@@ -71,20 +71,20 @@ private:
     }
   }
 
-  // what each slot in table points to (if not bignode)
+  // what each bucket in table points to (if not bignode)
   template <int Size>
   struct Node {
     using node = Node<0>;
     int cnt;
     KV entries[Size];
-    int find(const K& k) {
+    int find_index(const K& k) {
       if (cnt <= 31) return find_key(entries, cnt, k);
       else return find_key(((BigNode*) this)->entries, cnt, k);
     }
 
-    std::optional<V> find_value(const K& k) {
+    std::optional<V> find(const K& k) {
       if (cnt <= 31) { // regular node
-	int i = find(k);
+	int i = find_index(k);
 	if (i == -1) return {};
 	else return entries[i].value;
       } else { // big node
@@ -135,19 +135,19 @@ private:
       remove(entries, ((BigNode*) old)->entries, cnt+1, k); }
   };
 
-  using slot = std::atomic<node*>;
+  using bucket = std::atomic<node*>;
 
   struct Table {
-    parlay::sequence<slot> table;
+    parlay::sequence<bucket> table;
     size_t size;
-    slot* get_slot(const K& k) {
+    bucket* get_bucket(const K& k) {
       size_t idx = Hash{}(k)  & (size-1u);
       return &table[idx];
     }
     Table(size_t n) {
       int bits = 1 + parlay::log2_up(n);
       size = 1ul << bits;
-      table = parlay::sequence<slot>(size);
+      table = parlay::sequence<bucket>(size);
     }
   };
 
@@ -207,8 +207,8 @@ private:
     else big_node_pool.destruct((BigNode*) old);
   }
 
-  // try to install a new node in slot s
-  static std::optional<bool> try_update(slot* s, node* old_node, node* new_node, bool ret_val) {
+  // try to install a new node in bucket s
+  static std::optional<bool> try_update(bucket* s, node* old_node, node* new_node, bool ret_val) {
 #ifdef USE_CAS
     if (s->load() == old_node &&
 	s->compare_exchange_strong(old_node, new_node)) {
@@ -225,16 +225,16 @@ private:
     return {};
   }
 
-  static std::optional<bool> try_insert_at(slot* s, const K& k, const V& v) {
+  static std::optional<bool> try_insert_at(bucket* s, const K& k, const V& v) {
     node* old_node = s->load();
-    if (old_node != nullptr && old_node->find(k) != -1) return false;
+    if (old_node != nullptr && old_node->find_index(k) != -1) return false;
     return try_update(s, old_node, insert_to_node(old_node, k, v), true);
   }
 
   template <typename F>
-  static std::optional<bool> try_upsert_at(slot* s, const K& k, F& f) {
+  static std::optional<bool> try_upsert_at(bucket* s, const K& k, F& f) {
     node* old_node = s->load();
-    bool found = old_node != nullptr && old_node->find(k) != -1;
+    bool found = old_node != nullptr && old_node->find_index(k) != -1;
     if (!found)
       try_update(s, old_node, insert_to_node(old_node, k, f(std::optional<V>())), true);
     else
@@ -251,9 +251,9 @@ private:
 #endif
   }
 
-  static std::optional<bool> try_remove_at(slot* s, const K& k) {
+  static std::optional<bool> try_remove_at(bucket* s, const K& k) {
       node* old_node = s->load();
-      if (old_node == nullptr || old_node->find(k) == -1) return false;
+      if (old_node == nullptr || old_node->find_index(k) == -1) return false;
       return try_update(s, old_node, remove_from_node(old_node, k), true);
   }
 
@@ -266,17 +266,17 @@ public:
   }
   
   std::optional<V> find(const K& k) {
-    slot* s = hash_table.get_slot(k);
+    bucket* s = hash_table.get_bucket(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
       node* x = s->load();
       if (x == nullptr) return std::optional<V>();
-      return std::optional<V>(x->find_value(k));
+      return std::optional<V>(x->find(k));
     });
   }
 
   bool insert(const K& k, const V& v) {
-    slot* s = hash_table.get_slot(k);
+    bucket* s = hash_table.get_bucket(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
       return flck::try_loop([&] {return try_insert_at(s, k, v);});});
@@ -284,14 +284,14 @@ public:
 
   template <typename F>
   bool upsert(const K& k, const F& f) {
-    slot* s = hash_table.get_slot(k);
+    bucket* s = hash_table.get_bucket(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
       return flck::try_loop([&] {return try_update_at(s, k, f);});});
   }
 
   bool remove(const K& k) {
-    slot* s = hash_table.get_slot(k);
+    bucket* s = hash_table.get_bucket(k);
     __builtin_prefetch (s);
     return flck::with_epoch([&] {
       return flck::try_loop([&] {return try_remove_at(s, k);});});
