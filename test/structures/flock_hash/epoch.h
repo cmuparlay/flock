@@ -73,9 +73,13 @@ struct alignas(64) epoch_s {
 
   int announce() {
     size_t id = get_my_id();
-    long current_e = get_current();
-    announcements[id].last.exchange(current_e, std::memory_order_seq_cst);
-    return id;
+    while (true) {
+      long current_e = get_current();
+      long tmp = current_e;
+      // apparently an exchange is faster than a store (write and fence)
+      announcements[id].last.exchange(tmp, std::memory_order_seq_cst);
+      if (get_current() == current_e) return id;
+    }
   }
 
   void unannounce(size_t id) {
@@ -88,10 +92,11 @@ struct alignas(64) epoch_s {
     long current_e = get_current();
     bool all_there = true;
     // check if everyone is done with earlier epochs
-    for (int j=0; j<2; j++) //do twice
-      for (int i=0; i < workers; i++)
-      	if ((announcements[i].last != -1l) && announcements[i].last < current_e) 
-      	  all_there = false;
+    for (int i=0; i < workers; i++)
+      if ((announcements[i].last != -1l) && announcements[i].last < current_e) {
+	all_there = false;
+	break;
+      }
     // if so then increment current epoch
     if (all_there) {
       for (auto h : before_epoch_hooks) h();

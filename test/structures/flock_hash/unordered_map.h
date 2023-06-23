@@ -1,20 +1,63 @@
 // MIT license (https://opensource.org/license/mit/)
 // Initial Author: Guy Blelloch
-
-// A lock free concurrent unordered_map using a hash table
-// Supports: fast atomic insert, upsert, remove, and  find
-// along with a non-atomic, and slow, size
-// Each bucket points to a structure (Node) containing an array of entries
-// Nodes come in varying sizes and on update the node is copied.
-// Allows arbitrary growing, but only efficient if not much larger
-// than the original given size (i.e. number of buckets is fixes, but
-// number of entries per bucket can grow).
+// Developed as part of the flock library
+// 
+// A lock free (or lock-based) concurrent unordered_map using a hash
+// table.   On a key type K and value type V it supports:
+//
+//   unordered_map<K,V,Hash=std::hash<K>,Equal=std::equal_to<K>>(n) :
+//   constructor for table of size n
+//
+//   find(K&) -> std::optional<V> : returns key if found, otherwise empty
+//
+//   insert(const K&, const V&) -> bool : if key not in the table it inserts the key
+//   with the given value and returns true, otherwise does nothing and
+//   returns false
+//
+//   remove(const K&) -> bool : if key is in the table it removes the entry
+//   and returns true, otherwise it does nothing and returns false.
+//
+//   upsert(const K&, (const std::optional<V>&) -> V)) -> bool : if
+//   key is in the table then it calls the function (second argument
+//   with the current value, replaces the current value with the
+//   returned value, and returns false.  Otherwise it calls the
+//   function with empty and inserts the key into the table with the
+//   returned value, and returns true.
+//
+//   size() -> long : returns the size of the table.  Not linearizable with
+//   the other functions, and takes time proportional to the table size.
+//
+// Each bucket points to a structure (Node) containing an array of
+// entries.  Nodes come in varying sizes and on update the node is
+// copied.  Allows arbitrary growing, but only efficient if not much
+// larger than the original given size (i.e. number of buckets is
+// fixed, but number of entries per bucket can grow).  Time is
+// proportional to size of bucket.
+//
+// define USE_LOCKS to use locks.  Locks are faster with high
+// contention workloads that include reads.  The lock-free version is
+// marginally faster on low-contention uniform workloads, or if
+// updates only.  Also the lock-based version can suffer under
+// oversubscription (more user threads than available hardware
+// threads).  The lock-based version only acquires locks on updates.
+//
+// The type for keys and values must be copyable, and might be copied
+// by the hash_table even when not being updated (e.g. when another
+// key in the same bucket is being updated).  Keys and values
+// therefore should not be mutated while in the table since it could
+// cause a read-write race.
+//
+// The upsert operation takes a function f of type
+//   (const std::optional<V>&) -> V
+// If using locks, f is executed with no write-write races.
+// There can be concurrent reads on the old value, hence the const to prevent
+// any read-write races.
 
 #include <atomic>
 #include <optional>
 #include "epoch.h"
 #include "lock.h"
-//#define USE_CAS 1
+#define USE_LOCKS 1
 
 template <typename K,
 	  typename V,
@@ -209,7 +252,7 @@ private:
 
   // try to install a new node in bucket s
   static std::optional<bool> try_update(bucket* s, node* old_node, node* new_node, bool ret_val) {
-#ifdef USE_CAS
+#ifndef USE_LOCKS
     if (s->load() == old_node &&
 	s->compare_exchange_strong(old_node, new_node)) {
 #else  // use try_lock
@@ -238,7 +281,7 @@ private:
     if (!found)
       try_update(s, old_node, insert_to_node(old_node, k, f(std::optional<V>())), true);
     else
-#ifdef USE_CAS
+#ifndef USE_LOCKS
     return try_update(s, old_node, update_node(old_node, k, f), false);
 #else  // use try_lock
     if (locks.try_lock((long) s, [=] {
@@ -271,6 +314,8 @@ public:
     return flck::with_epoch([&] {
       node* x = s->load();
       if (x == nullptr) return std::optional<V>();
+      //if (KeyEqual{}(x->entries[0].key, k))
+      //  return std::optional<V>(x->entries[0].value);
       return std::optional<V>(x->find(k));
     });
   }
