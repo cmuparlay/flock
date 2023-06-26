@@ -11,6 +11,9 @@ using K = unsigned long;
 using V = unsigned long;
 #include "unordered_map.h"
 
+// leave undefined if measuring througput since measuring latency will slow down throughput
+//#define Latency 1
+
 struct IntHash {
     std::size_t operator()(K const& k) const noexcept {
       return k * UINT64_C(0xbf58476d1ce4e5b9);}
@@ -25,13 +28,14 @@ double geometric_mean(const std::vector<double>& vals) {
 }
 
 double test_loop(commandLine& C,
-	       long n,   // num entries in map
-	       long p,   // num threads
-	       long rounds,  // num trials
-	       double zipfian_param, // zipfian parameter [0:1) (0 is uniform, .99 is high skew)
-	       int update_percent, // percent of operations that are either insert or delete (1/2 each)
-	       double trial_time, // time to run one trial
-	       bool verbose) {    // show some more info
+		 long n,   // num entries in map
+		 long p,   // num threads
+		 long rounds,  // num trials
+		 double zipfian_param, // zipfian parameter [0:1) (0 is uniform, .99 is high skew)
+		 int update_percent, // percent of operations that are either insert or delete (1/2 each)
+		 double trial_time, // time to run one trial
+		 double latency_cutoff, // cutoff to measure percent below
+		 bool verbose) {    // show some more info
   // total samples used
   long m = 10 * n + 1000 * p;
 
@@ -83,6 +87,7 @@ double test_loop(commandLine& C,
     parlay::sequence<long> query_counts(p);
     parlay::sequence<long> query_success_counts(p);
     parlay::sequence<long> update_success_counts(p);
+    parlay::sequence<long> latency_counts(p);
     size_t mp = m/p;
     auto start = std::chrono::system_clock::now();
 
@@ -96,6 +101,8 @@ double test_loop(commandLine& C,
       long query_count = 0;
       long query_success_count = 0;
       long update_success_count = 0;
+      long latency_count = 0.0;
+      
       while (true) {
 	// every once in a while check if time is over
 	if (cnt >= 100) {
@@ -108,18 +115,31 @@ double test_loop(commandLine& C,
 	    query_counts[i] = query_count;
 	    query_success_counts[i] = query_success_count;
 	    update_success_counts[i] = update_success_count;
+	    latency_counts[i] = latency_count;
 	    return;
 	  }
 	}
+
 	// do one of find, insert, or remove
 	if (op_types[k] == Find) {
 	  query_count++;
+#ifdef Latency
+	  auto start_op_time = std::chrono::system_clock::now();
 	  query_success_count += map.find(b[j]).has_value();
+	  auto current = std::chrono::system_clock::now();
+	  std::chrono::duration<double> duration = current - start_op_time;
+	  if (duration.count() * 1000000 < latency_cutoff)
+	    latency_count++;
+#else
+	  query_success_count += map.find(b[j]).has_value();
+#endif
 	} else if (op_types[k] == Insert) {
 	  if (map.insert(b[j], 123)) {added++; update_success_count++;}
 	} else { // (op_types[k] == Remove) 
 	  if (map.remove(b[j])) {added--; update_success_count++;}
 	}
+
+
 	// wrap around if ran out of samples
 	if (++j >= (i+1)*mp) j = i*mp;
 	if (++k >= (i+1)*mp) k = i*mp + 1; // offset so different ops on different rounds
@@ -131,6 +151,8 @@ double test_loop(commandLine& C,
     std::chrono::duration<double> duration = current - start;
 
     size_t num_ops = parlay::reduce(totals);
+    size_t queries = parlay::reduce(query_counts);
+    double latency_count = (double) parlay::reduce(latency_counts);
     double mops = num_ops / (duration.count() * 1e6);
     results.push_back(mops);
     std::cout << C.commandName() << ","
@@ -138,10 +160,12 @@ double test_loop(commandLine& C,
               << "n=" << n << ","
               << "p=" << p << ","
               << "z=" << zipfian_param << ","
+#ifdef Latency
+      	      << latency_count / queries * 100.0 << "%@" << latency_cutoff << "usec,"
+#endif
 	      << "insert_mops=" << (int) imops << ","
               << "mops=" << (int) mops << std::endl;
 
-    size_t queries = parlay::reduce(query_counts);
     size_t updates = num_ops - queries;
     size_t queries_success = parlay::reduce(query_success_counts);
     size_t updates_success = parlay::reduce(update_success_counts);
@@ -169,7 +193,7 @@ double test_loop(commandLine& C,
 }
     
 int main(int argc, char* argv[]) {
-  commandLine P(argc,argv,"[-n <size>] [-r <rounds>] [-p <procs>] [-z <zipfian_param>] [-u <update percent>]");
+  commandLine P(argc,argv,"[-n <size>] [-r <rounds>] [-p <procs>] [-z <zipfian_param>] [-u <update percent>] [-verbose]");
 
   long n = P.getOptionIntValue("-n", 0);
   int p = P.getOptionIntValue("-p", parlay::num_workers());  
@@ -177,6 +201,7 @@ int main(int argc, char* argv[]) {
   double zipfian_param = P.getOptionDoubleValue("-z", -1.0);
   int update_percent = P.getOptionIntValue("-u", -1);
   double trial_time = P.getOptionDoubleValue("-t", 1.0);
+  double latency_cuttoff = P.getOptionDoubleValue("-latency", 10.0); // in miliseconds
   bool verbose = P.getOption("-verbose");
 
   std::vector<long> sizes {100000, 10000000};
@@ -190,7 +215,8 @@ int main(int argc, char* argv[]) {
   for (auto zipfian_param : zipfians) 
     for (auto update_percent : percents) {
       for (auto n : sizes) 
-	results.push_back(test_loop(P, n, p, rounds, zipfian_param, update_percent, trial_time, verbose));
+	results.push_back(test_loop(P, n, p, rounds, zipfian_param, update_percent,
+				    trial_time, latency_cuttoff, verbose));
 	std::cout << std::endl;
     }
   std::cout << "geometric mean of mops = " << geometric_mean(results) << std::endl;

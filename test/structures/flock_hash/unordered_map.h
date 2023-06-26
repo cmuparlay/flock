@@ -8,7 +8,7 @@
 //   unordered_map<K,V,Hash=std::hash<K>,Equal=std::equal_to<K>>(n) :
 //   constructor for table of size n
 //
-//   find(K&) -> std::optional<V> : returns key if found, otherwise empty
+//   find(const K&) -> std::optional<V> : returns key if found, otherwise empty
 //
 //   insert(const K&, const V&) -> bool : if key not in the table it inserts the key
 //   with the given value and returns true, otherwise does nothing and
@@ -18,34 +18,32 @@
 //   and returns true, otherwise it does nothing and returns false.
 //
 //   upsert(const K&, (const std::optional<V>&) -> V)) -> bool : if
-//   key is in the table then it calls the function (second argument
-//   with the current value, replaces the current value with the
+//   key is in the table with value v then it calls the function (second argument)
+//   with std::optional<V>(v), replaces the current value with the
 //   returned value, and returns false.  Otherwise it calls the
-//   function with empty and inserts the key into the table with the
+//   function with std::nullopt and inserts the key into the table with the
 //   returned value, and returns true.
 //
 //   size() -> long : returns the size of the table.  Not linearizable with
 //   the other functions, and takes time proportional to the table size.
 //
-// Each bucket points to a structure (Node) containing an array of
-// entries.  Nodes come in varying sizes and on update the node is
-// copied.  Allows arbitrary growing, but only efficient if not much
-// larger than the original given size (i.e. number of buckets is
-// fixed, but number of entries per bucket can grow).  Time is
-// proportional to size of bucket.
+// Implementation: Each bucket points to a structure (Node) containing
+// an array of entries.  Nodes come in varying sizes and on update the
+// node is copied.  Allows arbitrary growing, but only efficient if
+// not much larger than the original given size (i.e. number of
+// buckets is fixed, but number of entries per bucket can grow).  Time
+// is proportional to the size of the bucket.
 //
-// define USE_LOCKS to use locks.  Locks are faster with high
-// contention workloads that include reads.  The lock-free version is
-// marginally faster on low-contention uniform workloads, or if
-// updates only.  Also the lock-based version can suffer under
-// oversubscription (more user threads than available hardware
-// threads).  The lock-based version only acquires locks on updates.
+// Define USE_LOCKS to use locks.  The lock-based version only
+// acquires locks on updates.  Locks are faster with high contention
+// workloads that include reads.  The lock-free version is marginally
+// faster on low-contention uniform workloads, or if updates only.
+// Also the lock-based version can suffer under oversubscription (more
+// user threads than available hardware threads).
 //
 // The type for keys and values must be copyable, and might be copied
 // by the hash_table even when not being updated (e.g. when another
-// key in the same bucket is being updated).  Keys and values
-// therefore should not be mutated while in the table since it could
-// cause a read-write race.
+// key in the same bucket is being updated). 
 //
 // The upsert operation takes a function f of type
 //   (const std::optional<V>&) -> V
@@ -68,22 +66,24 @@ private:
   struct KV {K key; V value;};
 
   template <typename Range>
-  static int find_key(const Range& entries, long cnt, const K& k) {
+  static int find_in_range(const Range& entries, long cnt, const K& k) {
     for (int i=0; i < cnt; i++)
       if (KeyEqual{}(entries[i].key, k)) return i;
     return -1;
   }
 
-  // copy entries and insert k,v at end
+  // The following three functions copy a range and
+  // insert/update/remove the specified key.  No ordering is assumed
+  // within the range.  Insert assumes k does not appear, while
+  // update/remove assume it does appear.
   template <typename Range, typename RangeIn>
-  static void insert(Range& out, const RangeIn& entries, long cnt, const K& k, const V& v) {
+  static void copy_and_insert(Range& out, const RangeIn& entries, long cnt, const K& k, const V& v) {
     for (int i=0; i < cnt; i++) out[i] = entries[i];
     out[cnt] = KV{k,v};
   }
 
-  // copy entries and update entry with key k to have value v
   template <typename Range, typename RangeIn, typename F>
-  static void update(Range& out, const RangeIn& entries, long cnt, const K& k, const F& f) {
+  static void copy_and_update(Range& out, const RangeIn& entries, long cnt, const K& k, const F& f) {
     int i = 0;
     while (!KeyEqual{}(k, entries[i].key) && i < cnt) {
       assert(i < cnt);
@@ -99,9 +99,8 @@ private:
     }
   }
 
-  // copy entries and remove entry with key k
   template <typename Range, typename RangeIn>
-  static void remove(Range& out, const RangeIn& entries, long cnt, const K& k) {
+  static void copy_and_remove(Range& out, const RangeIn& entries, long cnt, const K& k) {
     int i = 0;
     while (!KeyEqual{}(k, entries[i].key)) {
       assert(i < cnt);
@@ -114,43 +113,51 @@ private:
     }
   }
 
-  // what each bucket in table points to (if not bignode)
+  // Each bucket points to a Node of some Size, or to a BigNode (defined below)
+  // A node contains an array of up to Size entries (actual # of entries given by cnt)
+  // Sizes are 1, 3, 7, 31
   template <int Size>
   struct Node {
     using node = Node<0>;
     int cnt;
     KV entries[Size];
+
+    // return index of key in entries, or -1 if not found
     int find_index(const K& k) {
-      if (cnt <= 31) return find_key(entries, cnt, k);
-      else return find_key(((BigNode*) this)->entries, cnt, k);
+      if (cnt <= 31) return find_in_range(entries, cnt, k);
+      else return find_in_range(((BigNode*) this)->entries, cnt, k);
     }
 
+    // return optional value found in entries given a key
     std::optional<V> find(const K& k) {
       if (cnt <= 31) { // regular node
 	int i = find_index(k);
 	if (i == -1) return {};
 	else return entries[i].value;
       } else { // big node
-	int i = find_key(((BigNode*) this)->entries, cnt, k);
+	int i = find_in_range(((BigNode*) this)->entries, cnt, k);
 	if (i == -1) return {};
 	else return ((BigNode*) this)->entries[i].value;
       }
     }
 
+    // copy and insert
     Node(node* old, const K& k, const V& v) {
       cnt = (old == nullptr) ? 1 : old->cnt + 1;
-      insert(entries, old->entries, cnt-1, k, v);
+      copy_and_insert(entries, old->entries, cnt-1, k, v);
     }
 
+    // copy and update
     template <typename F>
     Node(node* old, const K& k, const F& f) : cnt(old->cnt) {
       assert(old != nullptr);
-      update(entries, old->entries, cnt, k, f);
+      copy_and_update(entries, old->entries, cnt, k, f);
     }
 
+    // copy and remove
     Node(node* old, const K& k) : cnt(old->cnt - 1) {
-      if (cnt == 31) remove(entries, ((BigNode*) old)->entries, cnt+1, k);
-      else remove(entries, old->entries, cnt+1, k);
+      if (cnt == 31) copy_and_remove(entries, ((BigNode*) old)->entries, cnt+1, k);
+      else copy_and_remove(entries, old->entries, cnt+1, k);
     }
   };
   using node = Node<0>;
@@ -164,37 +171,19 @@ private:
 
     BigNode(node* old, const K& k, const V& v) : cnt(old->cnt + 1) {
       entries = entries_type(cnt);
-      if (old->cnt == 31) insert(entries, old->entries, old->cnt, k, v);
-      else insert(entries, ((BigNode*) old)->entries, old->cnt, k, v);
+      if (old->cnt == 31) copy_and_insert(entries, old->entries, old->cnt, k, v);
+      else copy_and_insert(entries, ((BigNode*) old)->entries, old->cnt, k, v);
     }
 
-        template <typename F>
+    template <typename F>
     BigNode(node* old, const K& k, const F& f) : cnt(old->cnt) {
       entries = entries_type(cnt);
-      update(entries, ((BigNode*) old)->entries, cnt, k, f);  }
+      copy_and_update(entries, ((BigNode*) old)->entries, cnt, k, f);  }
 
     BigNode(node* old, const K& k) : cnt(old->cnt - 1) {
       entries = entries_type(cnt);
-      remove(entries, ((BigNode*) old)->entries, cnt+1, k); }
+      copy_and_remove(entries, ((BigNode*) old)->entries, cnt+1, k); }
   };
-
-  using bucket = std::atomic<node*>;
-
-  struct Table {
-    parlay::sequence<bucket> table;
-    size_t size;
-    bucket* get_bucket(const K& k) {
-      size_t idx = Hash{}(k)  & (size-1u);
-      return &table[idx];
-    }
-    Table(size_t n) {
-      int bits = 1 + parlay::log2_up(n);
-      size = 1ul << bits;
-      table = parlay::sequence<bucket>(size);
-    }
-  };
-
-  Table hash_table;
 
   using Node1 = Node<1>;
   using Node3 = Node<3>;
@@ -250,6 +239,33 @@ private:
     else big_node_pool.destruct((BigNode*) old);
   }
 
+  // *********************************************
+  // The bucket and table structures
+  // *********************************************
+
+  using bucket = std::atomic<node*>;
+
+  struct Table {
+    parlay::sequence<bucket> table;
+    size_t size;
+    bucket* get_bucket(const K& k) {
+      size_t idx = Hash{}(k)  & (size-1u);
+      return &table[idx];
+    }
+    Table(size_t n) {
+      int bits = 1 + parlay::log2_up(n);
+      size = 1ul << bits;
+      table = parlay::sequence<bucket>(size);
+    }
+  };
+
+  Table hash_table;
+
+  // *********************************************
+  // The internal update functions (insert, upsert and remove)
+  // *********************************************
+
+
   // try to install a new node in bucket s
   static std::optional<bool> try_update(bucket* s, node* old_node, node* new_node, bool ret_val) {
 #ifndef USE_LOCKS
@@ -301,6 +317,10 @@ private:
   }
 
 public:
+  // *********************************************
+  // The public interface
+  // *********************************************
+
   unordered_map(size_t n) : hash_table(Table(n)) {}
   ~unordered_map() {
     auto& table = hash_table.table;
